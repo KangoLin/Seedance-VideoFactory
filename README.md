@@ -37,10 +37,29 @@
 - 拖动集数卡片左侧 **⠿** 可调整显示顺序，顺序会保存到本地
 - 集内点击 **+** 添加任务；任务面板可并行生成
 - 集内工具栏 **一键拼接本集**：按 **分镜任务1 → 2 → 3…** 顺序，把各任务**最新预览成片**拼成一条（输出 `05_Video/exports/ep-{集数}-concat_TikTok_v001.mp4`，可多次拼接递增 v002…）
+- 每个任务面板都有 **DeepSeek 提示词优化**：通过本地 OpenAI 兼容代理与 DeepSeek 网页端反代服务沟通，返回分析和可一键应用的优化 Prompt
 - 集数卡片右上角 **×** 可删除整集（至少保留 1 集）；任务标题栏 **删除** 可移除任务（每集至少保留 1 个）
 - 所有集数、任务（Prompt、参考、首尾帧路径等）自动保存到本地 `05_Video/workspace/episodes.json`，刷新页面不丢失
 
 输出成片与集数、分镜任务对应，例如 `ep-1-task-1_TikTok_v001.mp4`；每次点击「正式生成」都会重新请求 API，并自动递增版本号（`v002`、`v003`…）。修改集数或任务顺序后会自动重命名已有文件。
+
+### DeepSeek 网页端反代提示词优化
+
+本工具不内置 DeepSeek 网页逆向逻辑，优先复用 GitHub 开源代理项目，例如 `Fly143/deepseek-free-api`、`TQZHR/deepseek2api`、`ds2api`。先单独启动其中一个代理，让它提供 OpenAI 兼容接口，再启动本 GUI。
+
+本项目已提供快捷启动：
+
+- 双击 `start_deepseek_proxy.bat` 启动 DeepSeek 网页端反代管理面板
+- 打开后访问 `http://127.0.0.1:8000/admin`，登录 DeepSeek 网页账号或导入 cURL
+- 再回到视频工具中点击任务面板的 **DeepSeek 提示词优化**
+
+默认连接：
+
+- `PROMPT_OPTIMIZER_BASE_URL=http://127.0.0.1:8000/v1`
+- `PROMPT_OPTIMIZER_MODEL=deepseek-chat`
+- `PROMPT_OPTIMIZER_API_KEY=`（本地代理不需要鉴权时留空；如代理要求本地 key 再填写）
+
+这些项目通常不需要 DeepSeek 官方 API Key，但需要 DeepSeek 网页账号登录态或代理项目自己的账号配置。
 
 ## 目录说明
 

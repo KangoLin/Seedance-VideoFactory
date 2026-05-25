@@ -175,6 +175,24 @@
       font-size: 12px; font-weight: 600; height: 32px;
     }
     button.prompt-addon:hover { background: #eef8f6; border-color: var(--accent); }
+    button.deepseek-btn {
+      margin-bottom: 8px; background: #eef2ff; color: #3730a3; border-color: #c7d2fe;
+      font-size: 12px; font-weight: 700; height: 32px;
+    }
+    button.deepseek-btn:hover { background: #e0e7ff; border-color: #818cf8; }
+    .optimizer-panel {
+      margin: 0 0 10px; padding: 10px; border: 1px solid #c7d2fe;
+      border-radius: 8px; background: #f8faff;
+    }
+    .optimizer-panel[hidden] { display: none !important; }
+    .optimizer-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+    .optimizer-toolbar strong { flex: 1; font-size: 12px; color: #3730a3; }
+    .optimizer-toolbar button { width: auto; height: 28px; padding: 0 10px; margin: 0; font-size: 11px; }
+    .optimizer-panel textarea { min-height: 72px; font-size: 12px; }
+    .optimizer-output { min-height: 150px; white-space: pre-wrap; }
+    .optimizer-status { margin: 4px 0 8px; font-size: 11px; color: var(--muted); }
+    .optimizer-actions { display: flex; gap: 8px; }
+    .optimizer-actions button { flex: 1; margin: 0; font-size: 12px; }
     .save-hint { font-size: 11px; color: var(--muted); }
     .save-hint.saving { color: #9a6700; }
     .save-hint.saved { color: var(--ok); }
@@ -294,6 +312,23 @@
     <label data-for="prompt">视频描述（Prompt）</label>
     <textarea data-field="prompt" placeholder="描述画面、动作、镜头、风格。"></textarea>
     <button type="button" class="prompt-addon" data-action="appendRefStrict">+ 严格参考参考图</button>
+    <button type="button" class="deepseek-btn" data-action="toggleOptimizer">DeepSeek 提示词优化</button>
+    <div class="optimizer-panel" data-field="optimizerPanel" hidden>
+      <div class="optimizer-toolbar">
+        <strong>DeepSeek 网页端反代窗口</strong>
+        <button type="button" data-action="closeOptimizer">关闭</button>
+      </div>
+      <label>你想让 DeepSeek 怎么分析/优化</label>
+      <textarea data-field="optimizerInstruction">请分析当前视频生成提示词的问题，并优化为更适合 Seedance 的镜头语言。保留人物与场景一致性，增强主体、动作、运镜、节奏、光影和时长匹配。</textarea>
+      <p class="optimizer-status" data-field="optimizerStatus">使用本地 OpenAI 兼容代理，例如 deepseek-free-api / deepseek2api / ds2api。</p>
+      <button type="button" class="primary" data-action="sendOptimizer">发送给 DeepSeek</button>
+      <label style="margin-top:8px;">DeepSeek 返回结果</label>
+      <textarea class="optimizer-output" data-field="optimizerOutput" placeholder="返回内容会显示在这里，可一键应用【优化提示词】部分。"></textarea>
+      <div class="optimizer-actions">
+        <button type="button" data-action="applyOptimizer">应用优化提示词</button>
+        <button type="button" data-action="copyOptimizer">复制结果</button>
+      </div>
+    </div>
     <div class="ref-block" data-field="refBlock">
       <label data-for="referenceFile">参考</label>
       <input data-field="referenceFile" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" multiple />
@@ -330,11 +365,16 @@
     let savePending = false;
     let serverApiVersion = 0;
     let serverFeatures = [];
+    let promptOptimizerConfig = { base_url: 'http://127.0.0.1:8000/v1', model: 'deepseek-chat' };
 
     const RESTART_HINT = '请关闭旧的黑窗口，双击项目根目录 start_seedance_gui.bat 重新启动后再试。';
 
     function serverSupportsConcat() {
       return serverFeatures.includes('episode_concat') || serverApiVersion >= 9;
+    }
+
+    function serverSupportsPromptOptimizer() {
+      return serverFeatures.includes('prompt_optimizer') || serverApiVersion >= 10;
     }
 
     async function parseApiJson(res) {
@@ -354,7 +394,7 @@
         if (res.status === 404) {
           return {
             ok: false,
-            error: `拼接接口不存在 (HTTP 404)。当前 GUI 服务过旧，${RESTART_HINT}`,
+            error: `接口不存在 (HTTP 404)。当前 GUI 服务过旧，${RESTART_HINT}`,
           };
         }
         return {
@@ -363,6 +403,20 @@
         };
       }
       return { ok: false, error: trimmed.slice(0, 240) || `HTTP ${res.status}` };
+    }
+
+    function extractOptimizedPrompt(text) {
+      let value = String(text || '').trim();
+      const markers = ['【优化提示词】', '优化提示词：', '优化后的提示词：', '最终提示词：'];
+      for (const marker of markers) {
+        const idx = value.indexOf(marker);
+        if (idx >= 0) {
+          value = value.slice(idx + marker.length).trim();
+          break;
+        }
+      }
+      value = value.replace(/^```(?:text|txt|markdown)?\s*/i, '').replace(/```$/i, '').trim();
+      return value || String(text || '').trim();
     }
     let draggedEpisodeId = null;
 
@@ -674,17 +728,20 @@
         if (res.ok && data.ok && data.api_version >= 9) {
           serverApiVersion = data.api_version;
           serverFeatures = data.features || [];
+          promptOptimizerConfig = data.prompt_optimizer || promptOptimizerConfig;
           return true;
         }
         if (res.ok && data.ok && data.api_version >= 3) {
           serverApiVersion = data.api_version;
           serverFeatures = data.features || [];
+          promptOptimizerConfig = data.prompt_optimizer || promptOptimizerConfig;
           setSaveHint(`服务版本偏旧(v${data.api_version})，请重启 start_seedance_gui.bat`, 'saving');
           return true;
         }
         if (res.ok && data.ok && data.api_version >= 2) {
           serverApiVersion = data.api_version;
           serverFeatures = data.features || [];
+          promptOptimizerConfig = data.prompt_optimizer || promptOptimizerConfig;
           setSaveHint('服务版本过旧，请重启 start_seedance_gui.bat', 'saving');
           return true;
         }
@@ -1087,6 +1144,15 @@
       const ui = {
         laneId, index, asset: q('asset'), assetMeta: q('assetMeta'), genMode: q('genMode'),
         prompt: q('prompt'), appendRefStrict: side.querySelector('[data-action="appendRefStrict"]'),
+        toggleOptimizer: side.querySelector('[data-action="toggleOptimizer"]'),
+        optimizerPanel: q('optimizerPanel'),
+        closeOptimizer: side.querySelector('[data-action="closeOptimizer"]'),
+        optimizerInstruction: q('optimizerInstruction'),
+        optimizerStatus: q('optimizerStatus'),
+        sendOptimizer: side.querySelector('[data-action="sendOptimizer"]'),
+        optimizerOutput: q('optimizerOutput'),
+        applyOptimizer: side.querySelector('[data-action="applyOptimizer"]'),
+        copyOptimizer: side.querySelector('[data-action="copyOptimizer"]'),
         refBlock: q('refBlock'), kfBlock: q('kfBlock'),
         referenceFile: q('referenceFile'), refPreview: q('refPreview'),
         startFrameFile: q('startFrameFile'), endFrameFile: q('endFrameFile'),
@@ -1115,6 +1181,71 @@
         const images = state.uploadedReferences.filter(i => i.kind === 'image').length;
         const videos = state.uploadedReferences.filter(i => i.kind === 'video').length;
         return { images, videos };
+      }
+
+      function referenceTotalCount() {
+        const counts = refCounts();
+        return counts.images + counts.videos + (state.startFrame ? 1 : 0) + (state.endFrame ? 1 : 0);
+      }
+
+      function updateOptimizerStatus(text, isError) {
+        ui.optimizerStatus.textContent = text;
+        ui.optimizerStatus.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+      }
+
+      function refreshOptimizerUi() {
+        const ok = serverSupportsPromptOptimizer();
+        ui.toggleOptimizer.disabled = !ok;
+        ui.toggleOptimizer.title = ok
+          ? `连接 ${promptOptimizerConfig.base_url || '本地代理'} · ${promptOptimizerConfig.model || 'deepseek-chat'}`
+          : '需要重启 GUI（api_version ≥ 10）后才可使用';
+        updateOptimizerStatus(
+          ok
+            ? `代理：${promptOptimizerConfig.base_url || 'http://127.0.0.1:8000/v1'} · 模型：${promptOptimizerConfig.model || 'deepseek-chat'}`
+            : '当前 GUI 服务不支持提示词优化，请重启 start_seedance_gui.bat',
+          !ok
+        );
+      }
+
+      async function sendPromptToOptimizer() {
+        if (!serverSupportsPromptOptimizer()) {
+          alert(`当前服务不支持提示词优化（api v${serverApiVersion || '?'}）。${RESTART_HINT}`);
+          return;
+        }
+        const prompt = ui.prompt.value.trim();
+        if (!prompt) {
+          alert(`${shotTaskLabel(index)}: 请先填写 Prompt`);
+          return;
+        }
+        ui.sendOptimizer.disabled = true;
+        ui.applyOptimizer.disabled = true;
+        updateOptimizerStatus('正在通过本地 DeepSeek 网页端代理分析提示词…', false);
+        try {
+          const res = await fetch('/api/prompt/optimize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt,
+              instruction: ui.optimizerInstruction.value,
+              task_label: shotTaskLabel(index),
+              duration: Number(ui.duration.value) || DEFAULT_DURATION,
+              generation_mode: ui.genMode.value,
+              reference_count: referenceTotalCount(),
+            }),
+          });
+          const data = await parseApiJson(res);
+          if (!res.ok || !data.ok) {
+            throw new Error(data.error || '提示词优化失败');
+          }
+          ui.optimizerOutput.value = data.content || '';
+          updateOptimizerStatus(`完成：${data.model || promptOptimizerConfig.model || 'deepseek-chat'}`, false);
+        } catch (err) {
+          updateOptimizerStatus(err.message, true);
+          alert('DeepSeek 提示词优化失败：' + err.message);
+        } finally {
+          ui.sendOptimizer.disabled = false;
+          ui.applyOptimizer.disabled = false;
+        }
       }
 
       function renderRefPreview() {
@@ -1169,6 +1300,40 @@
         ui.prompt.value = current ? `${current}，${PROMPT_REF_STRICT_SUFFIX}` : PROMPT_REF_STRICT_SUFFIX;
         ui.prompt.focus();
         persistSoon();
+      });
+
+      ui.toggleOptimizer.addEventListener('click', () => {
+        ui.optimizerPanel.hidden = !ui.optimizerPanel.hidden;
+        if (!ui.optimizerPanel.hidden) {
+          refreshOptimizerUi();
+          ui.optimizerInstruction.focus();
+        }
+      });
+      ui.closeOptimizer.addEventListener('click', () => {
+        ui.optimizerPanel.hidden = true;
+      });
+      ui.sendOptimizer.addEventListener('click', sendPromptToOptimizer);
+      ui.applyOptimizer.addEventListener('click', () => {
+        const optimized = extractOptimizedPrompt(ui.optimizerOutput.value);
+        if (!optimized) {
+          alert('没有可应用的优化提示词');
+          return;
+        }
+        ui.prompt.value = optimized;
+        ui.prompt.focus();
+        persistSoon();
+      });
+      ui.copyOptimizer.addEventListener('click', async () => {
+        const text = ui.optimizerOutput.value.trim();
+        if (!text) return;
+        try {
+          await navigator.clipboard.writeText(text);
+          updateOptimizerStatus('已复制 DeepSeek 返回结果', false);
+        } catch {
+          ui.optimizerOutput.select();
+          document.execCommand('copy');
+          updateOptimizerStatus('已复制 DeepSeek 返回结果', false);
+        }
       });
 
       ui.refPreview.addEventListener('click', (e) => {
@@ -1350,6 +1515,7 @@
         renderKfPreview(ui.endPreview, state.endFrame);
       }
       syncModePanels();
+      refreshOptimizerUi();
       activeLaneCtrls.push(laneCtrl);
 
       const delBtn = laneRoot.querySelector('[data-action="deleteLane"]');

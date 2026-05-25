@@ -8,3 +8,7 @@ API_Key/VE_Key.txt
 05_Video/uploads/
 05_Video/segments/.api_cache/
 05_Video/exports/
+.venv/
+external_tools/deepseek-free-api/.venv/
+external_tools/deepseek-free-api/__pycache__/
+external_tools/deepseek-free-api/app/__pycache__/

@@ -12,7 +12,9 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.error
 import urllib.parse
+import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -54,10 +56,14 @@ EXPORT_DIR = ROOT / "05_Video" / "exports"
 SEGMENT_DIR = ROOT / "05_Video" / "segments"
 HOST = "127.0.0.1"
 PORT = 8765
-GUI_API_VERSION = 9
-BUILD_ID = "20260522-episode-concat"
+GUI_API_VERSION = 10
+BUILD_ID = "20260522-prompt-optimizer"
 MAX_JOB_LOG_LINES = 400
 EXIT_NO_NEW_VIDEO = 2
+PROMPT_OPTIMIZER_BASE_URL = os.environ.get("PROMPT_OPTIMIZER_BASE_URL", "http://127.0.0.1:8000/v1")
+PROMPT_OPTIMIZER_MODEL = os.environ.get("PROMPT_OPTIMIZER_MODEL", "deepseek-chat")
+PROMPT_OPTIMIZER_API_KEY = os.environ.get("PROMPT_OPTIMIZER_API_KEY", "")
+PROMPT_OPTIMIZER_TIMEOUT = int(os.environ.get("PROMPT_OPTIMIZER_TIMEOUT", "90"))
 
 job_lock = threading.Lock()
 workspace_lock = threading.Lock()
@@ -167,6 +173,108 @@ GUI_PAGE = SCRIPTS / "gui_page.html"
 
 def load_gui_html() -> str:
     return GUI_PAGE.read_text(encoding="utf-8")
+
+
+def prompt_optimizer_config() -> dict:
+    base_url = PROMPT_OPTIMIZER_BASE_URL.rstrip("/")
+    return {
+        "base_url": base_url,
+        "model": PROMPT_OPTIMIZER_MODEL,
+        "has_api_key": bool(PROMPT_OPTIMIZER_API_KEY),
+    }
+
+
+def prompt_optimizer_endpoint() -> str:
+    base_url = PROMPT_OPTIMIZER_BASE_URL.rstrip("/")
+    if base_url.endswith("/chat/completions"):
+        return base_url
+    return f"{base_url}/chat/completions"
+
+
+def build_prompt_optimizer_messages(payload: dict) -> list[dict[str, str]]:
+    prompt = str(payload.get("prompt", "")).strip()
+    task_label = str(payload.get("task_label", "分镜任务")).strip() or "分镜任务"
+    user_request = str(payload.get("instruction", "")).strip()
+    duration = payload.get("duration", "")
+    gen_mode = str(payload.get("generation_mode", "")).strip()
+    reference_count = int(payload.get("reference_count") or 0)
+
+    if not prompt:
+        raise ValueError("请先填写当前 Prompt")
+    if not user_request:
+        user_request = "请分析这个视频生成提示词的问题，并给出更适合 Seedance 视频生成的优化版本。"
+
+    context = [
+        f"任务: {task_label}",
+        f"生成方式: {gen_mode or '未填写'}",
+        f"时长: {duration or '未填写'} 秒",
+        f"参考素材数量: {reference_count}",
+        "当前 Prompt:",
+        prompt,
+        "",
+        "用户要求:",
+        user_request,
+    ]
+    return [
+        {
+            "role": "system",
+            "content": (
+                "你是 Seedance 视频生成提示词优化助手。请用中文分析提示词，"
+                "重点检查主体、场景、动作、镜头、节奏、风格、时长匹配、参考图一致性。"
+                "输出必须包含两个小节：【问题分析】和【优化提示词】。"
+                "【优化提示词】中只写可直接粘贴到视频生成器的最终提示词，"
+                "并保留或补充：人物形象和场景严格参考参考图，杜绝美化和修改。"
+            ),
+        },
+        {"role": "user", "content": "\n".join(context)},
+    ]
+
+
+def call_prompt_optimizer(payload: dict) -> dict:
+    endpoint = prompt_optimizer_endpoint()
+    body = {
+        "model": PROMPT_OPTIMIZER_MODEL,
+        "messages": build_prompt_optimizer_messages(payload),
+        "stream": False,
+        "temperature": 0.4,
+    }
+    raw = json.dumps(body, ensure_ascii=False).encode("utf-8")
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    if PROMPT_OPTIMIZER_API_KEY:
+        headers["Authorization"] = f"Bearer {PROMPT_OPTIMIZER_API_KEY}"
+
+    req = urllib.request.Request(endpoint, data=raw, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=PROMPT_OPTIMIZER_TIMEOUT) as resp:
+            text = resp.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:800]
+        raise RuntimeError(f"提示词代理 HTTP {exc.code}: {detail}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(
+            f"无法连接提示词代理 {endpoint}。请先启动 deepseek-free-api/deepseek2api/ds2api。"
+        ) from exc
+
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"提示词代理返回的不是 JSON: {text[:300]}") from exc
+
+    content = ""
+    choices = data.get("choices") if isinstance(data, dict) else None
+    if choices:
+        first = choices[0] or {}
+        message = first.get("message") or {}
+        content = str(message.get("content") or first.get("text") or "").strip()
+    if not content and isinstance(data, dict):
+        content = str(data.get("output_text") or data.get("content") or "").strip()
+    if not content:
+        raise RuntimeError("提示词代理没有返回可用内容")
+    model = data.get("model") if isinstance(data, dict) else ""
+    return {"content": content, "model": model or PROMPT_OPTIMIZER_MODEL}
 
 
 
@@ -627,9 +735,14 @@ class Handler(BaseHTTPRequestHandler):
                         "force_regenerate",
                         "versioned_export",
                         "episode_concat",
+                        "prompt_optimizer",
                     ],
+                    "prompt_optimizer": prompt_optimizer_config(),
                 }
             )
+            return
+        if parsed.path == "/api/prompt/config":
+            self.send_json({"ok": True, **prompt_optimizer_config()})
             return
         if parsed.path in {"/api/assets", "/api/config"}:
             meta = load_config_meta()
@@ -850,6 +963,16 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             self.send_json({"ok": False, "error": str(exc)}, status=500)
 
+    def handle_prompt_optimize(self) -> None:
+        try:
+            payload = self.read_json_body()
+            result = call_prompt_optimizer(payload)
+            self.send_json({"ok": True, **result, "config": prompt_optimizer_config()})
+        except (ValueError, json.JSONDecodeError) as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=400)
+        except Exception as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=502)
+
     def handle_delete_episode(self) -> None:
         try:
             payload = self.read_json_body()
@@ -975,6 +1098,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/episodes/concat":
             self.handle_concat_episode()
+            return
+        if parsed.path == "/api/prompt/optimize":
+            self.handle_prompt_optimize()
             return
         if parsed.path == "/api/episodes/delete":
             self.handle_delete_episode()
