@@ -1,0 +1,31 @@
+{
+  "defaults": {
+    "duration": 4,
+    "fps": 24,
+    "ratio": "9:16",
+    "resolution": "720p"
+  },
+  "assets": {
+    "DEMO_TEXT_001": {
+      "platform": "TikTok",
+      "segments": [
+        {
+          "id": "S01",
+          "mode": "text",
+          "duration": 4,
+          "prompt": "A cute cartoon cat jumps on a sofa in a bright living room, smooth camera, no subtitles."
+        }
+      ]
+    },
+    "GUI_QUICK": {
+      "platform": "TikTok",
+      "segments": [
+        {
+          "id": "S01",
+          "mode": "reference",
+          "prompt": "在 GUI 填写 Prompt 并上传参考素材（图/视频）。时长由任务面板「时长（秒）」控制。"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,1536 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Video Batch Console</title>
+  <style>
+    :root {
+      --bg: #f5f7fa; --panel: #fff; --line: #d9e0e8; --text: #16202a;
+      --muted: #657384; --accent: #0f7a6f; --danger: #b42318; --ok: #16784f;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, sans-serif; }
+    header {
+      height: 56px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; background: #fff; border-bottom: 1px solid var(--line);
+    }
+    h1 { margin: 0; font-size: 17px; }
+    .workspace { padding: 12px 12px 16px; min-height: calc(100vh - 56px); }
+    .episodes-board, .lanes-board {
+      display: flex; flex-wrap: wrap; align-items: flex-start; align-content: flex-start;
+      gap: 12px; width: 100%;
+    }
+    .episode-card {
+      position: relative;
+      flex: 0 1 200px; width: 200px; max-width: calc(100% - 12px);
+      padding: 16px 36px 16px 30px; background: var(--panel); border: 1px solid var(--line);
+      border-radius: 10px; border-top: 3px solid var(--accent); cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s, opacity 0.15s;
+    }
+    .episode-card:hover { border-color: var(--accent); box-shadow: 0 4px 12px rgba(15, 122, 111, 0.12); }
+    .episode-card.dragging { opacity: 0.45; }
+    .episode-card.drag-over {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(15, 122, 111, 0.25);
+    }
+    .ep-drag {
+      position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+      width: 20px; height: 32px; margin: 0; padding: 0; border: none; border-radius: 4px;
+      background: transparent; color: var(--muted); font-size: 16px; line-height: 1;
+      cursor: grab; user-select: none;
+    }
+    .ep-drag:hover { background: #eef2f7; color: var(--accent); }
+    .ep-drag:active { cursor: grabbing; }
+    .episodes-board-hint {
+      flex: 1 1 100%; margin: 0 0 4px; font-size: 12px; color: var(--muted);
+    }
+    .episode-card h3 { margin: 0 0 6px; font-size: 16px; }
+    .episode-card p { margin: 0; color: var(--muted); font-size: 12px; }
+    .task-toolbar {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+      padding: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    }
+    .task-toolbar h2 { margin: 0; font-size: 16px; flex: 1; }
+    .task-toolbar .concat-btn {
+      background: #0f766e; border-color: #0f766e; color: #fff;
+      width: auto; min-width: 108px; padding: 6px 12px; font-size: 13px;
+    }
+    .episode-concat-preview {
+      margin: 0 0 12px; padding: 10px 12px; background: #f0fdf9;
+      border: 1px solid #99f6e4; border-radius: 8px; font-size: 13px;
+    }
+    .episode-concat-preview a { color: #0f766e; font-weight: 700; }
+    .episode-concat-preview video {
+      display: block; width: 100%; max-width: 280px; margin-top: 8px;
+      border-radius: 6px; background: #000;
+    }
+    button.back-btn {
+      width: auto; height: 34px; padding: 0 12px; margin: 0;
+      background: #f8fafc; color: var(--accent); border-color: #b8d4cf;
+    }
+    .lane {
+      flex: 0 1 520px; width: 520px; max-width: calc(100% - 12px);
+      display: grid; grid-template-columns: minmax(220px, 260px) minmax(180px, 1fr);
+      gap: 10px; align-content: start;
+    }
+    .lane-head {
+      grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; background: var(--panel); border: 1px solid var(--line);
+      border-radius: 8px; border-top: 3px solid var(--accent);
+    }
+    .lane-head h2 { margin: 0; font-size: 14px; flex: 1; }
+    button.btn-del {
+      width: auto; height: 28px; margin: 0; padding: 0 10px;
+      border: 1px solid #f5c4c0; border-radius: 6px;
+      background: #fff1f0; color: var(--danger); font-size: 11px; font-weight: 700;
+    }
+    button.btn-del:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+    button.btn-del:disabled { opacity: 0.45; cursor: not-allowed; }
+    button.ep-del {
+      position: absolute; top: 8px; right: 8px;
+      width: 24px; height: 24px; margin: 0; padding: 0;
+      border: none; border-radius: 50%;
+      background: var(--danger); color: #fff; font-size: 14px; line-height: 1;
+    }
+    button.ep-del:hover { filter: brightness(1.05); }
+    button.ep-del:disabled { opacity: 0.35; cursor: not-allowed; }
+    button.ep-edit {
+      position: absolute; top: 8px; right: 36px;
+      width: 24px; height: 24px; margin: 0; padding: 0;
+      border: 1px solid var(--line); border-radius: 50%;
+      background: #fff; color: var(--accent); font-size: 12px; line-height: 1;
+    }
+    button.ep-edit:hover { background: #eef8f6; border-color: var(--accent); }
+    section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .side { padding: 12px; }
+    label { display: block; margin-bottom: 4px; color: var(--muted); font-size: 11px; font-weight: 700; }
+    select, button, input[type="number"] {
+      width: 100%; height: 34px; border: 1px solid var(--line); border-radius: 6px;
+      background: #fff; font: inherit; margin-bottom: 4px;
+    }
+    input[type="number"] { padding: 0 8px; }
+    textarea {
+      width: 100%; min-height: 88px; margin-bottom: 6px; padding: 8px;
+      border: 1px solid var(--line); border-radius: 6px; font: inherit; resize: vertical;
+    }
+    button { font-weight: 700; cursor: pointer; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .preview-side { padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 320px; }
+    .video-wrap {
+      position: relative; width: 100%; aspect-ratio: 9 / 16; max-height: 400px; margin: 0 auto;
+      background: #0f172a; border-radius: 8px; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .video-wrap video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .preview-empty { margin: 0; color: #94a3b8; font-size: 13px; text-align: center; padding: 0 12px; }
+    .gen-status {
+      margin: 0; padding: 12px; border-radius: 8px; text-align: center;
+      font-size: 15px; font-weight: 700; background: #f8fafc; color: var(--muted); border: 1px solid var(--line);
+    }
+    .gen-status.phase-running { color: #9a6700; background: #fff9e6; border-color: #f5e6b8; }
+    .gen-status.phase-success { color: var(--ok); background: #edfdf5; border-color: #b7ebd4; }
+    .gen-status.phase-skipped { color: var(--danger); background: #fff1f0; border-color: #f5c4c0; }
+    .gen-status.phase-failed { color: var(--danger); background: #fff1f0; border-color: #f5c4c0; }
+    .run-log-label { margin: 0; font-size: 11px; color: var(--muted); font-weight: 600; }
+    .run-log-wrap {
+      max-height: 180px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      scroll-behavior: smooth;
+    }
+    .run-log {
+      margin: 0;
+      padding: 8px 10px;
+      font: 11px/1.45 Consolas, "Courier New", monospace;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .hint { color: var(--muted); font-size: 11px; margin-top: 8px; }
+    input[type="file"] { width: 100%; font-size: 11px; margin-bottom: 4px; }
+    .ref-preview { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+    .ref-preview img, .ref-preview video {
+      width: 56px; height: 56px; object-fit: cover; border-radius: 4px; border: 1px solid var(--line);
+    }
+    .ref-chip { font-size: 9px; color: var(--muted); }
+    .ref-card, .kf-card { position: relative; width: 64px; }
+    .ref-card button.del, .kf-card button.del {
+      position: absolute; top: 1px; right: 1px; width: 18px; height: 18px; margin: 0; padding: 0;
+      border: none; border-radius: 50%; background: var(--danger); color: #fff; font-size: 12px; cursor: pointer;
+    }
+    .ref-block, .kf-block { margin-bottom: 4px; }
+    button.add-tile {
+      flex: 0 0 56px; width: 56px; height: 56px; margin-top: 4px;
+      border: 2px dashed var(--line); border-radius: 12px; background: #fff;
+      color: var(--accent); font-size: 28px; line-height: 1; cursor: pointer;
+    }
+    button.add-tile:hover { border-color: var(--accent); background: #f0faf8; }
+    button.prompt-addon {
+      margin-bottom: 8px; background: #f8fafc; color: var(--accent); border-color: #b8d4cf;
+      font-size: 12px; font-weight: 600; height: 32px;
+    }
+    button.prompt-addon:hover { background: #eef8f6; border-color: var(--accent); }
+    .save-hint { font-size: 11px; color: var(--muted); }
+    .save-hint.saving { color: #9a6700; }
+    .save-hint.saved { color: var(--ok); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(15, 23, 42, 0.45);
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay[hidden] { display: none !important; }
+    .modal-panel {
+      width: min(400px, 100%); padding: 18px; background: var(--panel);
+      border: 1px solid var(--line); border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+    .modal-panel h3 { margin: 0 0 14px; font-size: 16px; }
+    .ep-no-picker {
+      display: grid; grid-template-columns: 88px 1fr; gap: 10px; margin-bottom: 12px;
+    }
+    .ep-no-wheel-wrap {
+      position: relative; height: 132px; border: 1px solid var(--line);
+      border-radius: 8px; overflow: hidden; background: #f8fafc;
+    }
+    .ep-no-wheel-wrap::before,
+    .ep-no-wheel-wrap::after {
+      content: ''; position: absolute; left: 0; right: 0; height: 44px; z-index: 1;
+      pointer-events: none;
+    }
+    .ep-no-wheel-wrap::before {
+      top: 0; background: linear-gradient(#f8fafc, rgba(248, 250, 252, 0));
+    }
+    .ep-no-wheel-wrap::after {
+      bottom: 0; background: linear-gradient(rgba(248, 250, 252, 0), #f8fafc);
+    }
+    .ep-no-wheel {
+      height: 100%; overflow-y: auto; scroll-snap-type: y mandatory;
+      padding: 44px 0; scrollbar-width: thin;
+    }
+    .ep-no-item {
+      height: 44px; display: flex; align-items: center; justify-content: center;
+      scroll-snap-align: center; font-size: 18px; font-weight: 700; color: var(--muted);
+      cursor: pointer; user-select: none;
+    }
+    .ep-no-item.active { color: var(--accent); font-size: 22px; }
+    .ep-no-item.taken { opacity: 0.35; text-decoration: line-through; }
+    .ep-no-input-wrap input[type="number"] {
+      height: 48px; font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 4px;
+    }
+    .ep-no-input-wrap input[type="text"] {
+      width: 100%; height: 34px; padding: 0 8px; margin-bottom: 0;
+      border: 1px solid var(--line); border-radius: 6px; font: inherit;
+    }
+    .modal-actions {
+      display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px;
+    }
+    .modal-actions button { width: auto; min-width: 72px; margin: 0; }
+    .modal-err { color: var(--danger); font-size: 12px; min-height: 18px; margin: 0 0 8px; }
+    @media (max-width: 520px) { .lane { width: 100%; flex-basis: 100%; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AI Video Batch Console</h1>
+    <span class="save-hint" id="saveHint">已同步到本地</span>
+    <span class="save-hint" id="serverVer" style="margin-left:8px;color:#64748b;"></span>
+  </header>
+  <div class="workspace">
+    <div id="episodeView">
+      <div class="episodes-board" id="episodesBoard">
+        <p class="episodes-board-hint">拖动卡片左侧 ⠿ 可调整集数顺序，松手后自动保存</p>
+        <button type="button" class="add-tile" id="addEpisodeBtn" title="添加集数">+</button>
+      </div>
+    </div>
+    <div id="taskView" hidden>
+      <div class="task-toolbar">
+        <button type="button" class="back-btn" id="backToEpisodes">← 返回集数</button>
+        <h2 id="activeEpisodeTitle">第 1 集</h2>
+        <button type="button" class="back-btn" id="editActiveEpisode">修改集数</button>
+        <button type="button" class="concat-btn" id="concatEpisodeBtn" title="按分镜任务1、2、3…顺序拼接各任务最新预览视频">一键拼接本集</button>
+      </div>
+      <div id="episodeConcatBar" class="episode-concat-preview" hidden></div>
+      <div class="lanes-board" id="lanesBoard">
+        <button type="button" class="add-tile" id="addLaneBtn" title="添加分镜任务">+</button>
+      </div>
+    </div>
+  </div>
+  <div id="episodeModal" class="modal-overlay" hidden>
+    <div class="modal-panel" role="dialog" aria-labelledby="episodeModalTitle">
+      <h3 id="episodeModalTitle">新建集数</h3>
+      <p class="modal-err" id="episodeModalErr"></p>
+      <label>集数编号</label>
+      <div class="ep-no-picker">
+        <div class="ep-no-wheel-wrap">
+          <div class="ep-no-wheel" id="epNoWheel"></div>
+        </div>
+        <div class="ep-no-input-wrap">
+          <input type="number" id="epNoInput" min="1" max="999" step="1" />
+          <p class="hint" style="margin:4px 0 8px;">滚动左侧数字表选择，或直接输入</p>
+          <label for="epTitleInput" style="margin-top:4px;">显示标题</label>
+          <input type="text" id="epTitleInput" placeholder="第 1 集" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="epModalCancel">取消</button>
+        <button type="button" class="primary" id="epModalConfirm">确定</button>
+      </div>
+    </div>
+  </div>
+  <template id="controls-template">
+    <label data-for="asset">素材模板</label>
+    <select data-field="asset"></select>
+    <p class="hint" data-field="assetMeta" style="margin-top:4px;"></p>
+    <label data-for="genMode">生成方式</label>
+    <select data-field="genMode">
+      <option value="reference" selected>参考 + 文字</option>
+      <option value="keyframes">首尾帧（上传）</option>
+    </select>
+    <label data-for="prompt">视频描述（Prompt）</label>
+    <textarea data-field="prompt" placeholder="描述画面、动作、镜头、风格。"></textarea>
+    <button type="button" class="prompt-addon" data-action="appendRefStrict">+ 严格参考参考图</button>
+    <div class="ref-block" data-field="refBlock">
+      <label data-for="referenceFile">参考</label>
+      <input data-field="referenceFile" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" multiple />
+      <div class="ref-preview" data-field="refPreview"></div>
+      <p class="hint" style="margin-top:0;">图片最多 9 个（≤30MB），视频最多 3 个（≤50MB），可混用</p>
+    </div>
+    <div class="kf-block" data-field="kfBlock">
+      <div class="kf-row">
+        <label data-for="startFrameFile">首帧</label>
+        <input data-field="startFrameFile" type="file" accept="image/png,image/jpeg,image/webp" />
+        <div class="ref-preview" data-field="startPreview"></div>
+      </div>
+      <div class="kf-row">
+        <label data-for="endFrameFile">尾帧</label>
+        <input data-field="endFrameFile" type="file" accept="image/png,image/jpeg,image/webp" />
+        <div class="ref-preview" data-field="endPreview"></div>
+      </div>
+    </div>
+    <label data-for="duration">时长（秒）</label>
+    <input data-field="duration" type="number" min="4" max="15" step="1" value="4" />
+    <button data-action="dry">干跑检查</button>
+    <button class="primary" data-action="generate">正式生成</button>
+  </template>
+  <script>
+    const DEFAULT_DURATION = 4;
+    const DEFAULT_ASSET = 'GUI_QUICK';
+    const PROMPT_REF_STRICT_SUFFIX = '人物形象和场景严格参考参考图，杜绝美化和修改';
+
+    let configData = { defaults: { duration: DEFAULT_DURATION }, assets: {} };
+    let workspace = { episodes: [], active_episode_id: null, episode_seq: 0 };
+    let activeEpisodeId = null;
+    let activeLaneCtrls = [];
+    let saveTimer = null;
+    let savePending = false;
+    let serverApiVersion = 0;
+    let serverFeatures = [];
+
+    const RESTART_HINT = '请关闭旧的黑窗口，双击项目根目录 start_seedance_gui.bat 重新启动后再试。';
+
+    function serverSupportsConcat() {
+      return serverFeatures.includes('episode_concat') || serverApiVersion >= 9;
+    }
+
+    async function parseApiJson(res) {
+      const text = await res.text();
+      if (!text.trim()) {
+        return { ok: false, error: `HTTP ${res.status}（空响应）` };
+      }
+      const trimmed = text.trim();
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        try {
+          return JSON.parse(trimmed);
+        } catch (e) {
+          return { ok: false, error: '响应不是有效 JSON' };
+        }
+      }
+      if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<html')) {
+        if (res.status === 404) {
+          return {
+            ok: false,
+            error: `拼接接口不存在 (HTTP 404)。当前 GUI 服务过旧，${RESTART_HINT}`,
+          };
+        }
+        return {
+          ok: false,
+          error: `服务器返回了网页而非 JSON (HTTP ${res.status})。${RESTART_HINT}`,
+        };
+      }
+      return { ok: false, error: trimmed.slice(0, 240) || `HTTP ${res.status}` };
+    }
+    let draggedEpisodeId = null;
+
+    function field(root, name) {
+      return root.querySelector(`[data-field="${name}"]`);
+    }
+
+    function shotTaskLabel(index) {
+      return `分镜任务${index}`;
+    }
+
+    function taskOutputSlug(episode, taskIndex) {
+      const epNo = parseEpisodeNo(episode);
+      return `ep-${epNo}-task-${taskIndex}`;
+    }
+
+    function mediaUrl(path) {
+      return `/api/media?path=${encodeURIComponent(path)}`;
+    }
+
+    function findEpisode(episodeId) {
+      return workspace.episodes.find(ep => ep.id === episodeId) || null;
+    }
+
+    function parseEpisodeNo(ep) {
+      if (ep.episode_no != null) return Number(ep.episode_no);
+      const m = String(ep.title || '').match(/第\s*(\d+)\s*集/);
+      if (m) return parseInt(m[1], 10);
+      const idm = String(ep.id || '').match(/^ep-(\d+)$/);
+      return idm ? parseInt(idm[1], 10) : 1;
+    }
+
+    function suggestNextEpisodeNo() {
+      const used = new Set(workspace.episodes.map(ep => parseEpisodeNo(ep)));
+      let n = 1;
+      while (used.has(n)) n += 1;
+      return n;
+    }
+
+    function nextInternalEpisodeId() {
+      let max = 0;
+      workspace.episodes.forEach(ep => {
+        const m = String(ep.id || '').match(/^ep-(\d+)$/);
+        if (m) max = Math.max(max, parseInt(m[1], 10));
+      });
+      return `ep-${max + 1}`;
+    }
+
+    function episodeNoTaken(episodeNo, excludeId) {
+      return workspace.episodes.some(
+        ep => parseEpisodeNo(ep) === episodeNo && ep.id !== excludeId
+      );
+    }
+
+    const episodeModal = {
+      el: null,
+      wheel: null,
+      input: null,
+      titleInput: null,
+      err: null,
+      excludeId: null,
+      titleManual: false,
+      resolver: null,
+      scrollTimer: null,
+    };
+
+    function initEpisodeModal() {
+      episodeModal.el = document.getElementById('episodeModal');
+      episodeModal.wheel = document.getElementById('epNoWheel');
+      episodeModal.input = document.getElementById('epNoInput');
+      episodeModal.titleInput = document.getElementById('epTitleInput');
+      episodeModal.err = document.getElementById('episodeModalErr');
+
+      episodeModal.wheel.addEventListener('scroll', () => {
+        clearTimeout(episodeModal.scrollTimer);
+        episodeModal.scrollTimer = setTimeout(syncEpisodeNoFromWheel, 80);
+      });
+
+      episodeModal.input.addEventListener('input', () => {
+        const n = clampEpisodeNo(episodeModal.input.value);
+        episodeModal.input.value = String(n);
+        scrollWheelToNo(n);
+        maybeAutoTitle(n);
+      });
+
+      episodeModal.titleInput.addEventListener('input', () => {
+        episodeModal.titleManual = true;
+      });
+
+      document.getElementById('epModalCancel').addEventListener('click', () => closeEpisodeModal(null));
+      document.getElementById('epModalConfirm').addEventListener('click', confirmEpisodeModal);
+      episodeModal.el.addEventListener('click', (e) => {
+        if (e.target === episodeModal.el) closeEpisodeModal(null);
+      });
+    }
+
+    function clampEpisodeNo(value) {
+      const n = parseInt(String(value), 10);
+      if (!Number.isFinite(n) || n < 1) return 1;
+      if (n > 999) return 999;
+      return n;
+    }
+
+    function wheelMaxNo() {
+      const used = workspace.episodes.map(ep => parseEpisodeNo(ep));
+      const base = suggestNextEpisodeNo();
+      return Math.max(99, base + 30, ...used, 1) + 10;
+    }
+
+    function buildEpisodeWheel(excludeId) {
+      const maxNo = wheelMaxNo();
+      const html = [];
+      for (let n = 1; n <= maxNo; n += 1) {
+        const taken = episodeNoTaken(n, excludeId);
+        html.push(
+          `<div class="ep-no-item${taken ? ' taken' : ''}" data-no="${n}">${n}</div>`
+        );
+      }
+      episodeModal.wheel.innerHTML = html.join('');
+      episodeModal.wheel.querySelectorAll('.ep-no-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const n = clampEpisodeNo(item.dataset.no);
+          episodeModal.input.value = String(n);
+          scrollWheelToNo(n);
+          maybeAutoTitle(n);
+        });
+      });
+    }
+
+    function scrollWheelToNo(no) {
+      const item = episodeModal.wheel.querySelector(`.ep-no-item[data-no="${no}"]`);
+      if (!item) return;
+      const top = item.offsetTop - (episodeModal.wheel.clientHeight - item.clientHeight) / 2;
+      episodeModal.wheel.scrollTop = top;
+      highlightWheelItem(no);
+    }
+
+    function highlightWheelItem(no) {
+      episodeModal.wheel.querySelectorAll('.ep-no-item').forEach(el => {
+        el.classList.toggle('active', Number(el.dataset.no) === no);
+      });
+    }
+
+    function syncEpisodeNoFromWheel() {
+      const wrap = episodeModal.wheel;
+      const center = wrap.scrollTop + wrap.clientHeight / 2;
+      let best = null;
+      let bestDist = Infinity;
+      wrap.querySelectorAll('.ep-no-item').forEach(item => {
+        const itemCenter = item.offsetTop + item.clientHeight / 2;
+        const dist = Math.abs(itemCenter - center);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = item;
+        }
+      });
+      if (!best) return;
+      const n = clampEpisodeNo(best.dataset.no);
+      episodeModal.input.value = String(n);
+      highlightWheelItem(n);
+      maybeAutoTitle(n);
+    }
+
+    function maybeAutoTitle(no) {
+      if (episodeModal.titleManual) return;
+      episodeModal.titleInput.value = `第 ${no} 集`;
+    }
+
+    function showEpisodeModal({ existing, excludeId }) {
+      return new Promise((resolve) => {
+        episodeModal.resolver = resolve;
+        episodeModal.excludeId = excludeId || (existing ? existing.id : null);
+        episodeModal.titleManual = !!(existing && existing.title
+          && existing.title !== `第 ${parseEpisodeNo(existing)} 集`);
+        episodeModal.err.textContent = '';
+        document.getElementById('episodeModalTitle').textContent =
+          existing ? '修改集数' : '新建集数';
+
+        const defaultNo = existing ? parseEpisodeNo(existing) : suggestNextEpisodeNo();
+        buildEpisodeWheel(episodeModal.excludeId);
+        episodeModal.input.value = String(defaultNo);
+        episodeModal.titleInput.value = existing
+          ? (existing.title || `第 ${defaultNo} 集`)
+          : `第 ${defaultNo} 集`;
+        episodeModal.el.hidden = false;
+        requestAnimationFrame(() => scrollWheelToNo(defaultNo));
+        episodeModal.input.focus();
+        episodeModal.input.select();
+      });
+    }
+
+    function closeEpisodeModal(result) {
+      episodeModal.el.hidden = true;
+      if (episodeModal.resolver) episodeModal.resolver(result);
+      episodeModal.resolver = null;
+    }
+
+    function confirmEpisodeModal() {
+      const episode_no = clampEpisodeNo(episodeModal.input.value);
+      const title = episodeModal.titleInput.value.trim() || `第 ${episode_no} 集`;
+      if (episodeNoTaken(episode_no, episodeModal.excludeId)) {
+        episodeModal.err.textContent = `第 ${episode_no} 集已存在，请换编号`;
+        return;
+      }
+      closeEpisodeModal({ episode_no, title });
+    }
+
+    function updateActiveEpisodeTitle() {
+      const ep = activeEpisodeId ? findEpisode(activeEpisodeId) : null;
+      document.getElementById('activeEpisodeTitle').textContent =
+        ep ? (ep.title || `第 ${parseEpisodeNo(ep)} 集`) : '';
+    }
+
+    function refreshAllOutputLabels() {
+      for (const ctrl of activeLaneCtrls) {
+        if (ctrl.refreshOutputLabel) ctrl.refreshOutputLabel();
+      }
+    }
+
+    function updateEpisodeLocal(episodeId, episode_no, title) {
+      const ep = findEpisode(episodeId);
+      if (!ep) return;
+      ep.episode_no = episode_no;
+      ep.title = title;
+    }
+
+    function defaultClientWorkspace() {
+      return {
+        version: 1,
+        episode_seq: 1,
+        active_episode_id: null,
+        episodes: [{
+          id: 'ep-1',
+          episode_no: 1,
+          title: '第 1 集',
+          tasks: [{
+            lane_id: 'ep-1-task-1',
+            asset: 'GUI_QUICK',
+            gen_mode: 'reference',
+            prompt: '',
+            duration: 4,
+            references: [],
+            start_frame: null,
+            end_frame: null,
+          }],
+        }],
+      };
+    }
+
+    function setSaveHint(text, cls) {
+      const el = document.getElementById('saveHint');
+      el.textContent = text;
+      el.className = 'save-hint' + (cls ? ' ' + cls : '');
+    }
+
+    function syncActiveTasksToWorkspace() {
+      if (!activeEpisodeId) return;
+      const episode = findEpisode(activeEpisodeId);
+      if (!episode) return;
+      episode.tasks = activeLaneCtrls.map(ctrl => ctrl.getSnapshot());
+    }
+
+    function scheduleSave() {
+      if (saveTimer) clearTimeout(saveTimer);
+      setSaveHint('保存中...', 'saving');
+      saveTimer = setTimeout(saveWorkspace, 500);
+    }
+
+    async function saveWorkspace() {
+      syncActiveTasksToWorkspace();
+      const payload = {
+        workspace: {
+          version: 1,
+          episode_seq: workspace.episode_seq,
+          active_episode_id: activeEpisodeId,
+          episodes: workspace.episodes,
+        },
+      };
+      savePending = true;
+      try {
+        const res = await fetch('/api/workspace', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        let data = {};
+        try { data = await res.json(); } catch { data = {}; }
+        if (res.status === 404) {
+          setSaveHint('请重启 GUI 服务', 'saving');
+          return false;
+        }
+        if (!res.ok || !data.ok) throw new Error(data.error || '保存失败');
+        workspace = data.workspace;
+        setSaveHint('已保存到本地', 'saved');
+        return true;
+      } catch (err) {
+        setSaveHint('保存失败', '');
+        console.error(err);
+        return false;
+      } finally {
+        savePending = false;
+      }
+    }
+
+    async function checkServerApi() {
+      try {
+        const res = await fetch('/api/ping');
+        const data = await res.json();
+        if (res.ok && data.ok && data.api_version >= 9) {
+          serverApiVersion = data.api_version;
+          serverFeatures = data.features || [];
+          return true;
+        }
+        if (res.ok && data.ok && data.api_version >= 3) {
+          serverApiVersion = data.api_version;
+          serverFeatures = data.features || [];
+          setSaveHint(`服务版本偏旧(v${data.api_version})，请重启 start_seedance_gui.bat`, 'saving');
+          return true;
+        }
+        if (res.ok && data.ok && data.api_version >= 2) {
+          serverApiVersion = data.api_version;
+          serverFeatures = data.features || [];
+          setSaveHint('服务版本过旧，请重启 start_seedance_gui.bat', 'saving');
+          return true;
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      serverApiVersion = 0;
+      setSaveHint('服务需重启', 'saving');
+      return false;
+    }
+
+    function deleteEpisodeLocal(episodeId) {
+      workspace.episodes = workspace.episodes.filter(ep => ep.id !== episodeId);
+      if (workspace.active_episode_id === episodeId) {
+        workspace.active_episode_id = null;
+      }
+    }
+
+    function deleteTaskLocal(episodeId, laneId) {
+      const episode = findEpisode(episodeId);
+      if (!episode) return;
+      episode.tasks = episode.tasks.filter(task => task.lane_id !== laneId);
+    }
+
+    function reorderEpisodes(dragId, targetId) {
+      const list = workspace.episodes;
+      const fromIdx = list.findIndex(ep => ep.id === dragId);
+      const toIdx = list.findIndex(ep => ep.id === targetId);
+      if (fromIdx < 0 || toIdx < 0 || fromIdx === toIdx) return;
+      const [item] = list.splice(fromIdx, 1);
+      list.splice(toIdx, 0, item);
+    }
+
+    function initEpisodeDragDrop() {
+      const board = document.getElementById('episodesBoard');
+      if (board.dataset.dndInit === '1') return;
+      board.dataset.dndInit = '1';
+
+      board.addEventListener('dragstart', (e) => {
+        const handle = e.target.closest('.ep-drag');
+        if (!handle) return;
+        const card = handle.closest('.episode-card');
+        if (!card) return;
+        draggedEpisodeId = card.dataset.episode;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', draggedEpisodeId);
+        if (e.dataTransfer.setDragImage) {
+          e.dataTransfer.setDragImage(card, card.offsetWidth / 2, card.offsetHeight / 2);
+        }
+      });
+
+      board.addEventListener('dragend', () => {
+        board.querySelectorAll('.episode-card.dragging').forEach(el => el.classList.remove('dragging'));
+        board.querySelectorAll('.episode-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+        draggedEpisodeId = null;
+      });
+
+      board.addEventListener('dragover', (e) => {
+        if (!draggedEpisodeId) return;
+        const card = e.target.closest('.episode-card');
+        if (!card) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        board.querySelectorAll('.episode-card.drag-over').forEach(el => el.classList.remove('drag-over'));
+        if (card.dataset.episode !== draggedEpisodeId) {
+          card.classList.add('drag-over');
+        }
+      });
+
+      board.addEventListener('dragleave', (e) => {
+        const card = e.target.closest('.episode-card');
+        if (card) card.classList.remove('drag-over');
+      });
+
+      board.addEventListener('drop', (e) => {
+        if (!draggedEpisodeId) return;
+        const targetCard = e.target.closest('.episode-card');
+        if (!targetCard) return;
+        e.preventDefault();
+        const targetId = targetCard.dataset.episode;
+        if (!targetId || targetId === draggedEpisodeId) return;
+        reorderEpisodes(draggedEpisodeId, targetId);
+        renderEpisodeBoard();
+        scheduleSave();
+      });
+    }
+
+    function renderEpisodeBoard() {
+      const board = document.getElementById('episodesBoard');
+      const addBtn = document.getElementById('addEpisodeBtn');
+      board.querySelectorAll('.episode-card').forEach(el => el.remove());
+      const canDeleteEpisode = workspace.episodes.length > 1;
+      workspace.episodes.forEach(ep => {
+        const card = document.createElement('div');
+        card.className = 'episode-card';
+        card.dataset.episode = ep.id;
+        const count = (ep.tasks || []).length;
+        const epNo = parseEpisodeNo(ep);
+        const dragBtn = document.createElement('button');
+        dragBtn.type = 'button';
+        dragBtn.className = 'ep-drag';
+        dragBtn.draggable = true;
+        dragBtn.title = '拖动调整顺序';
+        dragBtn.textContent = '⠿';
+        dragBtn.addEventListener('click', (e) => e.stopPropagation());
+        dragBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'ep-edit';
+        editBtn.title = '修改集数';
+        editBtn.textContent = '✎';
+        editBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          editEpisode(ep.id);
+        });
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'ep-del';
+        delBtn.title = canDeleteEpisode ? '删除集数' : '至少保留一个集数';
+        delBtn.textContent = '×';
+        delBtn.disabled = !canDeleteEpisode;
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteEpisode(ep.id);
+        });
+        card.innerHTML = `<h3>${ep.title || `第 ${epNo} 集`}</h3><p>第 ${epNo} 集 · ${count} 个分镜任务 · 点击进入</p>`;
+        card.appendChild(dragBtn);
+        card.appendChild(editBtn);
+        card.appendChild(delBtn);
+        card.addEventListener('click', () => enterEpisode(ep.id));
+        board.insertBefore(card, addBtn);
+      });
+    }
+
+    async function editEpisode(episodeId) {
+      const ep = findEpisode(episodeId);
+      if (!ep) return;
+      const fields = await showEpisodeModal({ existing: ep, excludeId: episodeId });
+      if (!fields) return;
+      try {
+        const res = await fetch('/api/episodes/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            episode_id: episodeId,
+            episode_no: fields.episode_no,
+            title: fields.title,
+          }),
+        });
+        let data = {};
+        try { data = await res.json(); } catch { data = {}; }
+        if (res.status === 404) {
+          updateEpisodeLocal(episodeId, fields.episode_no, fields.title);
+          if (await saveWorkspace()) {
+            renderEpisodeBoard();
+            if (activeEpisodeId === episodeId) updateActiveEpisodeTitle();
+            return;
+          }
+          alert('修改接口不可用。' + RESTART_HINT);
+          return;
+        }
+        if (!res.ok || !data.ok) {
+          alert(data.error || `修改失败 (${res.status})`);
+          return;
+        }
+        if (data.workspace) workspace = data.workspace;
+        renderEpisodeBoard();
+        if (activeEpisodeId === episodeId) refreshAllOutputLabels();
+        if (activeEpisodeId === episodeId) updateActiveEpisodeTitle();
+        setSaveHint('已保存到本地', 'saved');
+      } catch (err) {
+        alert('修改集数失败：' + err.message);
+      }
+    }
+
+    async function deleteEpisode(episodeId) {
+      if (workspace.episodes.length <= 1) {
+        alert('至少保留一个集数');
+        return;
+      }
+      const ep = findEpisode(episodeId);
+      if (!ep) return;
+      if (!confirm(`确定删除「${ep.title || episodeId}」及其全部 ${(ep.tasks || []).length} 个分镜任务？`)) return;
+      if (activeEpisodeId === episodeId) {
+        syncActiveTasksToWorkspace();
+        activeEpisodeId = null;
+        workspace.active_episode_id = null;
+        clearTaskBoard();
+        showEpisodeView();
+      }
+      try {
+        const res = await fetch('/api/episodes/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ episode_id: episodeId }),
+        });
+        let data = {};
+        try { data = await res.json(); } catch { data = {}; }
+        if (res.status === 404) {
+          deleteEpisodeLocal(episodeId);
+          if (await saveWorkspace()) {
+            renderEpisodeBoard();
+            return;
+          }
+          alert('删除接口不可用。' + RESTART_HINT);
+          return;
+        }
+        if (!res.ok || !data.ok) {
+          alert(data.error || `删除失败 (${res.status})`);
+          return;
+        }
+        workspace = data.workspace;
+        renderEpisodeBoard();
+        setSaveHint('已保存到本地', 'saved');
+      } catch (err) {
+        alert('删除集数失败：' + err.message);
+      }
+    }
+
+    async function deleteTask(laneId) {
+      if (!activeEpisodeId) return;
+      const episode = findEpisode(activeEpisodeId);
+      if (!episode || episode.tasks.length <= 1) {
+        alert('至少保留一个分镜任务');
+        return;
+      }
+      if (!confirm('确定删除该分镜任务？相关配置将从本集移除（已生成视频文件仍保留在 exports 目录）。')) return;
+      syncActiveTasksToWorkspace();
+      try {
+        const res = await fetch('/api/tasks/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ episode_id: activeEpisodeId, lane_id: laneId }),
+        });
+        let data = {};
+        try { data = await res.json(); } catch { data = {}; }
+        if (res.status === 404) {
+          deleteTaskLocal(activeEpisodeId, laneId);
+          if (await saveWorkspace()) {
+            const ep = findEpisode(activeEpisodeId);
+            clearTaskBoard();
+            if (ep) (ep.tasks || []).forEach((task, index) => mountTaskPanel(task, index + 1));
+            return;
+          }
+          alert('删除接口不可用。' + RESTART_HINT);
+          return;
+        }
+        if (!res.ok || !data.ok) {
+          alert(data.error || `删除失败 (${res.status})`);
+          return;
+        }
+        workspace = data.workspace;
+        const ep = findEpisode(activeEpisodeId);
+        clearTaskBoard();
+        if (ep) (ep.tasks || []).forEach((task, index) => mountTaskPanel(task, index + 1));
+        setSaveHint('已保存到本地', 'saved');
+      } catch (err) {
+        alert('删除分镜任务失败：' + err.message);
+      }
+    }
+
+    function showEpisodeView() {
+      document.getElementById('episodeView').hidden = false;
+      document.getElementById('taskView').hidden = true;
+    }
+
+    function showTaskView() {
+      document.getElementById('episodeView').hidden = true;
+      document.getElementById('taskView').hidden = false;
+    }
+
+    function clearTaskBoard() {
+      const board = document.getElementById('lanesBoard');
+      board.querySelectorAll('.lane').forEach(el => el.remove());
+      activeLaneCtrls = [];
+    }
+
+    function enterEpisode(episodeId) {
+      syncActiveTasksToWorkspace();
+      activeEpisodeId = episodeId;
+      workspace.active_episode_id = episodeId;
+      const episode = findEpisode(episodeId);
+      if (!episode) return;
+      updateActiveEpisodeTitle();
+      showTaskView();
+      clearTaskBoard();
+      (episode.tasks || []).forEach((task, index) => mountTaskPanel(task, index + 1));
+      scheduleSave();
+    }
+
+    function leaveEpisode() {
+      syncActiveTasksToWorkspace();
+      activeEpisodeId = null;
+      workspace.active_episode_id = null;
+      clearTaskBoard();
+      const bar = document.getElementById('episodeConcatBar');
+      if (bar) bar.hidden = true;
+      showEpisodeView();
+      renderEpisodeBoard();
+      scheduleSave();
+    }
+
+    function updateConcatButtonState() {
+      const btn = document.getElementById('concatEpisodeBtn');
+      if (!btn) return;
+      const ok = serverSupportsConcat();
+      btn.disabled = !ok;
+      btn.title = ok
+        ? '按分镜任务1、2、3…顺序拼接各任务最新预览视频'
+        : '需要重启 GUI（api_version ≥ 9）后才可使用';
+    }
+
+    async function concatActiveEpisode() {
+      if (!activeEpisodeId) return;
+      if (!serverSupportsConcat()) {
+        alert(`当前服务不支持一键拼接（api v${serverApiVersion || '?'}）。${RESTART_HINT}`);
+        return;
+      }
+      const btn = document.getElementById('concatEpisodeBtn');
+      const bar = document.getElementById('episodeConcatBar');
+      if (btn) btn.disabled = true;
+      if (bar) {
+        bar.hidden = false;
+        bar.textContent = '正在拼接，请稍候…';
+      }
+      try {
+        const res = await fetch('/api/episodes/concat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ episode_id: activeEpisodeId }),
+        });
+        const data = await parseApiJson(res);
+        if (!res.ok || !data.ok) {
+          alert(data.error || '拼接失败');
+          if (bar) bar.hidden = true;
+          return;
+        }
+        const skipped = (data.skipped || []).length
+          ? `<p style="margin:4px 0 0;color:#b45309;">跳过无预览：${data.skipped.join('、')}</p>` : '';
+        if (bar) {
+          bar.innerHTML = `
+            <div>${data.message}：${(data.included || []).join(' → ')}</div>
+            <div>文件：<strong>${data.filename}</strong>
+              <a href="${data.preview_url}" target="_blank" rel="noopener">新窗口播放</a></div>
+            ${skipped}
+            <video controls playsinline preload="metadata" src="${data.preview_url}"></video>`;
+          bar.hidden = false;
+        }
+      } catch (err) {
+        alert('拼接失败：' + err.message);
+        if (bar) bar.hidden = true;
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function buildLaneElement(laneId, index, canDeleteTask) {
+      const el = document.createElement('div');
+      el.className = 'lane';
+      el.dataset.lane = laneId;
+      const delDisabled = canDeleteTask ? '' : ' disabled';
+      const delTitle = canDeleteTask ? '删除分镜任务' : '至少保留一个分镜任务';
+      el.innerHTML = `
+        <div class="lane-head">
+          <h2>${shotTaskLabel(index)}</h2>
+          <button type="button" class="btn-del" data-action="deleteLane" title="${delTitle}"${delDisabled}>删除</button>
+        </div>
+        <section class="side" data-role="controls"></section>
+        <section class="preview-side">
+          <div class="video-wrap">
+            <p class="preview-empty" data-role="previewEmpty">暂无视频，生成成功后将在此预览</p>
+            <video data-role="preview" controls playsinline preload="metadata" style="display:none;"></video>
+          </div>
+          <p class="gen-status phase-idle" data-role="genStatus">就绪</p>
+          <p class="run-log-label">运行日志</p>
+          <div class="run-log-wrap" data-role="runLogWrap">
+            <pre class="run-log" data-role="runLog">（点击「正式生成」后，原黑窗口输出会显示在这里）</pre>
+          </div>
+        </section>`;
+      return el;
+    }
+
+    function refFromStored(item) {
+      return {
+        path: item.path,
+        kind: item.kind || 'image',
+        name: item.name || 'file',
+        preview: mediaUrl(item.path),
+      };
+    }
+
+    function initLane(laneRoot, index, snapshot) {
+      const laneId = laneRoot.dataset.lane;
+      const tpl = document.getElementById('controls-template');
+      laneRoot.querySelector('[data-role="controls"]').appendChild(tpl.content.cloneNode(true));
+      const side = laneRoot.querySelector('.side');
+      const q = (name) => field(side, name);
+      const state = { uploadedReferences: [], startFrame: null, endFrame: null };
+      const ui = {
+        laneId, index, asset: q('asset'), assetMeta: q('assetMeta'), genMode: q('genMode'),
+        prompt: q('prompt'), appendRefStrict: side.querySelector('[data-action="appendRefStrict"]'),
+        refBlock: q('refBlock'), kfBlock: q('kfBlock'),
+        referenceFile: q('referenceFile'), refPreview: q('refPreview'),
+        startFrameFile: q('startFrameFile'), endFrameFile: q('endFrameFile'),
+        startPreview: q('startPreview'), endPreview: q('endPreview'),
+        duration: q('duration'),
+        preview: laneRoot.querySelector('[data-role="preview"]'),
+        previewEmpty: laneRoot.querySelector('[data-role="previewEmpty"]'),
+        genStatus: laneRoot.querySelector('[data-role="genStatus"]'),
+        runLog: laneRoot.querySelector('[data-role="runLog"]'),
+        runLogWrap: laneRoot.querySelector('[data-role="runLogWrap"]'),
+        dryBtn: side.querySelector('[data-action="dry"]'),
+        generateBtn: side.querySelector('[data-action="generate"]'),
+        lastPreviewUrl: '',
+      };
+
+      function persistSoon() { scheduleSave(); }
+
+      function syncModePanels() {
+        const mode = ui.genMode.value;
+        ui.refBlock.style.display = mode === 'reference' ? 'block' : 'none';
+        ui.kfBlock.style.display = mode === 'keyframes' ? 'block' : 'none';
+        persistSoon();
+      }
+
+      function refCounts() {
+        const images = state.uploadedReferences.filter(i => i.kind === 'image').length;
+        const videos = state.uploadedReferences.filter(i => i.kind === 'video').length;
+        return { images, videos };
+      }
+
+      function renderRefPreview() {
+        ui.refPreview.innerHTML = state.uploadedReferences.map((item, idx) => {
+          const media = item.kind === 'video'
+            ? `<video src="${item.preview}" muted></video>`
+            : `<img src="${item.preview}" alt="ref">`;
+          const tag = item.kind === 'video' ? '视频' : '图片';
+          return `<div class="ref-card">
+            <button type="button" class="del" data-idx="${idx}">×</button>
+            ${media}<div class="ref-chip">${tag} · ${item.name}</div></div>`;
+        }).join('');
+        persistSoon();
+      }
+
+      function renderKfPreview(container, frame) {
+        container.innerHTML = frame ? `<div class="kf-card">
+          <button type="button" class="del">×</button>
+          <img src="${frame.preview}" alt="kf"><div class="ref-chip">${frame.name}</div></div>` : '';
+        persistSoon();
+      }
+
+      async function deleteUploadedPath(path) {
+        const res = await fetch('/api/upload/delete', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || '删除失败');
+      }
+
+      async function uploadFile(file) {
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        const base64 = String(dataUrl).split(',')[1] || '';
+        const res = await fetch('/api/upload', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, data: base64 }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || '上传失败');
+        return { path: data.path, kind: data.kind || 'image', name: file.name, preview: mediaUrl(data.path) };
+      }
+
+      ui.appendRefStrict.addEventListener('click', () => {
+        const current = ui.prompt.value.trimEnd();
+        if (current.includes(PROMPT_REF_STRICT_SUFFIX)) return;
+        ui.prompt.value = current ? `${current}，${PROMPT_REF_STRICT_SUFFIX}` : PROMPT_REF_STRICT_SUFFIX;
+        ui.prompt.focus();
+        persistSoon();
+      });
+
+      ui.refPreview.addEventListener('click', (e) => {
+        const btn = e.target.closest('.del');
+        if (!btn) return;
+        const item = state.uploadedReferences[Number(btn.dataset.idx)];
+        if (!item) return;
+        deleteUploadedPath(item.path).then(() => {
+          state.uploadedReferences.splice(Number(btn.dataset.idx), 1);
+          renderRefPreview();
+        }).catch(err => alert(err.message));
+      });
+
+      ui.referenceFile.addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files || []);
+        const counts = refCounts();
+        let newImages = 0, newVideos = 0;
+        for (const f of files) {
+          if (/\.(mp4|mov|webm)$/i.test(f.name)) newVideos += 1;
+          else newImages += 1;
+        }
+        if (counts.images + newImages > 9) { alert('参考图片最多 9 个'); return; }
+        if (counts.videos + newVideos > 3) { alert('参考视频最多 3 个'); return; }
+        try {
+          for (const f of files) state.uploadedReferences.push(await uploadFile(f));
+          renderRefPreview();
+        } catch (err) { alert(err.message); }
+        e.target.value = '';
+      });
+
+      ui.startFrameFile.addEventListener('change', async (e) => {
+        const file = (e.target.files || [])[0];
+        if (!file) return;
+        try {
+          if (state.startFrame) await deleteUploadedPath(state.startFrame.path).catch(() => {});
+          state.startFrame = await uploadFile(file);
+          renderKfPreview(ui.startPreview, state.startFrame);
+        } catch (err) { alert(err.message); }
+        e.target.value = '';
+      });
+
+      ui.endFrameFile.addEventListener('change', async (e) => {
+        const file = (e.target.files || [])[0];
+        if (!file) return;
+        try {
+          if (state.endFrame) await deleteUploadedPath(state.endFrame.path).catch(() => {});
+          state.endFrame = await uploadFile(file);
+          renderKfPreview(ui.endPreview, state.endFrame);
+        } catch (err) { alert(err.message); }
+        e.target.value = '';
+      });
+
+      ui.startPreview.addEventListener('click', (e) => {
+        if (!e.target.closest('.del') || !state.startFrame) return;
+        deleteUploadedPath(state.startFrame.path).then(() => {
+          state.startFrame = null; renderKfPreview(ui.startPreview, null);
+        }).catch(err => alert(err.message));
+      });
+
+      ui.endPreview.addEventListener('click', (e) => {
+        if (!e.target.closest('.del') || !state.endFrame) return;
+        deleteUploadedPath(state.endFrame.path).then(() => {
+          state.endFrame = null; renderKfPreview(ui.endPreview, null);
+        }).catch(err => alert(err.message));
+      });
+
+      ui.genMode.addEventListener('change', syncModePanels);
+      ui.prompt.addEventListener('input', persistSoon);
+      ui.asset.addEventListener('change', persistSoon);
+      ui.duration.addEventListener('change', persistSoon);
+
+      function refreshOutputLabel(job) {
+        const ep = findEpisode(activeEpisodeId);
+        const base = ep ? taskOutputSlug(ep, index) : laneId;
+        const label = job?.output_label;
+        ui.assetMeta.textContent = label ? `输出: ${label}` : `输出: ${base}_TikTok_v001 起递增`;
+      }
+
+      function populateAssets() {
+        const ids = Object.keys(configData.assets);
+        ui.asset.innerHTML = ids.map(id => `<option value="${id}">${id}</option>`).join('');
+        if (ids.includes(DEFAULT_ASSET)) ui.asset.value = DEFAULT_ASSET;
+        refreshOutputLabel();
+      }
+
+      async function runJob(mode) {
+        const prompt = ui.prompt.value.trim();
+        const generationMode = ui.genMode.value;
+        const references = state.uploadedReferences.map(i => i.path);
+        const start_frame = state.startFrame ? state.startFrame.path : '';
+        const end_frame = state.endFrame ? state.endFrame.path : '';
+        if (!prompt) { alert(`${shotTaskLabel(index)}: 请填写 Prompt`); return; }
+        if (generationMode === 'reference' && !references.length) {
+          alert(`${shotTaskLabel(index)}: 请上传参考`); return;
+        }
+        if (generationMode === 'keyframes' && (!start_frame || !end_frame)) {
+          alert(`${shotTaskLabel(index)}: 请上传首帧和尾帧`); return;
+        }
+        const res = await fetch('/api/run', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lane: laneId, mode, asset: ui.asset.value,
+            duration: Number(ui.duration.value) || DEFAULT_DURATION,
+            prompt, generation_mode: generationMode,
+            references, start_frame, end_frame,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) alert(data.error || '启动失败');
+      }
+
+      ui.dryBtn.onclick = () => runJob('dry');
+      ui.generateBtn.onclick = () => runJob('generate');
+
+      function setPreview(url) {
+        if (!url || url === ui.lastPreviewUrl) return;
+        ui.lastPreviewUrl = url;
+        ui.preview.src = url;
+        ui.preview.style.display = 'block';
+        ui.previewEmpty.style.display = 'none';
+        ui.preview.load();
+      }
+
+      const laneCtrl = {
+        laneId,
+        refreshOutputLabel,
+        getSnapshot() {
+          return {
+            lane_id: laneId,
+            asset: ui.asset.value,
+            gen_mode: ui.genMode.value,
+            prompt: ui.prompt.value,
+            duration: Number(ui.duration.value) || DEFAULT_DURATION,
+            references: state.uploadedReferences.map(({ path, kind, name }) => ({ path, kind, name })),
+            start_frame: state.startFrame
+              ? { path: state.startFrame.path, kind: state.startFrame.kind, name: state.startFrame.name } : null,
+            end_frame: state.endFrame
+              ? { path: state.endFrame.path, kind: state.endFrame.kind, name: state.endFrame.name } : null,
+          };
+        },
+        updateJob(job) {
+          let phase = job.phase || (job.running ? 'running' : 'idle');
+          if (phase === 'skipped') phase = 'failed';
+          let text = job.status_text || '就绪';
+          if (job.mode === 'generate' || job.running) {
+            if (job.running && !job.api_sent) text = job.status_text || 'API：编码/提交中…｜视频：等待';
+            else if (job.running && job.api_sent) text = 'API：已发送｜视频：生成中';
+            else if (job.video_status === 'success') text = job.status_text || 'API：已发送｜视频：成功';
+            else if (job.video_status === 'failed') text = job.status_text || 'API：已发送｜视频：失败';
+          }
+          ui.genStatus.textContent = text;
+          ui.genStatus.className = 'gen-status phase-' + phase;
+          ui.dryBtn.disabled = !!job.running;
+          ui.generateBtn.disabled = !!job.running;
+          if (job.preview_url) setPreview(job.preview_url);
+          refreshOutputLabel(job);
+          if (ui.runLog) {
+            ui.runLog.textContent = job.log || '（等待任务…）';
+            if (ui.runLogWrap) ui.runLogWrap.scrollTop = ui.runLogWrap.scrollHeight;
+          }
+        },
+        populateAssets,
+        syncModePanels,
+      };
+
+      ui.duration.value = configData.defaults.duration || DEFAULT_DURATION;
+      populateAssets();
+
+      if (snapshot) {
+        ui.prompt.value = snapshot.prompt || '';
+        ui.genMode.value = snapshot.gen_mode || 'reference';
+        if (snapshot.asset) ui.asset.value = snapshot.asset;
+        ui.duration.value = snapshot.duration || DEFAULT_DURATION;
+        state.uploadedReferences = (snapshot.references || []).map(refFromStored);
+        state.startFrame = snapshot.start_frame ? refFromStored(snapshot.start_frame) : null;
+        state.endFrame = snapshot.end_frame ? refFromStored(snapshot.end_frame) : null;
+        renderRefPreview();
+        renderKfPreview(ui.startPreview, state.startFrame);
+        renderKfPreview(ui.endPreview, state.endFrame);
+      }
+      syncModePanels();
+      activeLaneCtrls.push(laneCtrl);
+
+      const delBtn = laneRoot.querySelector('[data-action="deleteLane"]');
+      if (delBtn && !delBtn.disabled) {
+        delBtn.addEventListener('click', () => deleteTask(laneId));
+      }
+      return laneCtrl;
+    }
+
+    function mountTaskPanel(task, index) {
+      const board = document.getElementById('lanesBoard');
+      const addBtn = document.getElementById('addLaneBtn');
+      const episode = findEpisode(activeEpisodeId);
+      const canDeleteTask = episode && episode.tasks.length > 1;
+      const laneEl = buildLaneElement(task.lane_id, index, canDeleteTask);
+      board.insertBefore(laneEl, addBtn);
+      initLane(laneEl, index, task);
+    }
+
+    async function addTaskPanel() {
+      if (!activeEpisodeId) return;
+      const res = await fetch('/api/lanes/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ episode_id: activeEpisodeId }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        alert(data.error || '创建分镜任务失败');
+        return;
+      }
+      const episode = findEpisode(activeEpisodeId);
+      if (episode) {
+        episode.tasks = episode.tasks || [];
+        episode.tasks.push(data.task);
+      }
+      mountTaskPanel(data.task, activeLaneCtrls.length + 1);
+      scheduleSave();
+    }
+
+    async function addEpisode() {
+      const fields = await showEpisodeModal({ existing: null });
+      if (!fields) return;
+      try {
+        const res = await fetch('/api/episodes/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            episode_no: fields.episode_no,
+            title: fields.title,
+          }),
+        });
+        let data = {};
+        try { data = await res.json(); } catch { data = {}; }
+        if (res.status === 404) {
+          if (episodeNoTaken(fields.episode_no)) {
+            alert(`第 ${fields.episode_no} 集已存在`);
+            return;
+          }
+          const epId = nextInternalEpisodeId();
+          workspace.episodes.push({
+            id: epId,
+            episode_no: fields.episode_no,
+            title: fields.title,
+            tasks: [{
+              lane_id: `${epId}-task-1`,
+              asset: 'GUI_QUICK',
+              gen_mode: 'reference',
+              prompt: '',
+              duration: 4,
+              references: [],
+              start_frame: null,
+              end_frame: null,
+            }],
+          });
+          if (await saveWorkspace()) {
+            renderEpisodeBoard();
+            return;
+          }
+          alert('创建接口不可用。' + RESTART_HINT);
+          return;
+        }
+        if (!res.ok || !data.ok) {
+          alert(data.error || `创建集数失败 (${res.status})`);
+          return;
+        }
+        if (data.workspace) workspace = data.workspace;
+        else if (data.episode) workspace.episodes.push(data.episode);
+        renderEpisodeBoard();
+        setSaveHint('已保存到本地', 'saved');
+      } catch (err) {
+        alert('创建集数失败：' + err.message);
+      }
+    }
+
+    async function loadConfig() {
+      const res = await fetch('/api/config');
+      configData = await res.json();
+      if (!configData.defaults.duration) configData.defaults.duration = DEFAULT_DURATION;
+    }
+
+    async function loadWorkspace() {
+      const res = await fetch('/api/workspace');
+      let data = {};
+      try { data = await res.json(); } catch { data = {}; }
+      if (res.status === 404 || !res.ok || !data.ok) {
+        throw new Error(res.status === 404 ? 'workspace_api_missing' : '加载工作区失败');
+      }
+      workspace = data.workspace;
+      if (!workspace.episodes || !workspace.episodes.length) {
+        workspace = defaultClientWorkspace();
+      }
+      return data.jobs || {};
+    }
+
+    async function poll() {
+      if (!activeEpisodeId || !activeLaneCtrls.length) return;
+      const res = await fetch('/api/jobs');
+      const jobs = await res.json();
+      for (const ctrl of activeLaneCtrls) {
+        ctrl.updateJob(jobs[ctrl.laneId] || {
+          running: false, returncode: null, phase: 'idle', status_text: '就绪',
+        });
+      }
+    }
+
+    document.getElementById('addEpisodeBtn').addEventListener('click', () => addEpisode());
+    document.getElementById('addLaneBtn').addEventListener('click', () => addTaskPanel());
+    document.getElementById('backToEpisodes').addEventListener('click', () => leaveEpisode());
+    document.getElementById('editActiveEpisode').addEventListener('click', () => {
+      if (activeEpisodeId) editEpisode(activeEpisodeId);
+    });
+    document.getElementById('concatEpisodeBtn').addEventListener('click', () => concatActiveEpisode());
+    initEpisodeModal();
+    initEpisodeDragDrop();
+
+    (async function boot() {
+      const apiOk = await checkServerApi();
+      updateConcatButtonState();
+      const verEl = document.getElementById('serverVer');
+      if (verEl) {
+        if (serverSupportsConcat()) {
+          verEl.textContent = `服务 v${serverApiVersion} ✓`;
+          verEl.style.color = '#15803d';
+        } else if (serverApiVersion >= 5) {
+          verEl.textContent = `服务 v${serverApiVersion}（需重启以支持拼接）`;
+          verEl.style.color = '#b45309';
+        } else {
+          verEl.textContent = `服务 v${serverApiVersion || '?'}（过旧，请重启 bat）`;
+          verEl.style.color = '#b45309';
+        }
+      }
+      try {
+        await loadConfig();
+      } catch (err) {
+        console.error(err);
+        setSaveHint('配置加载失败', '');
+      }
+      if (!apiOk) {
+        alert('检测到 GUI 服务版本过旧或未完整启动（需要 api_version≥5）。\n\n' + RESTART_HINT);
+      }
+      let jobs = {};
+      try {
+        jobs = await loadWorkspace();
+      } catch (err) {
+        console.error(err);
+        workspace = defaultClientWorkspace();
+        setSaveHint('请重启 GUI 服务后刷新', 'saving');
+      }
+      renderEpisodeBoard();
+      if (workspace.active_episode_id && findEpisode(workspace.active_episode_id)) {
+        enterEpisode(workspace.active_episode_id);
+        for (const ctrl of activeLaneCtrls) {
+          ctrl.updateJob(jobs[ctrl.laneId] || { running: false, phase: 'idle', status_text: '就绪' });
+        }
+      } else {
+        showEpisodeView();
+      }
+      setInterval(poll, 1000);
+      poll();
+    })();
+  </script>
+</body>
+</html>

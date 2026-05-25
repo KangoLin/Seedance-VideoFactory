@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.mp4
+*.png
+*.jpg
+*.jpeg
+API_Key/VE_Key.txt
+05_Video/uploads/
+05_Video/segments/.api_cache/
+05_Video/exports/
