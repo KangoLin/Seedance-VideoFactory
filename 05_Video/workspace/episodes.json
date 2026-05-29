@@ -1,7 +1,7 @@
 {
   "version": 1,
   "episode_seq": 13,
-  "active_episode_id": "ep-12",
+  "active_episode_id": "ep-8",
   "episodes": [
     {
       "id": "ep-8",
@@ -13,6 +13,7 @@
           "gen_mode": "reference",
           "prompt": "0-3s，低角度压迫近景，两个普通丧尸背影逼近参考图方块护士，把她堵在医务室角落，护士缩在药柜旁抱紧病历夹，3-5s，切到平视特写，她眼睛含泪露出绝望可怜表情，低多边形3D渲染，人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 5,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_162600_护士.png",
@@ -32,13 +33,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-1-task-1",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-1-task-1"
         },
         {
           "lane_id": "ep-8-task-4",
@@ -46,6 +46,7 @@
           "gen_mode": "reference",
           "prompt": "0-2s，固定特写镜头，参考图方块护士低头发抖，表情从可怜慢慢变凶悍，眼神发亮，2-3s，快速切到病历夹落地特写，3-5s，切回中景，她从背后夸张掏出两把AK47，低多边形3D渲染，人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 5,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_163312_护士.png",
@@ -65,13 +66,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-1-task-2",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-1-task-2"
         },
         {
           "lane_id": "ep-8-task-5",
@@ -79,6 +79,7 @@
           "gen_mode": "reference",
           "prompt": "0-2s，反应特写切镜，一大群丧尸看到护士手里的双AK47呆住，互相对视，2-3s，切到丧尸慌张转身逃跑的中景，3-6s，低角度中景拍护士站稳开火，枪口喷出卡通火光，弹壳夸张飞出，低多边形3D渲染，人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 6,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_163345_护士.png",
@@ -98,13 +99,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-1-task-3",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-1-task-3"
         },
         {
           "lane_id": "ep-8-task-6",
@@ -112,6 +112,7 @@
           "gen_mode": "reference",
           "prompt": "0-2s，中景平视，医务室走廊，方块护士把双AK47扔到一旁，双手伸向背后。2-4s，中景侧拍，她从背后夸张掏出两把加特林机枪。4-5s，特写镜头，黑色墨镜落到鼻梁上，嘴里叼上雪茄。5-9s，过肩镜头，从方块护士肩后看向走廊前方，她用双加特林扫射背对着镜头正在逃跑的丧尸群，枪口喷出卡通火光。9-12s，中景镜头，被扫中的丧尸群纷纷倒下，尸体在走廊地上叠成一堆。12-15s，低角度英雄定格，方块护士一只脚踩在丧尸尸体堆上，双加特林枪口冒着轻烟，她叼着雪茄戴着墨镜，低多边形3D渲染。人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 15,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_163450_护士.png",
@@ -131,13 +132,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-1-task-4",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-1-task-4"
         }
       ],
       "episode_no": 1
@@ -152,6 +152,7 @@
           "gen_mode": "reference",
           "prompt": "0-1s，全景平视固定，工业厂房大门开启，方块女孩囚犯站在门口，1-2s，特写平视，方块女孩囚犯脸部冷静，左脸颊有卡通红色黏液，2-4s，俯视特写，她用棉签把手机当作镜子擦掉自己脸上的黏液（不是擦手机上的粘液是擦自己脸上的粘液），手机背面朝向摄像机，低多边形3D渲染，废弃灰石监狱工业库房，薄雾。，人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 4,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_185407_跑酷妹子.png",
@@ -166,13 +167,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-1",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-2-task-1"
         },
         {
           "lane_id": "ep-10-task-2",
@@ -180,6 +180,7 @@
           "gen_mode": "reference",
           "prompt": "0-2s，中景平视固定，方块女孩囚犯放下手机坚毅环顾杂物库房，2-3s，特写横移扫过黄色安全帽货架，3-5s，中景仰视，她在货架间穿梭一手扳手一手零食，低多边形3D渲染，废弃灰石监狱工业库房，薄雾。，人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 5,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_185412_跑酷妹子.png",
@@ -194,13 +195,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-2",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-2-task-2"
         },
         {
           "lane_id": "ep-10-task-3",
@@ -208,6 +208,7 @@
           "gen_mode": "reference",
           "prompt": "0-1s，中景侧拍，方块女孩囚犯拿起电烙铁端详，1-2s，特写平视，红黑重型电锯摆在货架最显眼位置，2-3s，中景平视，她盯着电锯眼神变兴奋，3-5s，特写平视，她头戴护目镜正在焊接电路板，电路板上烟雾升起，低多边形3D渲染，废弃工业库房。人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 5,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_185421_跑酷妹子.png",
@@ -222,13 +223,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-3",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-2-task-3"
         },
         {
           "lane_id": "ep-10-task-4",
@@ -236,6 +236,7 @@
           "gen_mode": "reference",
           "prompt": "0-2s，中景侧拍推进，方块女孩囚犯提起红黑电锯拉动启动绳，电锯轰鸣，2-4s，特写仰视，她举电锯夸张大笑，低多边形3D渲染，废弃工业库房。，人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 4,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_185428_跑酷妹子.png",
@@ -250,13 +251,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-4",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-2-task-4"
         },
         {
           "lane_id": "ep-10-task-5",
@@ -264,6 +264,7 @@
           "gen_mode": "reference",
           "prompt": "0-2s，俯视全景，桌上电锯、扳手和撬棍整齐铺开，2-3s，特写仰视快速推进，方块女孩戴耳机调整直视镜头，并拿起电锯，3-5s，全景平视中心构图，手持电锯站在工业走廊中央，并拉向电锯，低多边形3D渲染，狭长废弃工业走廊，薄雾。人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 5,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_185433_跑酷妹子.png",
@@ -278,13 +279,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-5",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-2-task-5"
         },
         {
           "lane_id": "ep-10-task-6",
@@ -292,6 +292,7 @@
           "gen_mode": "reference",
           "prompt": "0-2s，中景跟随晃动，走廊暗处丧尸从背后扑向方块女孩囚犯，2-5s，近景平视快速剪辑，她转身挥动电锯反击，卡通红色黏液喷到镜头和护目镜上，丧尸被震退，低多边形3D渲染，工业走廊。，人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 5,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_185441_跑酷妹子.png",
@@ -311,13 +312,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-6",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-2-task-6"
         },
         {
           "lane_id": "ep-10-task-7",
@@ -325,6 +325,7 @@
           "gen_mode": "reference",
           "prompt": "低多边形3D渲染风格，14秒连续镜头。全片采用第三人称跟随视角（轻微晃动，模拟肩扛摄像机）。人物形象和场景严格参考参考图，杜绝美化和修改。\n\n0-2秒：地面仰视固定镜头，镜头表面沾有少量红色黏液痕迹。上方传来电锯轰鸣声，方块女孩的靴子（沾有红色黏液）和旋转的电锯锯齿快速掠过画面上边缘，红色黏液稀疏滴落。\n\n2-5秒：镜头快速上摇转为中景第三人称跟随。她在狭窄工业走廊中，前方约2米处有两只丧尸，后方约1.5米处有一只丧尸逼近。她先向右侧滑步躲开右前方丧尸扑咬，随即身体左回正，横向挥动电锯（从左至右）斩击前方另一丧尸头部，溅出黑色液体。接着她以右脚为轴心转身180度，反手（从右向左）挥锯扫向后方丧尸颈部，将其逼退两步。\n\n5-7秒：镜头切为近景固定（腰部以上）。一只丧尸从左侧扑来，她抬脚踹中丧尸胸口将其蹬开，同时用电锯手柄向右上方格挡另一丧尸利爪，金属碰撞处火花四溅。她借力向后撤一步，与两只丧尸拉开约1米距离。\n\n7-10秒：镜头转为过肩平视（以她的右肩为前景），向后跟随后退。她转身向前跑出两步，拉大与丧尸距离至约2.5米。她回身站定，面向右侧一根垂直的金属管道，双手握紧电锯从右向左横向锯向管道中部，电锯锯齿与金属接触处火星四溅，管道被完全锯断。\n\n10-12秒：锯断的管道向下坠落，横倒在走廊地面中央，丧尸被暂时隔开在管道另一侧。她后退半步，电锯仍在手中空转轰鸣。\n\n12-14秒：镜头切为特写固定（轻微晃动），拍摄她的面部。她靠墙喘息，脸上沾满红色黏液和黑色污渍。突然她紧咬牙关从喉咙深处发出嘶吼，表情疯狂，画面在该嘶吼表情上定格0.5秒后结束。",
           "duration": 14,
+          "ratio": "9:16",
           "references": [
             {
               "path": "05_Video/uploads/20260522_185740_跑酷妹子.png",
@@ -344,13 +345,12 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-7",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-2-task-7"
         }
       ],
       "episode_no": 2
@@ -1261,6 +1261,44 @@
           "lane_id": "ep-12-task-3",
           "asset": "GUI_QUICK",
           "gen_mode": "reference",
+          "prompt": "延续参考视频，0-2s，中景镜头，丧尸听到声响缓缓转身，2-4s，特写，丧尸嘴角挂汤汁嘴里叼着骨头，骨头嗒地落在地上，它眼神空洞地看着少年。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_164144_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_164144_media__1_.jpg",
+              "kind": "image",
+              "name": "media (1).jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260529_164144_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_164205_video__1_.mp4",
+              "kind": "video",
+              "name": "video (1).mp4"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-3"
+        },
+        {
+          "lane_id": "ep-12-task-4",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
           "prompt": "",
           "duration": 4,
           "ratio": "9:16",
@@ -1272,7 +1310,7 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-4-task-3"
+          "output_slug": "ep-4-task-4"
         }
       ]
     },
@@ -1287,16 +1325,16 @@
           "gen_mode": "reference",
           "prompt": "",
           "duration": 4,
+          "ratio": "9:16",
           "references": [],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-5-task-1",
           "image_gen_mode": "text_image",
           "image_gen_prompt": "",
-          "image_gen_model": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "ratio": "9:16"
+          "output_slug": "ep-5-task-1"
         }
       ]
     }
