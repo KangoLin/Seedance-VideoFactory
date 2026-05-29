@@ -12,7 +12,7 @@
 
 | GUI 选项 | 说明 |
 |----------|------|
-| **参考 + 文字** | 上传参考（图片与/或视频，可混用、可删除），填 Prompt |
+| **参考 + 文字** | 上传参考视频和参考图（可混用、可删除），填 Prompt |
 | **首尾帧（上传）** | 上传首帧、尾帧，填 Prompt |
 
 ### 参考素材限制
@@ -28,6 +28,7 @@
 ## 启动 GUI
 
 - Windows: 双击 `start_seedance_gui.bat`
+- 开发改 GUI 后快速重启（无 `pause`，供 Cursor Agent 使用）: `restart_seedance_gui.bat`
 - 浏览器: `http://127.0.0.1:8765`
 - 生成任务的**运行日志**在任务面板「视频预览」下方，可滚动查看（无需黑窗口）
 
@@ -43,23 +44,31 @@
 
 输出成片与集数、分镜任务对应，例如 `ep-1-task-1_TikTok_v001.mp4`；每次点击「正式生成」都会重新请求 API，并自动递增版本号（`v002`、`v003`…）。修改集数或任务顺序后会自动重命名已有文件。
 
-### DeepSeek 网页端反代提示词优化
+### AI API 提示词优化
 
-本工具不内置 DeepSeek 网页逆向逻辑，优先复用 GitHub 开源代理项目，例如 `Fly143/deepseek-free-api`、`TQZHR/deepseek2api`、`ds2api`。先单独启动其中一个代理，让它提供 OpenAI 兼容接口，再启动本 GUI。
+每个任务面板都有 **AI 提示词优化**，可在窗口内切换 **DeepSeek** / **Gemini** 及具体模型，分析当前视频 Prompt，并返回可一键应用的优化版本。
 
-本项目已提供快捷启动：
+每个任务面板右侧还有 **图片生成（Gemini）**：
 
-- 双击 `start_deepseek_proxy.bat` 启动 DeepSeek 网页端反代管理面板
-- 打开后访问 `http://127.0.0.1:8000/admin`，登录 DeepSeek 网页账号或导入 cURL
-- 再回到视频工具中点击任务面板的 **DeepSeek 提示词优化**
+- **文生图**：只输入图片提示词生成参考图
+- **图生图**：上传参考图，基于图片生成新图
+- **文 + 图生图**：上传参考图并用文字控制修改方向
+- 生成图会保存到 `05_Video/uploads/`，可一键加入当前任务参考图
 
-默认连接：
+默认模型：
 
-- `PROMPT_OPTIMIZER_BASE_URL=http://127.0.0.1:8000/v1`
-- `PROMPT_OPTIMIZER_MODEL=deepseek-chat`
-- `PROMPT_OPTIMIZER_API_KEY=`（本地代理不需要鉴权时留空；如代理要求本地 key 再填写）
+- DeepSeek：`deepseek-chat`、`deepseek-reasoner`
+- Gemini：`gemini-3-pro-preview`、`gemini-3-flash-preview`、`gemini-3.1-pro-preview`、`gemini-3.5-flash`
+- Gemini 图片：`gemini-3-pro-image-preview`、`gemini-3.1-flash-image-preview`、`gemini-2.5-flash-image`
 
-这些项目通常不需要 DeepSeek 官方 API Key，但需要 DeepSeek 网页账号登录态或代理项目自己的账号配置。
+本地密钥文件：
+
+- DeepSeek：`API_Key/deepseek_api_key.txt`
+- Gemini：`API_Key/gemini_api_key.txt`
+
+也可用环境变量覆盖：`DEEPSEEK_API_KEY`、`GEMINI_API_KEY`、`DEEPSEEK_BASE_URL`、`GEMINI_BASE_URL`、`DEEPSEEK_MODEL`、`GEMINI_MODEL`。`API_Key/` 已加入 `.gitignore`，请勿外传。
+
+如后续仍想切换回网页端反代，可把 `PROMPT_OPTIMIZER_BASE_URL` 改为本地 OpenAI 兼容代理地址，例如 `http://127.0.0.1:8000/v1`。
 
 ## 目录说明
 

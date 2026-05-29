@@ -4,7 +4,7 @@ __pycache__/
 *.png
 *.jpg
 *.jpeg
-API_Key/VE_Key.txt
+API_Key/
 05_Video/uploads/
 05_Video/segments/.api_cache/
 05_Video/exports/

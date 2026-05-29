@@ -23,9 +23,15 @@ def default_task(lane_id: str) -> dict:
         "gen_mode": "reference",
         "prompt": "",
         "duration": 4,
+        "ratio": "9:16",
         "references": [],
         "start_frame": None,
         "end_frame": None,
+        "image_gen_mode": "text_image",
+        "image_gen_prompt": "",
+        "image_gen_model": "",
+        "image_gen_sources": [],
+        "image_gen_generated": [],
     }
 
 
@@ -261,9 +267,17 @@ def normalize_workspace(raw: dict | None) -> dict:
             task.setdefault("gen_mode", "reference")
             task.setdefault("prompt", "")
             task.setdefault("duration", 4)
+            task.setdefault("ratio", "9:16")
             task.setdefault("references", [])
             task.setdefault("start_frame", None)
             task.setdefault("end_frame", None)
+            task.setdefault("image_gen_mode", "text_image")
+            if task.get("image_gen_mode") in {"text", "image"}:
+                task["image_gen_mode"] = "text_image"
+            task.setdefault("image_gen_prompt", "")
+            task.setdefault("image_gen_model", "")
+            task.setdefault("image_gen_sources", [])
+            task.setdefault("image_gen_generated", [])
     active = workspace.get("active_episode_id")
     ids = {ep["id"] for ep in episodes}
     if active not in ids:

@@ -15,6 +15,8 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
+import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -56,14 +58,27 @@ EXPORT_DIR = ROOT / "05_Video" / "exports"
 SEGMENT_DIR = ROOT / "05_Video" / "segments"
 HOST = "127.0.0.1"
 PORT = 8765
-GUI_API_VERSION = 10
-BUILD_ID = "20260522-prompt-optimizer"
+GUI_API_VERSION = 11
+BUILD_ID = "20260529-public-video-upload-fallback"
 MAX_JOB_LOG_LINES = 400
 EXIT_NO_NEW_VIDEO = 2
-PROMPT_OPTIMIZER_BASE_URL = os.environ.get("PROMPT_OPTIMIZER_BASE_URL", "http://127.0.0.1:8000/v1")
-PROMPT_OPTIMIZER_MODEL = os.environ.get("PROMPT_OPTIMIZER_MODEL", "deepseek-chat")
-PROMPT_OPTIMIZER_API_KEY = os.environ.get("PROMPT_OPTIMIZER_API_KEY", "")
+DEEPSEEK_API_KEY_FILE = ROOT / "API_Key" / "deepseek_api_key.txt"
+GEMINI_API_KEY_FILE = ROOT / "API_Key" / "gemini_api_key.txt"
+PROMPT_OPTIMIZER_PROVIDER = os.environ.get("PROMPT_OPTIMIZER_PROVIDER", "deepseek").strip().lower()
+DEEPSEEK_BASE_URL = os.environ.get(
+    "DEEPSEEK_BASE_URL",
+    os.environ.get("PROMPT_OPTIMIZER_BASE_URL", "https://api.deepseek.com"),
+)
+DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", os.environ.get("PROMPT_OPTIMIZER_MODEL", "deepseek-chat"))
+GEMINI_BASE_URL = os.environ.get("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3-pro-preview")
 PROMPT_OPTIMIZER_TIMEOUT = int(os.environ.get("PROMPT_OPTIMIZER_TIMEOUT", "90"))
+OPTIMIZER_MODELS = {
+    "deepseek": ["deepseek-chat", "deepseek-reasoner"],
+    "gemini": ["gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-3.1-pro-preview", "gemini-3.5-flash"],
+}
+IMAGE_GENERATION_MODELS = ["gemini-3-pro-image-preview", "gemini-3.1-flash-image-preview", "gemini-2.5-flash-image"]
+DEFAULT_IMAGE_GENERATION_MODEL = os.environ.get("GEMINI_IMAGE_MODEL", IMAGE_GENERATION_MODELS[0])
 
 job_lock = threading.Lock()
 workspace_lock = threading.Lock()
@@ -175,17 +190,62 @@ def load_gui_html() -> str:
     return GUI_PAGE.read_text(encoding="utf-8")
 
 
+def read_secret_file(path: Path) -> str:
+    if path.is_file():
+        return path.read_text(encoding="utf-8-sig").strip()
+    return ""
+
+
+def load_prompt_optimizer_api_key(provider: str) -> str:
+    provider = provider.strip().lower()
+    if provider == "gemini":
+        env_key = os.environ.get("GEMINI_API_KEY", "").lstrip("\ufeff").strip()
+        return env_key or read_secret_file(GEMINI_API_KEY_FILE)
+    env_key = os.environ.get("DEEPSEEK_API_KEY", "").lstrip("\ufeff").strip()
+    if env_key:
+        return env_key
+    legacy_key = os.environ.get("PROMPT_OPTIMIZER_API_KEY", "").lstrip("\ufeff").strip()
+    return legacy_key or read_secret_file(DEEPSEEK_API_KEY_FILE)
+
+
 def prompt_optimizer_config() -> dict:
-    base_url = PROMPT_OPTIMIZER_BASE_URL.rstrip("/")
+    provider = PROMPT_OPTIMIZER_PROVIDER if PROMPT_OPTIMIZER_PROVIDER in OPTIMIZER_MODELS else "deepseek"
     return {
-        "base_url": base_url,
-        "model": PROMPT_OPTIMIZER_MODEL,
-        "has_api_key": bool(PROMPT_OPTIMIZER_API_KEY),
+        "provider": provider,
+        "base_url": DEEPSEEK_BASE_URL.rstrip("/") if provider == "deepseek" else GEMINI_BASE_URL.rstrip("/"),
+        "model": DEEPSEEK_MODEL if provider == "deepseek" else GEMINI_MODEL,
+        "has_api_key": bool(load_prompt_optimizer_api_key(provider)),
+        "providers": {
+            "deepseek": {
+                "label": "DeepSeek",
+                "base_url": DEEPSEEK_BASE_URL.rstrip("/"),
+                "default_model": DEEPSEEK_MODEL,
+                "models": OPTIMIZER_MODELS["deepseek"],
+                "has_api_key": bool(load_prompt_optimizer_api_key("deepseek")),
+            },
+            "gemini": {
+                "label": "Gemini",
+                "base_url": GEMINI_BASE_URL.rstrip("/"),
+                "default_model": GEMINI_MODEL,
+                "models": OPTIMIZER_MODELS["gemini"],
+                "has_api_key": bool(load_prompt_optimizer_api_key("gemini")),
+            },
+        },
     }
 
 
-def prompt_optimizer_endpoint() -> str:
-    base_url = PROMPT_OPTIMIZER_BASE_URL.rstrip("/")
+def image_generation_config() -> dict:
+    return {
+        "provider": "gemini",
+        "base_url": GEMINI_BASE_URL.rstrip("/"),
+        "default_model": DEFAULT_IMAGE_GENERATION_MODEL,
+        "models": IMAGE_GENERATION_MODELS,
+        "has_api_key": bool(load_prompt_optimizer_api_key("gemini")),
+    }
+
+
+def deepseek_optimizer_endpoint() -> str:
+    base_url = DEEPSEEK_BASE_URL.rstrip("/")
     if base_url.endswith("/chat/completions"):
         return base_url
     return f"{base_url}/chat/completions"
@@ -230,10 +290,10 @@ def build_prompt_optimizer_messages(payload: dict) -> list[dict[str, str]]:
     ]
 
 
-def call_prompt_optimizer(payload: dict) -> dict:
-    endpoint = prompt_optimizer_endpoint()
+def call_deepseek_optimizer(payload: dict, model: str) -> dict:
+    endpoint = deepseek_optimizer_endpoint()
     body = {
-        "model": PROMPT_OPTIMIZER_MODEL,
+        "model": model,
         "messages": build_prompt_optimizer_messages(payload),
         "stream": False,
         "temperature": 0.4,
@@ -243,8 +303,10 @@ def call_prompt_optimizer(payload: dict) -> dict:
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
-    if PROMPT_OPTIMIZER_API_KEY:
-        headers["Authorization"] = f"Bearer {PROMPT_OPTIMIZER_API_KEY}"
+    api_key = load_prompt_optimizer_api_key("deepseek")
+    if not api_key:
+        raise RuntimeError("未配置 DeepSeek API Key，请填写 API_Key/deepseek_api_key.txt")
+    headers["Authorization"] = f"Bearer {api_key}"
 
     req = urllib.request.Request(endpoint, data=raw, headers=headers, method="POST")
     try:
@@ -255,7 +317,7 @@ def call_prompt_optimizer(payload: dict) -> dict:
         raise RuntimeError(f"提示词代理 HTTP {exc.code}: {detail}") from exc
     except urllib.error.URLError as exc:
         raise RuntimeError(
-            f"无法连接提示词代理 {endpoint}。请先启动 deepseek-free-api/deepseek2api/ds2api。"
+            f"无法连接 DeepSeek API {endpoint}，请检查网络或 PROMPT_OPTIMIZER_BASE_URL。"
         ) from exc
 
     try:
@@ -273,8 +335,227 @@ def call_prompt_optimizer(payload: dict) -> dict:
         content = str(data.get("output_text") or data.get("content") or "").strip()
     if not content:
         raise RuntimeError("提示词代理没有返回可用内容")
-    model = data.get("model") if isinstance(data, dict) else ""
-    return {"content": content, "model": model or PROMPT_OPTIMIZER_MODEL}
+    response_model = data.get("model") if isinstance(data, dict) else ""
+    return {"content": content, "model": response_model or model, "provider": "deepseek"}
+
+
+def gemini_optimizer_endpoint(model: str) -> str:
+    base_url = GEMINI_BASE_URL.rstrip("/")
+    model_path = model if model.startswith("models/") else f"models/{model}"
+    return f"{base_url}/{model_path}:generateContent"
+
+
+def call_gemini_optimizer(payload: dict, model: str) -> dict:
+    messages = build_prompt_optimizer_messages(payload)
+    system_text = messages[0]["content"]
+    user_text = messages[1]["content"]
+    endpoint = gemini_optimizer_endpoint(model)
+    api_key = load_prompt_optimizer_api_key("gemini")
+    if not api_key:
+        raise RuntimeError("未配置 Gemini API Key，请填写 API_Key/gemini_api_key.txt")
+    url = f"{endpoint}?key={urllib.parse.quote(api_key)}"
+    body = {
+        "systemInstruction": {"parts": [{"text": system_text}]},
+        "contents": [{"role": "user", "parts": [{"text": user_text}]}],
+        "generationConfig": {"temperature": 0.4},
+    }
+    raw = json.dumps(body, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=raw,
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=PROMPT_OPTIMIZER_TIMEOUT) as resp:
+            text = resp.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:800]
+        raise RuntimeError(f"Gemini API HTTP {exc.code}: {detail}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(
+            f"无法连接 Gemini API {endpoint}，请检查网络或 GEMINI_BASE_URL。"
+        ) from exc
+
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Gemini API 返回的不是 JSON: {text[:300]}") from exc
+
+    content = ""
+    candidates = data.get("candidates") if isinstance(data, dict) else None
+    if candidates:
+        parts = (((candidates[0] or {}).get("content") or {}).get("parts") or [])
+        content = "\n".join(str(part.get("text", "")).strip() for part in parts if part.get("text")).strip()
+    if not content:
+        raise RuntimeError("Gemini API 没有返回可用内容")
+    return {"content": content, "model": model, "provider": "gemini"}
+
+
+def call_prompt_optimizer(payload: dict) -> dict:
+    provider = str(payload.get("provider") or PROMPT_OPTIMIZER_PROVIDER or "deepseek").strip().lower()
+    if provider not in OPTIMIZER_MODELS:
+        raise ValueError(f"不支持的提示词优化模型供应商: {provider}")
+    default_model = DEEPSEEK_MODEL if provider == "deepseek" else GEMINI_MODEL
+    model = str(payload.get("model") or default_model).strip() or default_model
+    if provider == "gemini":
+        return call_gemini_optimizer(payload, model)
+    return call_deepseek_optimizer(payload, model)
+
+
+def media_url_for_rel(rel_path: str) -> str:
+    path = ROOT / rel_path
+    stamp = int(path.stat().st_mtime) if path.is_file() else 0
+    return f"/api/media?path={urllib.parse.quote(rel_path, safe='/')}&t={stamp}"
+
+
+def image_ext_for_mime(mime_type: str) -> str:
+    normalized = mime_type.lower().split(";")[0].strip()
+    if normalized in {"image/jpeg", "image/jpg"}:
+        return ".jpg"
+    if normalized == "image/webp":
+        return ".webp"
+    return ".png"
+
+
+def save_generated_image(raw: bytes, mime_type: str, lane_id: str, index: int) -> dict:
+    if not raw:
+        raise ValueError("图片数据为空")
+    if len(raw) > MAX_IMAGE_BYTES:
+        raise ValueError(f"生成图片超过 {MAX_IMAGE_BYTES // (1024 * 1024)}MB")
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    safe_lane = re.sub(r"[^\w.\-]", "_", lane_id or "image")[:50]
+    ext = image_ext_for_mime(mime_type)
+    name = f"{time.strftime('%Y%m%d_%H%M%S')}_{safe_lane}_gen_{index}_{uuid.uuid4().hex[:8]}{ext}"
+    out = UPLOAD_DIR / name
+    out.write_bytes(raw)
+    rel = str(out.relative_to(ROOT)).replace("\\", "/")
+    return {
+        "path": rel,
+        "kind": "image",
+        "name": name,
+        "mime_type": mime_type or "image/png",
+        "preview_url": media_url_for_rel(rel),
+    }
+
+
+def normalize_image_gen_source_paths(payload: dict) -> list[str]:
+    paths: list[str] = []
+    raw_list = payload.get("source_images")
+    if isinstance(raw_list, list):
+        for item in raw_list:
+            rel = str(item or "").strip()
+            if rel and rel not in paths:
+                paths.append(rel)
+    single = str(payload.get("source_image") or "").strip()
+    if single and single not in paths:
+        paths.append(single)
+    return paths
+
+
+def call_gemini_image_generation(payload: dict) -> dict:
+    mode = str(payload.get("mode") or "text").strip().lower()
+    if mode not in {"text", "image", "text_image"}:
+        raise ValueError("图片生成模式无效")
+    prompt = str(payload.get("prompt") or "").strip()
+    source_images = normalize_image_gen_source_paths(payload)
+    model = str(payload.get("model") or DEFAULT_IMAGE_GENERATION_MODEL).strip() or DEFAULT_IMAGE_GENERATION_MODEL
+    lane_id = str(payload.get("lane_id") or "task").strip()
+
+    if mode in {"text", "text_image"} and not prompt:
+        raise ValueError("请填写图片生成提示词")
+    if mode in {"image", "text_image"} and not source_images:
+        raise ValueError("请上传用于图生图的参考图")
+    if len(source_images) > MAX_REFERENCE_IMAGES:
+        raise ValueError(f"图生图参考图最多 {MAX_REFERENCE_IMAGES} 张")
+    if mode == "image" and not prompt:
+        if len(source_images) > 1:
+            prompt = (
+                "请综合参考以上多张图片的主体、场景、风格与构图，生成一张新的图片，"
+                "保持关键元素一致并提升画面质量与细节。"
+            )
+        else:
+            prompt = "请基于参考图生成一张新的图片，保持主体特征与画面风格一致，提升构图与细节质量。"
+
+    api_key = load_prompt_optimizer_api_key("gemini")
+    if not api_key:
+        raise RuntimeError("未配置 Gemini API Key，请填写 API_Key/gemini_api_key.txt")
+
+    parts: list[dict] = []
+    if prompt:
+        parts.append({"text": prompt})
+    for rel in source_images:
+        source_path = resolve_upload_media_path(rel)
+        if media_kind(source_path) != "image":
+            raise ValueError("图生图只支持图片参考")
+        raw = source_path.read_bytes()
+        mime_type = MEDIA_TYPES.get(source_path.suffix.lower(), "image/png")
+        parts.append(
+            {
+                "inlineData": {
+                    "mimeType": mime_type,
+                    "data": base64.b64encode(raw).decode("ascii"),
+                }
+            }
+        )
+
+    endpoint = gemini_optimizer_endpoint(model)
+    url = f"{endpoint}?key={urllib.parse.quote(api_key)}"
+    body = {
+        "contents": [{"role": "user", "parts": parts}],
+        "generationConfig": {
+            "temperature": 0.7,
+            "responseModalities": ["TEXT", "IMAGE"],
+        },
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=PROMPT_OPTIMIZER_TIMEOUT) as resp:
+            text = resp.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:800]
+        raise RuntimeError(f"Gemini 图片生成 HTTP {exc.code}: {detail}") from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f"无法连接 Gemini 图片生成接口 {endpoint}") from exc
+
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Gemini 图片生成返回的不是 JSON: {text[:300]}") from exc
+
+    images: list[dict] = []
+    notes: list[str] = []
+    candidates = data.get("candidates") if isinstance(data, dict) else None
+    for candidate in candidates or []:
+        for part in (((candidate or {}).get("content") or {}).get("parts") or []):
+            if part.get("text"):
+                notes.append(str(part.get("text")).strip())
+            inline = part.get("inlineData") or part.get("inline_data")
+            if not inline:
+                continue
+            b64 = inline.get("data") or ""
+            mime_type = inline.get("mimeType") or inline.get("mime_type") or "image/png"
+            try:
+                raw = base64.b64decode(b64)
+            except binascii.Error as exc:
+                raise RuntimeError("Gemini 返回的图片数据无效") from exc
+            images.append(save_generated_image(raw, mime_type, lane_id, len(images) + 1))
+
+    if not images:
+        raise RuntimeError("Gemini 没有返回图片，请换一个图片模型或调整提示词")
+    return {
+        "provider": "gemini",
+        "model": model,
+        "mode": mode,
+        "source_count": len(source_images),
+        "images": images,
+        "note": "\n".join(note for note in notes if note),
+    }
 
 
 
@@ -435,6 +716,15 @@ def parse_runner_line(lane: str, line: str, mode: str) -> None:
     if mode == "generate" and "API_REQUEST: POST" in text:
         update_job_status(lane, phase="running", status_text="API：正在提交…｜视频：等待")
         return
+    if "API_REQUEST: upload_reference_video" in text:
+        update_job_status(lane, phase="running", status_text="API：上传参考视频到公网中…｜视频：等待")
+        return
+    if "API_REQUEST: reference_video_url" in text:
+        update_job_status(lane, phase="running", status_text="API：参考视频公网链接已准备｜视频：等待")
+        return
+    if "参考视频公网化失败" in text:
+        update_job_status(lane, phase="failed", status_text="参考视频公网化失败，无法提交 API")
+        return
     if mode == "generate" and text.startswith("Mode "):
         update_job_status(lane, phase="running", status_text="API：准备中…｜视频：等待")
         return
@@ -576,6 +866,7 @@ def run_command(
     mode: str,
     asset: str,
     duration: int | None = None,
+    ratio: str = "",
     prompt: str | None = None,
     generation_mode: str = "asset",
     references: list[str] | None = None,
@@ -619,6 +910,9 @@ def run_command(
         duration_value = DEFAULT_DURATION if duration is None else int(duration)
         clamped = max(MIN_DURATION, min(MAX_DURATION, duration_value))
         cmd.extend(["--duration", str(clamped)])
+        ratio_value = str(ratio or "").strip()
+        if ratio_value:
+            cmd.extend(["--ratio", ratio_value])
         output_id = output_slug_for_lane(get_workspace(), lane)
         cmd.extend(["--output-id", output_id])
 
@@ -736,8 +1030,10 @@ class Handler(BaseHTTPRequestHandler):
                         "versioned_export",
                         "episode_concat",
                         "prompt_optimizer",
+                        "image_generation",
                     ],
                     "prompt_optimizer": prompt_optimizer_config(),
+                    "image_generation": image_generation_config(),
                 }
             )
             return
@@ -973,6 +1269,16 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             self.send_json({"ok": False, "error": str(exc)}, status=502)
 
+    def handle_image_generate(self) -> None:
+        try:
+            payload = self.read_json_body()
+            result = call_gemini_image_generation(payload)
+            self.send_json({"ok": True, **result, "config": image_generation_config()})
+        except (ValueError, json.JSONDecodeError) as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=400)
+        except Exception as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=502)
+
     def handle_delete_episode(self) -> None:
         try:
             payload = self.read_json_body()
@@ -1047,6 +1353,7 @@ class Handler(BaseHTTPRequestHandler):
         mode = str(payload.get("mode", "")).strip()
         asset = payload.get("asset", "")
         duration = payload.get("duration")
+        ratio = str(payload.get("ratio", "")).strip()
         prompt = payload.get("prompt", "")
         generation_mode = payload.get("generation_mode", "asset")
         references = payload.get("references") or []
@@ -1079,7 +1386,7 @@ class Handler(BaseHTTPRequestHandler):
                 jobs[lane]["running"] = False
         thread = threading.Thread(
             target=run_command,
-            args=(lane, mode, asset, duration, prompt, generation_mode, references, start_frame, end_frame),
+            args=(lane, mode, asset, duration, ratio, prompt, generation_mode, references, start_frame, end_frame),
             daemon=True,
         )
         thread.start()
@@ -1101,6 +1408,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/prompt/optimize":
             self.handle_prompt_optimize()
+            return
+        if parsed.path == "/api/image/generate":
+            self.handle_image_generate()
             return
         if parsed.path == "/api/episodes/delete":
             self.handle_delete_episode()

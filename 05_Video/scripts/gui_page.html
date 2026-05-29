@@ -61,6 +61,12 @@
       border: 1px solid #99f6e4; border-radius: 8px; font-size: 13px;
     }
     .episode-concat-preview a { color: #0f766e; font-weight: 700; }
+    .episode-concat-preview a.download-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-left: 8px; padding: 4px 10px; border-radius: 6px;
+      background: #0f766e; color: #fff; text-decoration: none; font-size: 12px;
+    }
+    .episode-concat-preview a.download-btn:hover { background: #0b5f59; }
     .episode-concat-preview video {
       display: block; width: 100%; max-width: 280px; margin-top: 8px;
       border-radius: 6px; background: #000;
@@ -70,8 +76,8 @@
       background: #f8fafc; color: var(--accent); border-color: #b8d4cf;
     }
     .lane {
-      flex: 0 1 520px; width: 520px; max-width: calc(100% - 12px);
-      display: grid; grid-template-columns: minmax(220px, 260px) minmax(180px, 1fr);
+      flex: 0 1 760px; width: 760px; max-width: calc(100% - 12px);
+      display: grid; grid-template-columns: minmax(280px, 340px) minmax(300px, 1fr);
       gap: 10px; align-content: start;
     }
     .lane-head {
@@ -119,11 +125,19 @@
     button:disabled { opacity: 0.55; cursor: not-allowed; }
     .preview-side { padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 320px; }
     .video-wrap {
-      position: relative; width: 100%; aspect-ratio: 9 / 16; max-height: 400px; margin: 0 auto;
+      position: relative; width: 100%; aspect-ratio: 9 / 16; max-height: 460px; margin: 0 auto;
       background: #0f172a; border-radius: 8px; overflow: hidden;
       display: flex; align-items: center; justify-content: center;
     }
     .video-wrap video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .task-download-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      height: 34px; padding: 0 12px; border-radius: 6px;
+      background: #0f766e; color: #fff; text-decoration: none;
+      font-size: 13px; font-weight: 700;
+    }
+    .task-download-btn:hover { background: #0b5f59; }
+    .task-download-btn[hidden] { display: none !important; }
     .preview-empty { margin: 0; color: #94a3b8; font-size: 13px; text-align: center; padding: 0 12px; }
     .gen-status {
       margin: 0; padding: 12px; border-radius: 8px; text-align: center;
@@ -164,6 +178,23 @@
       border: none; border-radius: 50%; background: var(--danger); color: #fff; font-size: 12px; cursor: pointer;
     }
     .ref-block, .kf-block { margin-bottom: 4px; }
+    .paste-target:focus { outline: 2px solid rgba(15, 122, 111, 0.25); border-radius: 8px; }
+    .paste-zone-video, .paste-zone-image { transition: box-shadow 0.15s, outline 0.15s; }
+    .paste-zone-video.paste-zone-hot {
+      box-shadow: inset 0 0 0 2px rgba(15, 122, 111, 0.35);
+      outline: 2px dashed rgba(15, 122, 111, 0.45); outline-offset: 2px;
+    }
+    .paste-zone-image.paste-zone-hot {
+      box-shadow: inset 0 0 0 2px rgba(22, 101, 52, 0.35);
+      outline: 2px dashed rgba(22, 101, 52, 0.5); outline-offset: 2px;
+    }
+    button.paste-ref-btn {
+      margin-bottom: 8px; background: #f0fdf4; color: #166534; border-color: #86efac;
+      font-size: 12px; font-weight: 600; height: 32px;
+    }
+    button.paste-ref-btn:hover { background: #dcfce7; border-color: #4ade80; }
+    button.paste-ref-btn.video { background: #eef8f6; color: #0f766e; border-color: #99f6e4; }
+    button.paste-ref-btn.video:hover { background: #d1fae5; border-color: #5eead4; }
     button.add-tile {
       flex: 0 0 56px; width: 56px; height: 56px; margin-top: 4px;
       border: 2px dashed var(--line); border-radius: 12px; background: #fff;
@@ -193,6 +224,52 @@
     .optimizer-status { margin: 4px 0 8px; font-size: 11px; color: var(--muted); }
     .optimizer-actions { display: flex; gap: 8px; }
     .optimizer-actions button { flex: 1; margin: 0; font-size: 12px; }
+    .image-gen-panel {
+      padding: 10px; border: 1px solid #bbf7d0; border-radius: 8px;
+      background: #f0fdf4;
+    }
+    .image-gen-panel h3 { margin: 0 0 8px; font-size: 13px; color: #166534; }
+    .image-gen-panel textarea { min-height: 70px; font-size: 12px; }
+    .image-gen-source, .image-gen-result {
+      display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0;
+    }
+    .image-gen-source img, .image-gen-result img {
+      width: 76px; height: 76px; object-fit: cover; border-radius: 6px; border: 1px solid #86efac;
+      background: #fff;
+    }
+    .image-gen-result img { width: 100%; height: auto; max-height: 220px; object-fit: contain; }
+    .image-gen-result .gen-result-card { cursor: zoom-in; }
+    .image-gen-result .gen-zoomable:hover { filter: brightness(1.03); box-shadow: 0 2px 10px rgba(22, 101, 52, 0.25); }
+    .image-lightbox {
+      position: fixed; inset: 0; z-index: 1100;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .image-lightbox[hidden] { display: none !important; }
+    .image-lightbox-backdrop {
+      position: absolute; inset: 0; background: rgba(15, 23, 42, 0.85);
+    }
+    .image-lightbox-panel {
+      position: relative; z-index: 1; max-width: min(96vw, 1280px); max-height: 92vh;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .image-lightbox-close {
+      position: absolute; top: -8px; right: -8px; width: 36px; height: 36px; margin: 0; padding: 0;
+      border: none; border-radius: 50%; background: #fff; color: #334155;
+      font-size: 22px; line-height: 1; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    }
+    .image-lightbox-close:hover { background: #f1f5f9; }
+    .image-lightbox-caption {
+      margin: 0; max-width: 100%; font-size: 12px; color: #e2e8f0; text-align: center;
+      word-break: break-all;
+    }
+    .image-lightbox-panel img {
+      max-width: 100%; max-height: calc(92vh - 40px); object-fit: contain;
+      border-radius: 8px; background: #fff; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+    }
+    .image-gen-status { margin: 4px 0 8px; font-size: 11px; color: var(--muted); }
+    .image-gen-actions { display: flex; gap: 8px; }
+    .image-gen-actions button { flex: 1; margin: 0; font-size: 12px; }
     .save-hint { font-size: 11px; color: var(--muted); }
     .save-hint.saving { color: #9a6700; }
     .save-hint.saved { color: var(--ok); }
@@ -278,6 +355,14 @@
       </div>
     </div>
   </div>
+  <div id="imageLightbox" class="image-lightbox" hidden>
+    <div class="image-lightbox-backdrop" data-action="closeLightbox"></div>
+    <div class="image-lightbox-panel">
+      <button type="button" class="image-lightbox-close" data-action="closeLightbox" title="关闭 (Esc)">×</button>
+      <p class="image-lightbox-caption" id="imageLightboxCaption"></p>
+      <img id="imageLightboxImg" alt="" />
+    </div>
+  </div>
   <div id="episodeModal" class="modal-overlay" hidden>
     <div class="modal-panel" role="dialog" aria-labelledby="episodeModalTitle">
       <h3 id="episodeModalTitle">新建集数</h3>
@@ -311,29 +396,33 @@
     </select>
     <label data-for="prompt">视频描述（Prompt）</label>
     <textarea data-field="prompt" placeholder="描述画面、动作、镜头、风格。"></textarea>
-    <button type="button" class="prompt-addon" data-action="appendRefStrict">+ 严格参考参考图</button>
-    <button type="button" class="deepseek-btn" data-action="toggleOptimizer">DeepSeek 提示词优化</button>
+    <button type="button" class="prompt-addon" data-action="appendRefStrict">+ 严格参考素材</button>
+    <button type="button" class="deepseek-btn" data-action="toggleOptimizer">AI 提示词优化</button>
     <div class="optimizer-panel" data-field="optimizerPanel" hidden>
       <div class="optimizer-toolbar">
-        <strong>DeepSeek 网页端反代窗口</strong>
+        <strong>视频提示词优化窗口</strong>
         <button type="button" data-action="closeOptimizer">关闭</button>
       </div>
+      <label>优化模型</label>
+      <select data-field="optimizerProvider"></select>
+      <select data-field="optimizerModel"></select>
       <label>你想让 DeepSeek 怎么分析/优化</label>
       <textarea data-field="optimizerInstruction">请分析当前视频生成提示词的问题，并优化为更适合 Seedance 的镜头语言。保留人物与场景一致性，增强主体、动作、运镜、节奏、光影和时长匹配。</textarea>
-      <p class="optimizer-status" data-field="optimizerStatus">使用本地 OpenAI 兼容代理，例如 deepseek-free-api / deepseek2api / ds2api。</p>
-      <button type="button" class="primary" data-action="sendOptimizer">发送给 DeepSeek</button>
-      <label style="margin-top:8px;">DeepSeek 返回结果</label>
+      <p class="optimizer-status" data-field="optimizerStatus">可切换 DeepSeek / Gemini API 进行提示词优化。</p>
+      <button type="button" class="primary" data-action="sendOptimizer">发送给模型</button>
+      <label style="margin-top:8px;">模型返回结果</label>
       <textarea class="optimizer-output" data-field="optimizerOutput" placeholder="返回内容会显示在这里，可一键应用【优化提示词】部分。"></textarea>
       <div class="optimizer-actions">
         <button type="button" data-action="applyOptimizer">应用优化提示词</button>
         <button type="button" data-action="copyOptimizer">复制结果</button>
       </div>
     </div>
-    <div class="ref-block" data-field="refBlock">
-      <label data-for="referenceFile">参考</label>
-      <input data-field="referenceFile" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" multiple />
+    <div class="ref-block paste-target" data-field="refBlock" tabindex="0">
+      <label data-for="referenceFile">参考视频和参考图</label>
+      <input data-field="referenceFile" type="file" accept="image/*,video/*,.png,.jpg,.jpeg,.webp,.mp4,.mov,.webm" multiple />
+      <button type="button" class="prompt-addon paste-ref-btn video" data-action="pasteReferences">粘贴图片到参考素材</button>
       <div class="ref-preview" data-field="refPreview"></div>
-      <p class="hint" style="margin-top:0;">图片最多 9 个（≤30MB），视频最多 3 个（≤50MB），可混用</p>
+      <p class="hint" style="margin-top:0;">可上传图片或视频：图片最多 9 个（≤30MB），视频最多 3 个（≤50MB），可混用；Ctrl+V 仅支持粘贴图片</p>
     </div>
     <div class="kf-block" data-field="kfBlock">
       <div class="kf-row">
@@ -349,23 +438,61 @@
     </div>
     <label data-for="duration">时长（秒）</label>
     <input data-field="duration" type="number" min="4" max="15" step="1" value="4" />
+    <label data-for="ratio">画幅比例</label>
+    <select data-field="ratio">
+      <option value="9:16">9:16（竖屏）</option>
+      <option value="16:9">16:9（横屏）</option>
+      <option value="1:1">1:1（方形）</option>
+      <option value="3:4">3:4</option>
+      <option value="4:3">4:3</option>
+    </select>
     <button data-action="dry">干跑检查</button>
     <button class="primary" data-action="generate">正式生成</button>
   </template>
   <script>
     const DEFAULT_DURATION = 4;
     const DEFAULT_ASSET = 'GUI_QUICK';
-    const PROMPT_REF_STRICT_SUFFIX = '人物形象和场景严格参考参考图，杜绝美化和修改';
+    const PROMPT_REF_STRICT_SUFFIX = '人物形象和场景严格参考参考素材，杜绝美化和修改';
 
     let configData = { defaults: { duration: DEFAULT_DURATION }, assets: {} };
     let workspace = { episodes: [], active_episode_id: null, episode_seq: 0 };
     let activeEpisodeId = null;
     let activeLaneCtrls = [];
+    const pasteLaneHandlers = [];
+    let globalMouseX = 0;
+    let globalMouseY = 0;
     let saveTimer = null;
     let savePending = false;
     let serverApiVersion = 0;
     let serverFeatures = [];
-    let promptOptimizerConfig = { base_url: 'http://127.0.0.1:8000/v1', model: 'deepseek-chat' };
+    let imageGenerationConfig = {
+      provider: 'gemini',
+      base_url: 'https://generativelanguage.googleapis.com/v1beta',
+      default_model: 'gemini-3-pro-image-preview',
+      models: ['gemini-3-pro-image-preview', 'gemini-3.1-flash-image-preview', 'gemini-2.5-flash-image'],
+      has_api_key: false,
+    };
+    let promptOptimizerConfig = {
+      provider: 'deepseek',
+      base_url: 'https://api.deepseek.com',
+      model: 'deepseek-chat',
+      providers: {
+        deepseek: {
+          label: 'DeepSeek',
+          base_url: 'https://api.deepseek.com',
+          default_model: 'deepseek-chat',
+          models: ['deepseek-chat', 'deepseek-reasoner'],
+          has_api_key: false,
+        },
+        gemini: {
+          label: 'Gemini',
+          base_url: 'https://generativelanguage.googleapis.com/v1beta',
+          default_model: 'gemini-3-pro-preview',
+          models: ['gemini-3-pro-preview', 'gemini-3-flash-preview', 'gemini-3.1-pro-preview', 'gemini-3.5-flash'],
+          has_api_key: false,
+        },
+      },
+    };
 
     const RESTART_HINT = '请关闭旧的黑窗口，双击项目根目录 start_seedance_gui.bat 重新启动后再试。';
 
@@ -375,6 +502,10 @@
 
     function serverSupportsPromptOptimizer() {
       return serverFeatures.includes('prompt_optimizer') || serverApiVersion >= 10;
+    }
+
+    function serverSupportsImageGeneration() {
+      return serverFeatures.includes('image_generation') || serverApiVersion >= 11;
     }
 
     async function parseApiJson(res) {
@@ -482,6 +613,35 @@
       resolver: null,
       scrollTimer: null,
     };
+
+    function initImageLightbox() {
+      const lb = document.getElementById('imageLightbox');
+      const imgEl = document.getElementById('imageLightboxImg');
+      const captionEl = document.getElementById('imageLightboxCaption');
+      if (!lb || !imgEl) return;
+
+      function closeImageLightbox() {
+        lb.hidden = true;
+        imgEl.removeAttribute('src');
+        document.body.style.overflow = '';
+      }
+
+      window.openImageLightbox = (url, title) => {
+        if (!url) return;
+        imgEl.src = url;
+        imgEl.alt = title || '生成图片';
+        captionEl.textContent = title || '';
+        lb.hidden = false;
+        document.body.style.overflow = 'hidden';
+      };
+
+      lb.querySelectorAll('[data-action="closeLightbox"]').forEach((el) => {
+        el.addEventListener('click', closeImageLightbox);
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !lb.hidden) closeImageLightbox();
+      });
+    }
 
     function initEpisodeModal() {
       episodeModal.el = document.getElementById('episodeModal');
@@ -658,9 +818,15 @@
             gen_mode: 'reference',
             prompt: '',
             duration: 4,
+            ratio: '9:16',
             references: [],
             start_frame: null,
             end_frame: null,
+            image_gen_mode: 'text_image',
+            image_gen_prompt: '',
+            image_gen_model: '',
+            image_gen_sources: [],
+            image_gen_generated: [],
           }],
         }],
       };
@@ -729,12 +895,14 @@
           serverApiVersion = data.api_version;
           serverFeatures = data.features || [];
           promptOptimizerConfig = data.prompt_optimizer || promptOptimizerConfig;
+          imageGenerationConfig = data.image_generation || imageGenerationConfig;
           return true;
         }
         if (res.ok && data.ok && data.api_version >= 3) {
           serverApiVersion = data.api_version;
           serverFeatures = data.features || [];
           promptOptimizerConfig = data.prompt_optimizer || promptOptimizerConfig;
+          imageGenerationConfig = data.image_generation || imageGenerationConfig;
           setSaveHint(`服务版本偏旧(v${data.api_version})，请重启 start_seedance_gui.bat`, 'saving');
           return true;
         }
@@ -742,6 +910,7 @@
           serverApiVersion = data.api_version;
           serverFeatures = data.features || [];
           promptOptimizerConfig = data.prompt_optimizer || promptOptimizerConfig;
+          imageGenerationConfig = data.image_generation || imageGenerationConfig;
           setSaveHint('服务版本过旧，请重启 start_seedance_gui.bat', 'saving');
           return true;
         }
@@ -1018,7 +1187,30 @@
       const board = document.getElementById('lanesBoard');
       board.querySelectorAll('.lane').forEach(el => el.remove());
       activeLaneCtrls = [];
+      pasteLaneHandlers.length = 0;
     }
+
+    document.addEventListener('mousemove', (e) => {
+      globalMouseX = e.clientX;
+      globalMouseY = e.clientY;
+    }, { passive: true });
+
+    document.addEventListener('paste', async (e) => {
+      for (const handler of pasteLaneHandlers) {
+        const zone = handler.resolveZone(globalMouseX, globalMouseY);
+        if (!zone) continue;
+        const files = await handler.readImages(e.clipboardData);
+        if (!files.length) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        try {
+          await handler.apply(zone, files);
+        } catch (err) {
+          alert(err.message);
+        }
+        return;
+      }
+    }, true);
 
     function enterEpisode(episodeId) {
       syncActiveTasksToWorkspace();
@@ -1086,7 +1278,8 @@
           bar.innerHTML = `
             <div>${data.message}：${(data.included || []).join(' → ')}</div>
             <div>文件：<strong>${data.filename}</strong>
-              <a href="${data.preview_url}" target="_blank" rel="noopener">新窗口播放</a></div>
+              <a href="${data.preview_url}" target="_blank" rel="noopener">新窗口播放</a>
+              <a class="download-btn" href="${data.preview_url}" download="${data.filename}">下载视频</a></div>
             ${skipped}
             <video controls playsinline preload="metadata" src="${data.preview_url}"></video>`;
           bar.hidden = false;
@@ -1110,13 +1303,36 @@
           <h2>${shotTaskLabel(index)}</h2>
           <button type="button" class="btn-del" data-action="deleteLane" title="${delTitle}"${delDisabled}>删除</button>
         </div>
-        <section class="side" data-role="controls"></section>
+        <section class="side paste-zone-video" data-role="controls" data-paste-zone="video"></section>
         <section class="preview-side">
           <div class="video-wrap">
             <p class="preview-empty" data-role="previewEmpty">暂无视频，生成成功后将在此预览</p>
             <video data-role="preview" controls playsinline preload="metadata" style="display:none;"></video>
           </div>
+          <a class="task-download-btn" data-role="previewDownload" href="#" download hidden>下载当前分镜视频</a>
           <p class="gen-status phase-idle" data-role="genStatus">就绪</p>
+          <div class="image-gen-panel paste-zone-image" data-paste-zone="image">
+            <h3>图片生成（Gemini）</h3>
+            <p class="hint" style="margin:2px 0 6px;">模式固定：参考图 + 文本</p>
+            <label>图片模型</label>
+            <select data-field="imageGenModel"></select>
+            <label>图片提示词</label>
+            <textarea data-field="imageGenPrompt" placeholder="描述要生成的图片主体、构图、风格、光线、细节。"></textarea>
+            <div class="paste-target" data-field="imageGenSourceBlock" tabindex="0">
+              <label>图生图参考图</label>
+              <input data-field="imageGenSourceFile" type="file" accept="image/png,image/jpeg,image/webp" />
+              <button type="button" class="prompt-addon paste-ref-btn" data-action="pasteImageGenSource">粘贴到生图参考图</button>
+              <div class="image-gen-source" data-field="imageGenSourcePreview"></div>
+              <p class="hint" style="margin-top:4px;">鼠标移入「图片生成」区后 Ctrl+V 粘贴；最多 9 张，生成时全部作为多图参考发给 Gemini</p>
+            </div>
+            <p class="image-gen-status" data-field="imageGenStatus">生成的图片会保存到 uploads，可一键加入当前任务参考图。</p>
+            <button type="button" class="primary" data-action="generateImage">生成图片</button>
+            <div class="image-gen-result" data-field="imageGenResult"></div>
+            <div class="image-gen-actions">
+              <button type="button" data-action="addGeneratedToRefs" disabled>加入参考图</button>
+              <button type="button" data-action="clearGeneratedImage" disabled>清空</button>
+            </div>
+          </div>
           <p class="run-log-label">运行日志</p>
           <div class="run-log-wrap" data-role="runLogWrap">
             <pre class="run-log" data-role="runLog">（点击「正式生成」后，原黑窗口输出会显示在这里）</pre>
@@ -1140,13 +1356,16 @@
       laneRoot.querySelector('[data-role="controls"]').appendChild(tpl.content.cloneNode(true));
       const side = laneRoot.querySelector('.side');
       const q = (name) => field(side, name);
-      const state = { uploadedReferences: [], startFrame: null, endFrame: null };
+      const qLane = (name) => field(laneRoot, name);
+      const state = { uploadedReferences: [], startFrame: null, endFrame: null, imageSources: [], generatedImages: [] };
       const ui = {
         laneId, index, asset: q('asset'), assetMeta: q('assetMeta'), genMode: q('genMode'),
         prompt: q('prompt'), appendRefStrict: side.querySelector('[data-action="appendRefStrict"]'),
         toggleOptimizer: side.querySelector('[data-action="toggleOptimizer"]'),
         optimizerPanel: q('optimizerPanel'),
         closeOptimizer: side.querySelector('[data-action="closeOptimizer"]'),
+        optimizerProvider: q('optimizerProvider'),
+        optimizerModel: q('optimizerModel'),
         optimizerInstruction: q('optimizerInstruction'),
         optimizerStatus: q('optimizerStatus'),
         sendOptimizer: side.querySelector('[data-action="sendOptimizer"]'),
@@ -1155,14 +1374,29 @@
         copyOptimizer: side.querySelector('[data-action="copyOptimizer"]'),
         refBlock: q('refBlock'), kfBlock: q('kfBlock'),
         referenceFile: q('referenceFile'), refPreview: q('refPreview'),
+        pasteReferencesBtn: side.querySelector('[data-action="pasteReferences"]'),
+        imageGenPanel: laneRoot.querySelector('.image-gen-panel'),
         startFrameFile: q('startFrameFile'), endFrameFile: q('endFrameFile'),
         startPreview: q('startPreview'), endPreview: q('endPreview'),
         duration: q('duration'),
+        ratio: q('ratio'),
         preview: laneRoot.querySelector('[data-role="preview"]'),
         previewEmpty: laneRoot.querySelector('[data-role="previewEmpty"]'),
+        previewDownload: laneRoot.querySelector('[data-role="previewDownload"]'),
         genStatus: laneRoot.querySelector('[data-role="genStatus"]'),
         runLog: laneRoot.querySelector('[data-role="runLog"]'),
         runLogWrap: laneRoot.querySelector('[data-role="runLogWrap"]'),
+        imageGenModel: qLane('imageGenModel'),
+        imageGenPrompt: qLane('imageGenPrompt'),
+        imageGenSourceBlock: qLane('imageGenSourceBlock'),
+        imageGenSourceFile: qLane('imageGenSourceFile'),
+        pasteImageGenSourceBtn: laneRoot.querySelector('[data-action="pasteImageGenSource"]'),
+        imageGenSourcePreview: qLane('imageGenSourcePreview'),
+        imageGenStatus: qLane('imageGenStatus'),
+        imageGenResult: qLane('imageGenResult'),
+        generateImageBtn: laneRoot.querySelector('[data-action="generateImage"]'),
+        addGeneratedToRefsBtn: laneRoot.querySelector('[data-action="addGeneratedToRefs"]'),
+        clearGeneratedImageBtn: laneRoot.querySelector('[data-action="clearGeneratedImage"]'),
         dryBtn: side.querySelector('[data-action="dry"]'),
         generateBtn: side.querySelector('[data-action="generate"]'),
         lastPreviewUrl: '',
@@ -1193,15 +1427,44 @@
         ui.optimizerStatus.style.color = isError ? 'var(--danger)' : 'var(--muted)';
       }
 
+      function optimizerProviderInfo(provider) {
+        const providers = promptOptimizerConfig.providers || {};
+        return providers[provider] || providers.deepseek || {};
+      }
+
+      function populateOptimizerProviders() {
+        const providers = promptOptimizerConfig.providers || {};
+        const ids = Object.keys(providers);
+        ui.optimizerProvider.innerHTML = ids.map(id => {
+          const info = providers[id] || {};
+          const keyState = info.has_api_key ? '' : '（未配置Key）';
+          return `<option value="${id}">${info.label || id}${keyState}</option>`;
+        }).join('');
+        ui.optimizerProvider.value = ids.includes(promptOptimizerConfig.provider)
+          ? promptOptimizerConfig.provider : (ids[0] || 'deepseek');
+        populateOptimizerModels();
+      }
+
+      function populateOptimizerModels() {
+        const info = optimizerProviderInfo(ui.optimizerProvider.value);
+        const models = info.models || [info.default_model || promptOptimizerConfig.model || 'deepseek-chat'];
+        ui.optimizerModel.innerHTML = models.map(model => `<option value="${model}">${model}</option>`).join('');
+        const preferred = ui.optimizerProvider.value === promptOptimizerConfig.provider
+          ? promptOptimizerConfig.model : info.default_model;
+        ui.optimizerModel.value = models.includes(preferred) ? preferred : models[0];
+      }
+
       function refreshOptimizerUi() {
         const ok = serverSupportsPromptOptimizer();
+        if (!ui.optimizerProvider.options.length) populateOptimizerProviders();
+        const info = optimizerProviderInfo(ui.optimizerProvider.value);
         ui.toggleOptimizer.disabled = !ok;
         ui.toggleOptimizer.title = ok
-          ? `连接 ${promptOptimizerConfig.base_url || '本地代理'} · ${promptOptimizerConfig.model || 'deepseek-chat'}`
+          ? `连接 ${info.base_url || promptOptimizerConfig.base_url || '模型 API'} · ${ui.optimizerModel.value}`
           : '需要重启 GUI（api_version ≥ 10）后才可使用';
         updateOptimizerStatus(
           ok
-            ? `代理：${promptOptimizerConfig.base_url || 'http://127.0.0.1:8000/v1'} · 模型：${promptOptimizerConfig.model || 'deepseek-chat'}`
+            ? `API：${info.base_url || promptOptimizerConfig.base_url || '-'} · 模型：${ui.optimizerModel.value}`
             : '当前 GUI 服务不支持提示词优化，请重启 start_seedance_gui.bat',
           !ok
         );
@@ -1219,12 +1482,17 @@
         }
         ui.sendOptimizer.disabled = true;
         ui.applyOptimizer.disabled = true;
-        updateOptimizerStatus('正在通过本地 DeepSeek 网页端代理分析提示词…', false);
+        const provider = ui.optimizerProvider.value;
+        const model = ui.optimizerModel.value;
+        const providerLabel = (optimizerProviderInfo(provider).label || provider);
+        updateOptimizerStatus(`正在通过 ${providerLabel} API 分析提示词…`, false);
         try {
           const res = await fetch('/api/prompt/optimize', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              provider,
+              model,
               prompt,
               instruction: ui.optimizerInstruction.value,
               task_label: shotTaskLabel(index),
@@ -1238,13 +1506,113 @@
             throw new Error(data.error || '提示词优化失败');
           }
           ui.optimizerOutput.value = data.content || '';
-          updateOptimizerStatus(`完成：${data.model || promptOptimizerConfig.model || 'deepseek-chat'}`, false);
+          updateOptimizerStatus(`完成：${data.provider || provider} · ${data.model || model}`, false);
         } catch (err) {
           updateOptimizerStatus(err.message, true);
-          alert('DeepSeek 提示词优化失败：' + err.message);
+          alert('提示词优化失败：' + err.message);
         } finally {
           ui.sendOptimizer.disabled = false;
           ui.applyOptimizer.disabled = false;
+        }
+      }
+
+      function updateImageGenStatus(text, isError) {
+        ui.imageGenStatus.textContent = text;
+        ui.imageGenStatus.style.color = isError ? 'var(--danger)' : 'var(--muted)';
+      }
+
+      function populateImageGenModels() {
+        const models = imageGenerationConfig.models || ['gemini-3-pro-image-preview'];
+        ui.imageGenModel.innerHTML = models.map(model => `<option value="${model}">${model}</option>`).join('');
+        const preferred = imageGenerationConfig.default_model || models[0];
+        ui.imageGenModel.value = models.includes(preferred) ? preferred : models[0];
+      }
+
+      function syncImageGenMode() {
+        ui.imageGenSourceBlock.style.display = 'block';
+        ui.imageGenPrompt.placeholder = '描述要生成的图片主体、构图、风格、光线、细节。';
+      }
+
+      function renderImageSource() {
+        ui.imageGenSourcePreview.innerHTML = state.imageSources.length
+          ? state.imageSources.map((src, idx) => (
+            `<div class="kf-card">
+              <button type="button" class="del" data-idx="${idx}">×</button>
+              <img src="${src.preview}" alt="source">
+              <div class="ref-chip">${src.name}</div>
+            </div>`
+          )).join('')
+          : '';
+      }
+
+      function renderGeneratedImages() {
+        ui.imageGenResult.innerHTML = state.generatedImages.map((item, idx) => {
+          const label = `生成图 ${idx + 1} · ${item.name}`;
+          return `<div class="ref-card gen-result-card" style="width:100%;" title="点击放大查看">
+            <img class="gen-zoomable" src="${item.preview}" alt="${label}"
+              data-zoom-url="${item.preview}" data-zoom-title="${label}">
+            <div class="ref-chip">${label} · 点击放大</div>
+          </div>`;
+        }).join('');
+        const hasImages = state.generatedImages.length > 0;
+        ui.addGeneratedToRefsBtn.disabled = !hasImages;
+        ui.clearGeneratedImageBtn.disabled = !hasImages;
+      }
+
+      async function generateImage() {
+        if (!serverSupportsImageGeneration()) {
+          alert(`当前服务不支持图片生成（api v${serverApiVersion || '?'}）。${RESTART_HINT}`);
+          return;
+        }
+        const mode = 'text_image';
+        const prompt = ui.imageGenPrompt.value.trim();
+        if (!prompt) {
+          alert('请填写图片生成提示词');
+          return;
+        }
+        const sourcePaths = state.imageSources.map(src => src.path);
+        if (mode !== 'text' && !sourcePaths.length) {
+          alert('请先上传图生图参考图');
+          return;
+        }
+        ui.generateImageBtn.disabled = true;
+        ui.addGeneratedToRefsBtn.disabled = true;
+        const refHint = sourcePaths.length > 1 ? `（${sourcePaths.length} 张参考图）` : '';
+        updateImageGenStatus(`正在生成图片${refHint}，请稍候…`, false);
+        try {
+          const res = await fetch('/api/image/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              lane_id: laneId,
+              mode,
+              model: ui.imageGenModel.value,
+              prompt,
+              source_images: sourcePaths,
+              source_image: sourcePaths[sourcePaths.length - 1] || '',
+            }),
+          });
+          const data = await parseApiJson(res);
+          if (!res.ok || !data.ok) {
+            throw new Error(data.error || '图片生成失败');
+          }
+          state.generatedImages = (data.images || []).map(item => ({
+            path: item.path,
+            kind: 'image',
+            name: item.name || 'generated.png',
+            preview: item.preview_url || mediaUrl(item.path),
+          }));
+          renderGeneratedImages();
+          const srcCount = data.source_count || sourcePaths.length;
+          const countNote = srcCount > 1 ? ` · ${srcCount} 张参考` : '';
+          updateImageGenStatus(`完成：${data.model || ui.imageGenModel.value}${countNote}`, false);
+          persistSoon();
+        } catch (err) {
+          updateImageGenStatus(err.message, true);
+          alert('图片生成失败：' + err.message);
+        } finally {
+          ui.generateImageBtn.disabled = false;
+          if (state.generatedImages.length) ui.addGeneratedToRefsBtn.disabled = false;
         }
       }
 
@@ -1277,6 +1645,49 @@
         if (!res.ok) throw new Error(data.error || '删除失败');
       }
 
+      function collectFilesFromClipboard(clipboardData) {
+        const files = [];
+        if (!clipboardData) return files;
+        for (const item of clipboardData.items) {
+          const type = item.type || '';
+          if (item.kind !== 'file' && !type.startsWith('image/')) continue;
+          const blob = item.getAsFile();
+          if (!blob) continue;
+          const ext = type.startsWith('video/') || blob.type.startsWith('video/') ? '.mp4'
+            : type.includes('jpeg') || blob.type.includes('jpeg') ? '.jpg'
+            : type.includes('webp') || blob.type.includes('webp') ? '.webp' : '.png';
+          const name = blob.name || `pasted-${Date.now()}${files.length}${ext}`;
+          files.push(new File([blob], name, { type: blob.type || type || 'application/octet-stream' }));
+        }
+        return files;
+      }
+
+      async function addReferenceFiles(files) {
+        if (!files.length) return false;
+        const counts = refCounts();
+        let newImages = 0;
+        let newVideos = 0;
+        for (const f of files) {
+          const isVideo = /\.(mp4|mov|webm)$/i.test(f.name) || (f.type || '').startsWith('video/');
+          if (isVideo) newVideos += 1;
+          else newImages += 1;
+        }
+        if (counts.images + newImages > 9) {
+          alert('参考图片最多 9 个');
+          return false;
+        }
+        if (counts.videos + newVideos > 3) {
+          alert('参考视频最多 3 个');
+          return false;
+        }
+        for (const f of files) {
+          state.uploadedReferences.push(await uploadFile(f));
+        }
+        renderRefPreview();
+        persistSoon();
+        return true;
+      }
+
       async function uploadFile(file) {
         const dataUrl = await new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -1292,6 +1703,110 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || '上传失败');
         return { path: data.path, kind: data.kind || 'image', name: file.name, preview: mediaUrl(data.path) };
+      }
+
+      function filterClipboardImages(files) {
+        return files.filter(f => !(f.type || '').startsWith('video/') && !/\.(mp4|mov|webm)$/i.test(f.name));
+      }
+
+      async function readClipboardImageFiles(clipboardData) {
+        let files = filterClipboardImages(collectFilesFromClipboard(clipboardData));
+        if (files.length) return files;
+        if (navigator.clipboard && navigator.clipboard.read) {
+          try {
+            const items = await navigator.clipboard.read();
+            for (const item of items) {
+              for (const type of ['image/png', 'image/jpeg', 'image/webp']) {
+                if (!item.types.includes(type)) continue;
+                const blob = await item.getType(type);
+                const ext = type === 'image/jpeg' ? 'jpg' : type.split('/')[1];
+                files.push(new File([blob], `pasted-${Date.now()}.${ext}`, { type }));
+                return files;
+              }
+            }
+          } catch (err) {
+            if (err.name !== 'NotAllowedError') throw err;
+          }
+        }
+        return files;
+      }
+
+      let hoverPasteZone = null;
+
+      function resolvePasteZoneAt(x, y) {
+        const el = document.elementFromPoint(x, y);
+        if (!el || !laneRoot.contains(el)) return null;
+        if (el.closest('[data-paste-zone="image"]')) return 'image';
+        if (el.closest('[data-paste-zone="video"]')) return 'video';
+        return null;
+      }
+
+      function updatePasteZoneHighlight(zone) {
+        side.classList.toggle('paste-zone-hot', zone === 'video');
+        ui.imageGenPanel.classList.toggle('paste-zone-hot', zone === 'image');
+      }
+
+      laneRoot.addEventListener('mousemove', (e) => {
+        const zone = resolvePasteZoneAt(e.clientX, e.clientY);
+        if (zone === hoverPasteZone) return;
+        hoverPasteZone = zone;
+        updatePasteZoneHighlight(zone);
+      });
+      laneRoot.addEventListener('mouseleave', (e) => {
+        if (laneRoot.contains(e.relatedTarget)) return;
+        hoverPasteZone = null;
+        updatePasteZoneHighlight(null);
+      });
+
+      pasteLaneHandlers.push({
+        resolveZone: resolvePasteZoneAt,
+        readImages: readClipboardImageFiles,
+        apply: applyPasteToZone,
+      });
+
+      async function applyPasteToZone(zone, files) {
+        if (zone === 'image') {
+          for (const f of files) {
+            await setImageGenSourceFromFile(f);
+          }
+          updateImageGenStatus('已追加到生图参考图（生成时全部上传）', false);
+          return;
+        }
+        if (zone === 'video') {
+          if (ui.genMode.value !== 'reference') {
+            alert('请先将生成方式切换为「参考 + 文字」');
+            return;
+          }
+          await addReferenceFiles(files);
+        }
+      }
+
+      async function setImageGenSourceFromFile(file) {
+        if (state.imageSources.length >= 9) {
+          alert('生图参考图最多 9 张');
+          return;
+        }
+        state.imageSources.push(await uploadFile(file));
+        renderImageSource();
+        persistSoon();
+      }
+
+      async function pasteReferencesFromClipboard(clipboardData) {
+        const files = await readClipboardImageFiles(clipboardData);
+        if (!files.length) {
+          alert('剪贴板里没有可粘贴的图片');
+          return;
+        }
+        await applyPasteToZone('video', files);
+      }
+
+      async function pasteImageGenSourceFromClipboard(clipboardData) {
+        const files = await readClipboardImageFiles(clipboardData);
+        if (!files.length) {
+          alert('剪贴板里没有可粘贴的图片');
+          return;
+        }
+        await applyPasteToZone('image', files);
       }
 
       ui.appendRefStrict.addEventListener('click', () => {
@@ -1312,6 +1827,11 @@
       ui.closeOptimizer.addEventListener('click', () => {
         ui.optimizerPanel.hidden = true;
       });
+      ui.optimizerProvider.addEventListener('change', () => {
+        populateOptimizerModels();
+        refreshOptimizerUi();
+      });
+      ui.optimizerModel.addEventListener('change', () => refreshOptimizerUi());
       ui.sendOptimizer.addEventListener('click', sendPromptToOptimizer);
       ui.applyOptimizer.addEventListener('click', () => {
         const optimized = extractOptimizedPrompt(ui.optimizerOutput.value);
@@ -1328,11 +1848,11 @@
         if (!text) return;
         try {
           await navigator.clipboard.writeText(text);
-          updateOptimizerStatus('已复制 DeepSeek 返回结果', false);
+          updateOptimizerStatus('已复制模型返回结果', false);
         } catch {
           ui.optimizerOutput.select();
           document.execCommand('copy');
-          updateOptimizerStatus('已复制 DeepSeek 返回结果', false);
+          updateOptimizerStatus('已复制模型返回结果', false);
         }
       });
 
@@ -1349,21 +1869,17 @@
 
       ui.referenceFile.addEventListener('change', async (e) => {
         const files = Array.from(e.target.files || []);
-        const counts = refCounts();
-        let newImages = 0, newVideos = 0;
-        for (const f of files) {
-          if (/\.(mp4|mov|webm)$/i.test(f.name)) newVideos += 1;
-          else newImages += 1;
-        }
-        if (counts.images + newImages > 9) { alert('参考图片最多 9 个'); return; }
-        if (counts.videos + newVideos > 3) { alert('参考视频最多 3 个'); return; }
         try {
-          for (const f of files) state.uploadedReferences.push(await uploadFile(f));
-          renderRefPreview();
+          await addReferenceFiles(files);
         } catch (err) { alert(err.message); }
         e.target.value = '';
       });
-
+      ui.pasteReferencesBtn.addEventListener('click', () => {
+        pasteReferencesFromClipboard(null).catch(err => alert(err.message));
+      });
+      ui.pasteImageGenSourceBtn.addEventListener('click', () => {
+        pasteImageGenSourceFromClipboard(null).catch(err => alert(err.message));
+      });
       ui.startFrameFile.addEventListener('change', async (e) => {
         const file = (e.target.files || [])[0];
         if (!file) return;
@@ -1400,10 +1916,65 @@
         }).catch(err => alert(err.message));
       });
 
+      ui.imageGenPrompt.addEventListener('input', persistSoon);
+      ui.imageGenModel.addEventListener('change', persistSoon);
+      ui.imageGenSourceFile.addEventListener('change', async (e) => {
+        const file = (e.target.files || [])[0];
+        if (!file) return;
+        try {
+          await setImageGenSourceFromFile(file);
+        } catch (err) {
+          alert(err.message);
+        }
+        e.target.value = '';
+      });
+      ui.imageGenSourcePreview.addEventListener('click', (e) => {
+        const btn = e.target.closest('.del');
+        if (!btn) return;
+        const idx = Number(btn.dataset.idx);
+        const item = state.imageSources[idx];
+        if (!item) return;
+        deleteUploadedPath(item.path).then(() => {
+          state.imageSources.splice(idx, 1);
+          renderImageSource();
+          persistSoon();
+        }).catch(err => alert(err.message));
+      });
+      ui.imageGenResult.addEventListener('click', (e) => {
+        const img = e.target.closest('img.gen-zoomable');
+        if (!img) return;
+        if (typeof window.openImageLightbox === 'function') {
+          window.openImageLightbox(img.dataset.zoomUrl || img.src, img.dataset.zoomTitle || '');
+        }
+      });
+      ui.generateImageBtn.addEventListener('click', generateImage);
+      ui.addGeneratedToRefsBtn.addEventListener('click', () => {
+        const counts = refCounts();
+        if (counts.images + state.generatedImages.length > 9) {
+          alert('参考图片最多 9 个');
+          return;
+        }
+        for (const item of state.generatedImages) {
+          if (!state.uploadedReferences.some(ref => ref.path === item.path)) {
+            state.uploadedReferences.push(item);
+          }
+        }
+        renderRefPreview();
+        updateImageGenStatus('已加入当前任务参考图', false);
+        persistSoon();
+      });
+      ui.clearGeneratedImageBtn.addEventListener('click', () => {
+        state.generatedImages = [];
+        renderGeneratedImages();
+        updateImageGenStatus('已清空生成预览（文件仍保留在 uploads）', false);
+        persistSoon();
+      });
+
       ui.genMode.addEventListener('change', syncModePanels);
       ui.prompt.addEventListener('input', persistSoon);
       ui.asset.addEventListener('change', persistSoon);
       ui.duration.addEventListener('change', persistSoon);
+      ui.ratio.addEventListener('change', persistSoon);
 
       function refreshOutputLabel(job) {
         const ep = findEpisode(activeEpisodeId);
@@ -1425,6 +1996,7 @@
         const references = state.uploadedReferences.map(i => i.path);
         const start_frame = state.startFrame ? state.startFrame.path : '';
         const end_frame = state.endFrame ? state.endFrame.path : '';
+        const ratio = (ui.ratio.value || '9:16').trim();
         if (!prompt) { alert(`${shotTaskLabel(index)}: 请填写 Prompt`); return; }
         if (generationMode === 'reference' && !references.length) {
           alert(`${shotTaskLabel(index)}: 请上传参考`); return;
@@ -1437,6 +2009,7 @@
           body: JSON.stringify({
             lane: laneId, mode, asset: ui.asset.value,
             duration: Number(ui.duration.value) || DEFAULT_DURATION,
+            ratio,
             prompt, generation_mode: generationMode,
             references, start_frame, end_frame,
           }),
@@ -1448,12 +2021,28 @@
       ui.dryBtn.onclick = () => runJob('dry');
       ui.generateBtn.onclick = () => runJob('generate');
 
+      function previewDownloadName(url) {
+        try {
+          const parsed = new URL(url, window.location.href);
+          const relPath = parsed.searchParams.get('path') || parsed.pathname;
+          const filename = decodeURIComponent(relPath.split('/').pop() || '').trim();
+          if (filename) return filename;
+        } catch {}
+        const ep = findEpisode(activeEpisodeId);
+        return `${ep ? taskOutputSlug(ep, index) : laneId}.mp4`;
+      }
+
       function setPreview(url) {
         if (!url || url === ui.lastPreviewUrl) return;
         ui.lastPreviewUrl = url;
         ui.preview.src = url;
         ui.preview.style.display = 'block';
         ui.previewEmpty.style.display = 'none';
+        if (ui.previewDownload) {
+          ui.previewDownload.href = url;
+          ui.previewDownload.download = previewDownloadName(url);
+          ui.previewDownload.hidden = false;
+        }
         ui.preview.load();
       }
 
@@ -1467,11 +2056,17 @@
             gen_mode: ui.genMode.value,
             prompt: ui.prompt.value,
             duration: Number(ui.duration.value) || DEFAULT_DURATION,
+            ratio: ui.ratio.value || '9:16',
             references: state.uploadedReferences.map(({ path, kind, name }) => ({ path, kind, name })),
             start_frame: state.startFrame
               ? { path: state.startFrame.path, kind: state.startFrame.kind, name: state.startFrame.name } : null,
             end_frame: state.endFrame
               ? { path: state.endFrame.path, kind: state.endFrame.kind, name: state.endFrame.name } : null,
+            image_gen_mode: 'text_image',
+            image_gen_prompt: ui.imageGenPrompt.value,
+            image_gen_model: ui.imageGenModel.value,
+            image_gen_sources: state.imageSources.map(({ path, kind, name }) => ({ path, kind, name })),
+            image_gen_generated: state.generatedImages.map(({ path, kind, name }) => ({ path, kind, name })),
           };
         },
         updateJob(job) {
@@ -1500,6 +2095,7 @@
       };
 
       ui.duration.value = configData.defaults.duration || DEFAULT_DURATION;
+      ui.ratio.value = configData.defaults.ratio || '9:16';
       populateAssets();
 
       if (snapshot) {
@@ -1507,13 +2103,27 @@
         ui.genMode.value = snapshot.gen_mode || 'reference';
         if (snapshot.asset) ui.asset.value = snapshot.asset;
         ui.duration.value = snapshot.duration || DEFAULT_DURATION;
+        ui.ratio.value = snapshot.ratio || configData.defaults.ratio || '9:16';
         state.uploadedReferences = (snapshot.references || []).map(refFromStored);
         state.startFrame = snapshot.start_frame ? refFromStored(snapshot.start_frame) : null;
         state.endFrame = snapshot.end_frame ? refFromStored(snapshot.end_frame) : null;
         renderRefPreview();
         renderKfPreview(ui.startPreview, state.startFrame);
         renderKfPreview(ui.endPreview, state.endFrame);
+        ui.imageGenPrompt.value = snapshot.image_gen_prompt || '';
+        state.imageSources = (snapshot.image_gen_sources || []).map(refFromStored);
+        state.generatedImages = (snapshot.image_gen_generated || []).map(refFromStored);
       }
+      populateImageGenModels();
+      if (snapshot && snapshot.image_gen_model) {
+        const models = imageGenerationConfig.models || [];
+        if (models.includes(snapshot.image_gen_model)) {
+          ui.imageGenModel.value = snapshot.image_gen_model;
+        }
+      }
+      syncImageGenMode();
+      renderImageSource();
+      renderGeneratedImages();
       syncModePanels();
       refreshOptimizerUi();
       activeLaneCtrls.push(laneCtrl);
@@ -1586,9 +2196,15 @@
               gen_mode: 'reference',
               prompt: '',
               duration: 4,
+              ratio: '9:16',
               references: [],
               start_frame: null,
               end_frame: null,
+              image_gen_mode: 'text_image',
+              image_gen_prompt: '',
+              image_gen_model: '',
+              image_gen_sources: [],
+              image_gen_generated: [],
             }],
           });
           if (await saveWorkspace()) {
@@ -1649,6 +2265,7 @@
       if (activeEpisodeId) editEpisode(activeEpisodeId);
     });
     document.getElementById('concatEpisodeBtn').addEventListener('click', () => concatActiveEpisode());
+    initImageLightbox();
     initEpisodeModal();
     initEpisodeDragDrop();
 

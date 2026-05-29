@@ -20,7 +20,7 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":8765" ^| findstr LISTENING'
   pause
   exit /b 1
 )
-echo 启动新版 GUI（api_version 10，支持一键拼接与 DeepSeek 提示词优化）...
+echo 启动新版 GUI（api_version 11，支持一键拼接、提示词优化与图片生成）...
 start "" pythonw 05_Video\scripts\seedance_gui.py
 timeout /t 2 /nobreak >nul
 start http://127.0.0.1:8765/

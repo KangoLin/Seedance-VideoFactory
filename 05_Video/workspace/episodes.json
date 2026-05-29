@@ -1,7 +1,7 @@
 {
   "version": 1,
   "episode_seq": 13,
-  "active_episode_id": "ep-10",
+  "active_episode_id": "ep-12",
   "episodes": [
     {
       "id": "ep-8",
@@ -32,7 +32,13 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-1-task-1"
+          "output_slug": "ep-1-task-1",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         },
         {
           "lane_id": "ep-8-task-4",
@@ -59,7 +65,13 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-1-task-2"
+          "output_slug": "ep-1-task-2",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         },
         {
           "lane_id": "ep-8-task-5",
@@ -86,7 +98,13 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-1-task-3"
+          "output_slug": "ep-1-task-3",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         },
         {
           "lane_id": "ep-8-task-6",
@@ -113,20 +131,26 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-1-task-4"
+          "output_slug": "ep-1-task-4",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         }
       ],
       "episode_no": 1
     },
     {
       "id": "ep-10",
-      "title": "第 2 集",
+      "title": "女孩PV",
       "tasks": [
         {
           "lane_id": "ep-10-task-1",
           "asset": "GUI_QUICK",
           "gen_mode": "reference",
-          "prompt": "0-1s，全景平视固定，工业厂房大门开启，方块女孩囚犯站在门口，1-2s，特写平视，方块女孩囚犯脸部冷静，左脸颊有卡通红色黏液，2-4s，俯视特写，她用棉签把手机屏幕当作镜子擦掉自己脸上的黏液，低多边形3D渲染，废弃灰石监狱工业库房，薄雾。，人物形象和场景严格参考参考图，杜绝美化和修改",
+          "prompt": "0-1s，全景平视固定，工业厂房大门开启，方块女孩囚犯站在门口，1-2s，特写平视，方块女孩囚犯脸部冷静，左脸颊有卡通红色黏液，2-4s，俯视特写，她用棉签把手机当作镜子擦掉自己脸上的黏液（不是擦手机上的粘液是擦自己脸上的粘液），手机背面朝向摄像机，低多边形3D渲染，废弃灰石监狱工业库房，薄雾。，人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 4,
           "references": [
             {
@@ -142,7 +166,13 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-1"
+          "output_slug": "ep-2-task-1",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         },
         {
           "lane_id": "ep-10-task-2",
@@ -164,13 +194,19 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-2"
+          "output_slug": "ep-2-task-2",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         },
         {
           "lane_id": "ep-10-task-3",
           "asset": "GUI_QUICK",
           "gen_mode": "reference",
-          "prompt": "0-1s，中景侧拍，方块女孩囚犯拿起电烙铁端详，1-2s，特写平视，红黑重型电锯摆在货架最显眼位置，2-3s，中景平视，她盯着电锯眼神变兴奋，3-5s，特写平视，她戴护目镜焊接电路板烟雾升起，低多边形3D渲染，废弃工业库房。，人物形象和场景严格参考参考图，杜绝美化和修改",
+          "prompt": "0-1s，中景侧拍，方块女孩囚犯拿起电烙铁端详，1-2s，特写平视，红黑重型电锯摆在货架最显眼位置，2-3s，中景平视，她盯着电锯眼神变兴奋，3-5s，特写平视，她头戴护目镜正在焊接电路板，电路板上烟雾升起，低多边形3D渲染，废弃工业库房。人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 5,
           "references": [
             {
@@ -186,7 +222,13 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-3"
+          "output_slug": "ep-2-task-3",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         },
         {
           "lane_id": "ep-10-task-4",
@@ -208,13 +250,19 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-4"
+          "output_slug": "ep-2-task-4",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         },
         {
           "lane_id": "ep-10-task-5",
           "asset": "GUI_QUICK",
           "gen_mode": "reference",
-          "prompt": "0-2s，俯视全景，桌上黄色反光背心、黑色工具腰带和撬棍整齐铺开，2-3s，特写仰视快速推进，方块女孩囚犯戴安全帽调整探照灯直视镜头，3-5s，全景平视中心构图，她穿背心腰带持电锯站在工业走廊中央，低多边形3D渲染，狭长废弃工业走廊，薄雾。，人物形象和场景严格参考参考图，杜绝美化和修改",
+          "prompt": "0-2s，俯视全景，桌上电锯、扳手和撬棍整齐铺开，2-3s，特写仰视快速推进，方块女孩戴耳机调整直视镜头，并拿起电锯，3-5s，全景平视中心构图，手持电锯站在工业走廊中央，并拉向电锯，低多边形3D渲染，狭长废弃工业走廊，薄雾。人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 5,
           "references": [
             {
@@ -230,7 +278,13 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-5"
+          "output_slug": "ep-2-task-5",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         },
         {
           "lane_id": "ep-10-task-6",
@@ -257,14 +311,20 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-6"
+          "output_slug": "ep-2-task-6",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         },
         {
           "lane_id": "ep-10-task-7",
           "asset": "GUI_QUICK",
           "gen_mode": "reference",
-          "prompt": "0-2s，地面仰视旋转，卡通红色黏液如雨落下，方块女孩囚犯在上方挥舞电锯，2-8s，近景平视快速移动，她在狭窄工业通道与多只丧尸周旋，电锯轰鸣撬棍挡爪，8-10s，特写平视固定，她满脸黏液疯狂呐喊定格，低多边形3D渲染，废弃工业走廊。",
-          "duration": 10,
+          "prompt": "低多边形3D渲染风格，14秒连续镜头。全片采用第三人称跟随视角（轻微晃动，模拟肩扛摄像机）。人物形象和场景严格参考参考图，杜绝美化和修改。\n\n0-2秒：地面仰视固定镜头，镜头表面沾有少量红色黏液痕迹。上方传来电锯轰鸣声，方块女孩的靴子（沾有红色黏液）和旋转的电锯锯齿快速掠过画面上边缘，红色黏液稀疏滴落。\n\n2-5秒：镜头快速上摇转为中景第三人称跟随。她在狭窄工业走廊中，前方约2米处有两只丧尸，后方约1.5米处有一只丧尸逼近。她先向右侧滑步躲开右前方丧尸扑咬，随即身体左回正，横向挥动电锯（从左至右）斩击前方另一丧尸头部，溅出黑色液体。接着她以右脚为轴心转身180度，反手（从右向左）挥锯扫向后方丧尸颈部，将其逼退两步。\n\n5-7秒：镜头切为近景固定（腰部以上）。一只丧尸从左侧扑来，她抬脚踹中丧尸胸口将其蹬开，同时用电锯手柄向右上方格挡另一丧尸利爪，金属碰撞处火花四溅。她借力向后撤一步，与两只丧尸拉开约1米距离。\n\n7-10秒：镜头转为过肩平视（以她的右肩为前景），向后跟随后退。她转身向前跑出两步，拉大与丧尸距离至约2.5米。她回身站定，面向右侧一根垂直的金属管道，双手握紧电锯从右向左横向锯向管道中部，电锯锯齿与金属接触处火星四溅，管道被完全锯断。\n\n10-12秒：锯断的管道向下坠落，横倒在走廊地面中央，丧尸被暂时隔开在管道另一侧。她后退半步，电锯仍在手中空转轰鸣。\n\n12-14秒：镜头切为特写固定（轻微晃动），拍摄她的面部。她靠墙喘息，脸上沾满红色黏液和黑色污渍。突然她紧咬牙关从喉咙深处发出嘶吼，表情疯狂，画面在该嘶吼表情上定格0.5秒后结束。",
+          "duration": 14,
           "references": [
             {
               "path": "05_Video/uploads/20260522_185740_跑酷妹子.png",
@@ -284,7 +344,13 @@
           ],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-2-task-7"
+          "output_slug": "ep-2-task-7",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         }
       ],
       "episode_no": 2
@@ -292,36 +358,921 @@
     {
       "id": "ep-11",
       "episode_no": 3,
-      "title": "第 3 集",
+      "title": "男孩PV1",
       "tasks": [
         {
           "lane_id": "ep-11-task-1",
           "asset": "GUI_QUICK",
           "gen_mode": "reference",
-          "prompt": "",
+          "prompt": "0-3s，广角俯拍，全景展示灰石监狱洗衣房全貌，3排×6台工业洗衣机矩阵排列，4头丧尸在不同区域游荡，灰白色瓷砖地面泛水光，日光灯管闪烁。人物形象和场景严格参考参考图2，杜绝美化和修改",
           "duration": 4,
-          "references": [],
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_172300_1.jpg",
+              "kind": "image",
+              "name": "1.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_173003_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            }
+          ],
           "start_frame": null,
           "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "参考图3中，少年背对着镜头，一只参考图3中的丧尸背对着镜头在少年的下方双手抬高试着抓住男孩，挂在架子上，角色形象严格参考参考图1和参考图2，杜绝美化和修改，镜头场景保持不变",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260528_143351_ep-11-task-1_gen_1_10d74884.jpg",
+              "kind": "image",
+              "name": "20260528_143351_ep-11-task-1_gen_1_10d74884.jpg"
+            }
+          ],
           "output_slug": "ep-3-task-1"
+        },
+        {
+          "lane_id": "ep-11-task-2",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，仰拍特写，方块男孩囚犯双手撑住通风管道口锈蚀边缘，2-4s，中景平视，他松开手轻轻落在地面，膝盖微曲缓冲，蹲下身体快速扫视四周环境。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_173314_2.jpg",
+              "kind": "image",
+              "name": "2.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_173337_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "参考图2中的少年把参考图3中的丧尸塞入洗衣机中，丧尸只有两只脚漏在外面，角色光影要融入场景中",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260528_165844_ep-11-task-2_gen_1_c2154042.jpg",
+              "kind": "image",
+              "name": "20260528_165844_ep-11-task-2_gen_1_c2154042.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-2"
+        },
+        {
+          "lane_id": "ep-11-task-3",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，低角度跟拍，方块男孩囚犯猫着腰紧贴洗衣机金属外壳行走，人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_173706_3.jpg",
+              "kind": "image",
+              "name": "3.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_173713_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "参考图2中的少年打开参考图1中的大门，并回头看向镜头角色光影要融入场景中",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260528_171906_20260528_165227_20260528_094034_跑酷小子.png",
+              "kind": "image",
+              "name": "20260528_165227_20260528_094034_跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_173704_3.jpg",
+              "kind": "image",
+              "name": "3.jpg"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260528_172217_ep-11-task-3_gen_1_2dc38d1e.jpg",
+              "kind": "image",
+              "name": "20260528_172217_ep-11-task-3_gen_1_2dc38d1e.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-3"
+        },
+        {
+          "lane_id": "ep-11-task-4",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-3s，平视特写，方块男孩囚犯在洗衣机后微微探头，眼神警觉地观察前方约8米处踱步的丧尸背影，屏住呼吸。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_174705_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_174712_4.jpg",
+              "kind": "image",
+              "name": "4.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_175059_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "镜头拉近拍摄图片中的少年，过肩镜头特写图片中跑步的少年",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260528_171702_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260528_171842_ep-11-task-4_gen_1_bf69ef9b.jpg",
+              "kind": "image",
+              "name": "20260528_171842_ep-11-task-4_gen_1_bf69ef9b.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-4"
+        },
+        {
+          "lane_id": "ep-11-task-5",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，地面高度特写脚部，方块男孩囚犯继续潜行，2-4s，鞋尖踢中地面倒放的金属水桶，桶身横移与瓷砖摩擦发出刺耳声响，少年脚趾因碰撞轻轻抽搐。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_174826_5.jpg",
+              "kind": "image",
+              "name": "5.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_174833_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "镜头特写，方块男孩鞋尖踢中地面倒放的金属水桶，桶身横移与瓷砖摩擦发出刺耳声响，少年因碰撞而露出害怕惊讶的表情，场景严格参考参考图2，角色形象严格参控参考图1，杜绝美化和修改",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260527_183628_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260527_184456_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260527_184525_ep-11-task-5_gen_1_8de45412.jpg",
+              "kind": "image",
+              "name": "20260527_184525_ep-11-task-5_gen_1_8de45412.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-5"
+        },
+        {
+          "lane_id": "ep-11-task-6",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "地面特写，金属桶翻滚半圈桶口朝上，桶内残留的少量脏水溅出在地面形成一小片水渍，水桶停止在通道中央。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_175421_6.jpg",
+              "kind": "image",
+              "name": "6.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_175526_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "地面特写，金属桶翻滚半圈桶口朝上，桶内残留的少量脏水溅出在地面形成一小片水渍，水桶停止在通道中央。",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260527_185300_image.png",
+              "kind": "image",
+              "name": "image.png"
+            },
+            {
+              "path": "05_Video/uploads/20260527_185401_20260527_173334_ep-11-task-2_gen_1_33c48.jpg",
+              "kind": "image",
+              "name": "20260527_173334_ep-11-task-2_gen_1_33c48dad.jpg"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260527_185623_ep-11-task-6_gen_1_2d737967.jpg",
+              "kind": "image",
+              "name": "20260527_185623_ep-11-task-6_gen_1_2d737967.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-6"
+        },
+        {
+          "lane_id": "ep-11-task-7",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-4s，全景镜头，丧尸动作全部停止，头猛地转向摄像机，特写丧尸的脸。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_175909_1.jpg",
+              "kind": "image",
+              "name": "1.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_175912_7.jpg",
+              "kind": "image",
+              "name": "7.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_175925_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "特写丧尸的面部看向镜头，丧尸形象严格参考参考图2",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260527_185656_20260527_175824_ep-11-task-3_gen_1_b7c23.jpg",
+              "kind": "image",
+              "name": "20260527_175824_ep-11-task-3_gen_1_b7c23be4.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260527_185803_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260527_185834_ep-11-task-7_gen_1_e2c2ef0d.jpg",
+              "kind": "image",
+              "name": "20260527_185834_ep-11-task-7_gen_1_e2c2ef0d.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-7"
+        },
+        {
+          "lane_id": "ep-11-task-8",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "丧尸从远处逐渐缓慢逼近参考图1中的男孩，男孩惊慌，身体一边发抖一边往后退，人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_180730_8.jpg",
+              "kind": "image",
+              "name": "8.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_180819_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_180827_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "场景中的丧尸开始朝参考图2中的男孩追来，男孩恐慌站在原地，备对着镜头，角色形象严格参考参考图3和参考图4，杜绝美化和修改",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260527_190028_20260527_182935_1.jpg",
+              "kind": "image",
+              "name": "20260527_182935_1.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260527_190038_20260527_184032_ep-11-task-4_gen_1_c504a.jpg",
+              "kind": "image",
+              "name": "20260527_184032_ep-11-task-4_gen_1_c504a523.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260527_190047_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            },
+            {
+              "path": "05_Video/uploads/20260527_190053_20260527_183628_跑酷小子.png",
+              "kind": "image",
+              "name": "20260527_183628_跑酷小子.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260527_190321_ep-11-task-8_gen_1_8e642aa4.jpg",
+              "kind": "image",
+              "name": "20260527_190321_ep-11-task-8_gen_1_8e642aa4.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-8"
+        },
+        {
+          "lane_id": "ep-11-task-9",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，侧拍横移，方块男孩囚犯双手抓住洗衣机顶部边缘身体上拉翻上1.8米高机器顶部，2-5s，平视跟随，他在顶部猫腰跑两步跳到相邻机器顶部，下方丧尸疯狂地试图攀爬无法抓住光滑表面。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 5,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_180935_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_180958_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_181007_9.jpg",
+              "kind": "image",
+              "name": "9.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_181832_2.jpg",
+              "kind": "image",
+              "name": "2.jpg"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "三只丧尸追来，方块男孩囚犯双手抓住洗衣机顶部边缘身体上拉翻上1.8米高机器顶部，角色形象严格参控参考图1和参考图2",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260527_190404_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            },
+            {
+              "path": "05_Video/uploads/20260527_190409_20260527_190053_20260527_183628_跑酷小子.png",
+              "kind": "image",
+              "name": "20260527_190053_20260527_183628_跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260527_190722_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260527_190835_ep-11-task-9_gen_1_5c7a72f2.jpg",
+              "kind": "image",
+              "name": "20260527_190835_ep-11-task-9_gen_1_5c7a72f2.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-9"
+        },
+        {
+          "lane_id": "ep-11-task-10",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，高角度俯拍洗衣机矩阵，2-5s，方块男孩囚犯在顶部连续Z字形跳跃，下方3头丧尸在地面通道疯狂地左右追赶始终无法上到顶部。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_181620_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_181629_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_181642_12.jpg",
+              "kind": "image",
+              "name": "12.jpg"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "方块男孩背对着镜头在顶部连续Z字形跳跃，下方3头丧尸在地面通道追赶始终无法上到顶部。角色形象严格参考参考图3和参考图4",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260527_190802_20260527_173926_ep-11-task-2_gen_1_08bbb.jpg",
+              "kind": "image",
+              "name": "20260527_173926_ep-11-task-2_gen_1_08bbbc66.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260527_190828_20260527_190047_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "20260527_190047_图片节点_2__2_.png"
+            },
+            {
+              "path": "05_Video/uploads/20260527_190828_20260527_190053_20260527_183628_跑酷小子.png",
+              "kind": "image",
+              "name": "20260527_190053_20260527_183628_跑酷小子.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260527_190931_ep-11-task-10_gen_1_fa4284c5.jpg",
+              "kind": "image",
+              "name": "20260527_190931_ep-11-task-10_gen_1_fa4284c5.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-10"
+        },
+        {
+          "lane_id": "ep-11-task-11",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "镜头如参考图1，0-2s，地面俯拍洗衣机顶部，2-4s，方块男孩囚犯在第三排顶部向前跑，前方尽头出现一头丧尸抬头伸臂阻挡去路。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_182417_14.jpg",
+              "kind": "image",
+              "name": "14.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_182417_13.jpg",
+              "kind": "image",
+              "name": "13.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_182422_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_182429_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "参考图2中的少年双手抓住参考图1中的红圈位置，背对着镜头吊在空中",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260527_191405_4.png",
+              "kind": "image",
+              "name": "4.png"
+            },
+            {
+              "path": "05_Video/uploads/20260527_191435_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260527_192132_ep-11-task-11_gen_1_11534c69.jpg",
+              "kind": "image",
+              "name": "20260527_192132_ep-11-task-11_gen_1_11534c69.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-11"
+        },
+        {
+          "lane_id": "ep-11-task-12",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "镜头图参考图1，0-2s，慢动作仰拍，方块男孩囚犯在顶部急停右脚踩在洗衣机边缘身体后倾蓄力，2-5s，他猛力起跳腾空约3米高双手抓住天花板下方生锈金属横杆，横杆因体重轻微下弯。5-7s，侧拍横移，方块男孩囚犯双手握杆身体悬空向前滑行，7-10s，他越过前方丧尸头顶鞋底从丧尸头顶约30厘米处掠过，在横杆末端松手准备落地。",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_182615_17.jpg",
+              "kind": "image",
+              "name": "17.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_182615_16.jpg",
+              "kind": "image",
+              "name": "16.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_182722_17.jpg",
+              "kind": "image",
+              "name": "17.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_182727_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_182736_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "拉近参考图2的镜头到角色的肩膀上，将参考图2的镜头改为过肩镜头",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260527_192532_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260527_192730_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260527_192909_ep-11-task-12_gen_1_971bfadf.jpg",
+              "kind": "image",
+              "name": "20260527_192909_ep-11-task-12_gen_1_971bfadf.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-12"
+        },
+        {
+          "lane_id": "ep-11-task-13",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "镜头如参考图1和参考图2，0-2s，中景镜头，方块男孩囚犯松杆下坠双脚着地膝盖弯曲缓冲，2-5s，他迅速转身右腿猛踹身后追来的丧尸胸腹，丧尸踉跄后退背部撞到洗衣机玻璃舱门表面出现裂纹。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 5,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_183341_17.jpg",
+              "kind": "image",
+              "name": "17.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_183348_18.jpg",
+              "kind": "image",
+              "name": "18.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_183423_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_183433_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "参考图1中的洗衣机上的少年背对着镜头跳到左边的洗衣机上，丧尸和少年的形象严格参考参考图2和参考图3，杜绝美化和修改",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260528_093933_6.png",
+              "kind": "image",
+              "name": "6.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_094028_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_094034_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260528_095055_ep-11-task-13_gen_1_14d8237f.jpg",
+              "kind": "image",
+              "name": "20260528_095055_ep-11-task-13_gen_1_14d8237f.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-13"
+        },
+        {
+          "lane_id": "ep-11-task-14",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "镜头如参考图1，0-3s，特写镜头，方块男孩囚犯抓住丧尸警服后领向上提拉，3-4s，中景镜头，他像闪电般非常快速地将丧尸丢进洗衣机中并观赏洗衣机的舱门。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_183449_19.jpg",
+              "kind": "image",
+              "name": "19.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_183522_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_183529_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "参考图1中的丧尸被锁到洗衣机里，在洗衣机滚筒仓里，像衣服一样被洗，去掉旁边的少年",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260528_170053_20260528_094028_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "20260528_094028_图片节点_2__2_.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_170207_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260528_170328_ep-11-task-14_gen_1_90ef5e3e.jpg",
+              "kind": "image",
+              "name": "20260528_170328_ep-11-task-14_gen_1_90ef5e3e.jpg"
+            }
+          ],
+          "output_slug": "ep-3-task-14"
+        },
+        {
+          "lane_id": "ep-11-task-15",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "镜头如参考图1和参考图2，0-2s，特写镜头，方块男孩囚犯双手用力扣上舱门锁扣咔哒锁紧，2-4s，手部特写移动到控制面板按下启动按钮，绿灯亮起滚筒开始缓慢转动。4-6s，透过洗衣机玻璃舱门拍摄内部，丧尸在洗衣机舱里挣扎6-8s，丧尸仍然在洗衣机里挣扎，但是滚筒加速旋转丧尸身体随旋转翻来覆去，手臂和腿无力摆动，玻璃上有水渍和泡沫随震动晃动。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 8,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_183819_19.jpg",
+              "kind": "image",
+              "name": "19.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_183821_20.jpg",
+              "kind": "image",
+              "name": "20.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_183833_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260528_183928_图片节点_2__2_.png",
+              "kind": "image",
+              "name": "图片节点 2 (2).png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-3-task-15"
+        },
+        {
+          "lane_id": "ep-11-task-16",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "镜头如参考图1-3所示，0-2s，中景固定镜头，方块男孩囚犯直起身体看了一眼旋转的洗衣机嘴角上扬露出自信笑容，2-4s，他转身向洗衣房出口方向奔跑步伐轻快。人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260528_184028_21.jpg",
+              "kind": "image",
+              "name": "21.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_184030_22.jpg",
+              "kind": "image",
+              "name": "22.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_184038_23.jpg",
+              "kind": "image",
+              "name": "23.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260528_184105_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-3-task-16"
+        },
+        {
+          "lane_id": "ep-11-task-17",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "参考图中的少年打开大门，回头看了一眼摄像机方向，然后微微一笑，离开并把门关上，人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_114409_23.jpg",
+              "kind": "image",
+              "name": "23.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260529_114409_22.jpg",
+              "kind": "image",
+              "name": "22.jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260529_114414_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-3-task-17"
         }
       ]
     },
     {
       "id": "ep-12",
       "episode_no": 4,
-      "title": "第 4 集",
+      "title": "男孩PV2",
       "tasks": [
         {
           "lane_id": "ep-12-task-1",
           "asset": "GUI_QUICK",
           "gen_mode": "reference",
+          "prompt": "0-4s，广角全景摇镜，少年推开食堂侧门探头，领餐台前一头厨师丧尸背对镜头俯身喝汤，夕阳从高窗射入地砖上形成条状光影。低多边形3D渲染，人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_150917_image.png",
+              "kind": "image",
+              "name": "image.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_151036_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_151039_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "去掉参考图中的人和手电筒光照",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260529_150534_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260529_150607_ep-12-task-1_gen_1_0e632879.jpg",
+              "kind": "image",
+              "name": "20260529_150607_ep-12-task-1_gen_1_0e632879.jpg"
+            }
+          ],
+          "output_slug": "ep-4-task-1"
+        },
+        {
+          "lane_id": "ep-12-task-2",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "延续参考视频，0-2s，中景镜头，少年瞳孔微缩后退一步，2-4s，背部撞上门框发出闷响，他揉着后脑勺紧张地看着丧尸确认还没被发现。低多边形3D渲染，人物形象和场景严格参考参考图，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_151604_image.png",
+              "kind": "image",
+              "name": "image.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_151609_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_151609_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_153557_video.mp4",
+              "kind": "video",
+              "name": "video.mp4"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-2"
+        },
+        {
+          "lane_id": "ep-12-task-3",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
           "prompt": "",
           "duration": 4,
+          "ratio": "9:16",
           "references": [],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-4-task-1"
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-3"
         }
       ]
     },
@@ -339,7 +1290,13 @@
           "references": [],
           "start_frame": null,
           "end_frame": null,
-          "output_slug": "ep-5-task-1"
+          "output_slug": "ep-5-task-1",
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "ratio": "9:16"
         }
       ]
     }

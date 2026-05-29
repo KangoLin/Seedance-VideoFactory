@@ -13,7 +13,9 @@ import shutil
 import subprocess
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
+import uuid
 from pathlib import Path
 
 from export_versions import export_file_path, next_export_version
@@ -85,7 +87,24 @@ def read_key(path: Path) -> str:
 API_CACHE_DIR = DEFAULT_SEGMENT_DIR / ".api_cache"
 API_IMAGE_MAX_BYTES = 1024 * 1024
 _FFMPEG_EXE: str | None = None
-API_VIDEO_MAX_BYTES = 8 * 1024 * 1024
+API_VIDEO_MAX_BYTES = int(os.environ.get("REFERENCE_VIDEO_MAX_BYTES", str(50 * 1024 * 1024)))
+REFERENCE_VIDEO_URL_CACHE = API_CACHE_DIR / "reference_video_urls.json"
+REFERENCE_VIDEO_URL_CACHE_SECONDS = int(os.environ.get("REFERENCE_VIDEO_URL_CACHE_SECONDS", "1800"))
+
+
+def is_web_url(value: str | Path) -> bool:
+    parsed = urllib.parse.urlparse(str(value))
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def web_url_suffix(value: str) -> str:
+    return Path(urllib.parse.urlparse(value).path).suffix.lower()
+
+
+def reference_is_video(value: str | Path) -> bool:
+    if is_web_url(value):
+        return web_url_suffix(str(value)) in {".mp4", ".mov", ".webm"}
+    return is_video_file(value)
 
 
 def ensure_api_sized_media(path: Path) -> Path:
@@ -152,6 +171,126 @@ def media_ref_for_dry_run(path: Path) -> str:
     return f"dry-run://{path.name} ({kind}, {size_mb:.2f} MB)"
 
 
+def load_reference_video_url_cache() -> dict:
+    if not REFERENCE_VIDEO_URL_CACHE.is_file():
+        return {}
+    try:
+        return json.loads(REFERENCE_VIDEO_URL_CACHE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+
+
+def save_reference_video_url_cache(cache: dict) -> None:
+    API_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    REFERENCE_VIDEO_URL_CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def tmpfiles_download_url(url: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    if parsed.netloc.endswith("tmpfiles.org") and not parsed.path.startswith("/dl/"):
+        return urllib.parse.urlunparse(parsed._replace(path="/dl" + parsed.path))
+    return url
+
+
+def multipart_upload(
+    endpoint: str,
+    path: Path,
+    *,
+    filename: str,
+    mime: str,
+    accept: str = "*/*",
+) -> tuple[int, str]:
+    boundary = "----seedance-reference-video-" + uuid.uuid4().hex
+    head = (
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'
+        f"Content-Type: {mime}\r\n\r\n"
+    ).encode("utf-8")
+    tail = f"\r\n--{boundary}--\r\n".encode("utf-8")
+    body = head + path.read_bytes() + tail
+    req = urllib.request.Request(
+        endpoint,
+        data=body,
+        headers={
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "Content-Length": str(len(body)),
+            "Accept": accept,
+            "User-Agent": "Mozilla/5.0 SeedanceVideoToolkit/1.0",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=180) as resp:
+        return int(resp.status), resp.read().decode("utf-8", errors="replace")
+
+
+def try_upload_reference_video_tmpfiles(path: Path, safe_name: str, mime: str) -> str:
+    _, text = multipart_upload(
+        "https://tmpfiles.org/api/v1/upload",
+        path,
+        filename=safe_name,
+        mime=mime,
+        accept="application/json",
+    )
+    payload = json.loads(text)
+    url = ((payload.get("data") or {}).get("url") if isinstance(payload, dict) else "") or ""
+    if not url:
+        raise RuntimeError(f"tmpfiles.org 返回异常 {payload!r}")
+    return tmpfiles_download_url(str(url))
+
+
+def try_upload_reference_video_0x0(path: Path, safe_name: str, mime: str) -> str:
+    _, text = multipart_upload("https://0x0.st", path, filename=safe_name, mime=mime, accept="text/plain")
+    url = text.strip()
+    if not url.startswith(("http://", "https://")):
+        raise RuntimeError(f"0x0.st 返回异常 {url[:200]!r}")
+    return url
+
+
+def upload_reference_video_to_public_url(path: Path) -> str:
+    path = ensure_api_sized_media(path)
+    stat = path.stat()
+    cache_key = str(path.resolve())
+    cache = load_reference_video_url_cache()
+    cached = cache.get(cache_key) or {}
+    now = time.time()
+    if (
+        cached.get("size") == stat.st_size
+        and cached.get("mtime") == stat.st_mtime
+        and cached.get("url")
+        and now - float(cached.get("created_at") or 0) < REFERENCE_VIDEO_URL_CACHE_SECONDS
+    ):
+        print(f"API_REQUEST: use_public_video_url_cache {path.name}", flush=True)
+        return str(cached["url"])
+
+    safe_name = re.sub(r"[^\w.\-]+", "_", path.name) or f"reference_{uuid.uuid4().hex}.mp4"
+    mime = mimetypes.guess_type(safe_name)[0] or "video/mp4"
+    attempts = [
+        ("tmpfiles.org", try_upload_reference_video_tmpfiles),
+        ("0x0.st", try_upload_reference_video_0x0),
+    ]
+    errors: list[str] = []
+    url = ""
+    for name, uploader in attempts:
+        print(f"API_REQUEST: upload_reference_video {path.name} -> {name}", flush=True)
+        try:
+            url = uploader(path, safe_name, mime)
+            break
+        except Exception as exc:
+            errors.append(f"{name}: {exc}")
+            print(f"API_REQUEST: upload_reference_video_failed {name}: {exc}", flush=True)
+    if not url:
+        raise RuntimeError("参考视频公网化失败：" + "；".join(errors))
+    cache[cache_key] = {
+        "url": url,
+        "size": stat.st_size,
+        "mtime": stat.st_mtime,
+        "created_at": now,
+    }
+    save_reference_video_url_cache(cache)
+    print(f"API_REQUEST: reference_video_url {url}", flush=True)
+    return url
+
+
 def request_json(method: str, url: str, api_key: str, payload: dict | None = None, timeout: int = 60) -> dict:
     body = None if payload is None else json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=body, method=method)
@@ -197,14 +336,24 @@ def append_reference_media(
     *,
     dry_run: bool = False,
 ) -> None:
-    path = resolve_keyframe(rel_path)
-    media_url = media_ref_for_dry_run(path) if dry_run else media_data_url(path)
-    if is_video_file(path):
+    if is_web_url(rel_path):
+        media_url = rel_path
+        is_video = reference_is_video(rel_path)
+    else:
+        path = resolve_keyframe(rel_path)
+        is_video = is_video_file(path)
+        if is_video:
+            media_url = media_ref_for_dry_run(path) if dry_run else upload_reference_video_to_public_url(path)
+        else:
+            media_url = media_ref_for_dry_run(path) if dry_run else media_data_url(path)
+    if is_video:
         item: dict = {"type": "video_url", "video_url": {"url": media_url}}
+        role = "reference_video"
     else:
         item = {"type": "image_url", "image_url": {"url": media_url}}
+        role = "reference_image"
     if role_mode == "role":
-        item["role"] = "reference_image"
+        item["role"] = role
     content.append(item)
 
 
@@ -324,7 +473,7 @@ def segment_is_stale(segment: dict, output: Path, force: bool) -> bool:
     if force or not output.exists():
         return True
 
-    input_paths = [resolve_keyframe(rel) for rel in segment_required_paths(segment)]
+    input_paths = [resolve_keyframe(rel) for rel in segment_required_paths(segment) if not is_web_url(rel)]
     if not input_paths:
         return False
 

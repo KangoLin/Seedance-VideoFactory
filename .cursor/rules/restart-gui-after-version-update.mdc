@@ -1,0 +1,41 @@
+---
+description: GUI 版本更新后自动重启本地网页工具（8765）
+alwaysApply: true
+---
+
+# GUI 版本更新后重启网页工具
+
+对本仓库进行 **会影响 Seedance 本地网页 GUI** 的修改后，必须在同一轮对话内 **主动重启** 工具，不要等用户提醒。
+
+## 何时视为「版本更新」
+
+满足任一即触发：
+
+- 修改了 `05_Video/scripts/seedance_gui.py` 或 `05_Video/scripts/gui_page.html`
+- 变更了 `BUILD_ID`、`GUI_API_VERSION` 或 `/api/ping` 返回的 `features`
+- 用户明确要求发布/更新 GUI 功能，或你向用户交付了新的 GUI 能力
+
+以下情况 **不必** 重启：仅改 `README`、批处理脚本文案、workspace 数据（如 `episodes.json`）、与 GUI 无关的批量脚本。
+
+## 必须执行的操作（同一轮对话内完成）
+
+1. 在项目根目录运行无交互重启脚本（优先）：
+
+   ```bat
+   restart_seedance_gui.bat
+   ```
+
+2. 等待约 2–3 秒后验证服务可用（任选其一）：
+
+   - `curl -s http://127.0.0.1:8765/api/ping`
+   - 或 PowerShell：`Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/api/ping`
+
+   确认响应含 `api_version` 且 `build_id` 与当前代码一致。
+
+3. 在回复中简短告知用户：已重启 GUI、地址 `http://127.0.0.1:8765/`，并提醒 **Ctrl+F5** 强刷页面以免缓存旧 HTML。
+
+## 禁止与注意
+
+- **不要** 使用带 `pause` 的 `start_seedance_gui.bat` 作为 Agent 重启方式（会阻塞终端）。
+- 若 8765 仍被占用，先 `taskkill` 对应 PID 再重试 `restart_seedance_gui.bat`。
+- 重启失败时说明原因并给出下一步，不要假装已重启成功。
