@@ -12,8 +12,8 @@ ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE_DIR = ROOT / "05_Video" / "workspace"
 WORKSPACE_FILE = WORKSPACE_DIR / "episodes.json"
 WORKSPACE_VERSION = 1
-SEGMENT_DIR = ROOT / "05_Video" / "segments"
-EXPORT_DIR = ROOT / "05_Video" / "exports"
+SEGMENT_DIR = ROOT / "output" / "segments"
+EXPORT_DIR = ROOT / "output" / "exports"
 
 
 def default_task(lane_id: str) -> dict:
@@ -32,6 +32,22 @@ def default_task(lane_id: str) -> dict:
         "image_gen_model": "",
         "image_gen_sources": [],
         "image_gen_generated": [],
+        "last_export_path": "",
+    }
+
+
+def default_publish_profile() -> dict:
+    return {
+        "targets": [],
+        "default_language": "zh-CN",
+        "content": {
+            "title": "",
+            "description": "",
+            "hashtags": [],
+        },
+        "platform_overrides": {},
+        "last_validation_result": {"platforms": {}, "summary": {"pass": 0, "warn": 0, "block": 0}},
+        "updated_at": "",
     }
 
 
@@ -43,6 +59,7 @@ def default_episode(episode_id: str, title: str, episode_no: int | None = None) 
         "episode_no": number,
         "title": title,
         "tasks": [default_task(lane_id)],
+        "publish_profile": default_publish_profile(),
     }
 
 
@@ -257,6 +274,33 @@ def normalize_workspace(raw: dict | None) -> dict:
         if not episode.get("title"):
             episode["title"] = f"第 {parse_episode_no(episode)} 集"
         episode["episode_no"] = parse_episode_no(episode)
+        episode.setdefault("concat_video_path", "")
+        if episode.get("last_content_audit_result") is not None and not isinstance(
+            episode.get("last_content_audit_result"), dict
+        ):
+            episode["last_content_audit_result"] = None
+        profile = episode.get("publish_profile")
+        if not isinstance(profile, dict):
+            profile = default_publish_profile()
+            episode["publish_profile"] = profile
+        base_profile = default_publish_profile()
+        for key, value in base_profile.items():
+            profile.setdefault(key, deepcopy(value))
+        content = profile.get("content")
+        if not isinstance(content, dict):
+            content = deepcopy(base_profile["content"])
+            profile["content"] = content
+        content.setdefault("title", "")
+        content.setdefault("description", "")
+        content.setdefault("hashtags", [])
+        if not isinstance(content.get("hashtags"), list):
+            content["hashtags"] = []
+        if not isinstance(profile.get("targets"), list):
+            profile["targets"] = []
+        if not isinstance(profile.get("platform_overrides"), dict):
+            profile["platform_overrides"] = {}
+        if not isinstance(profile.get("last_validation_result"), dict):
+            profile["last_validation_result"] = deepcopy(base_profile["last_validation_result"])
         tasks = episode.get("tasks")
         if not isinstance(tasks, list) or not tasks:
             episode["tasks"] = [default_task(f"{episode['id']}-task-1")]
@@ -278,6 +322,7 @@ def normalize_workspace(raw: dict | None) -> dict:
             task.setdefault("image_gen_model", "")
             task.setdefault("image_gen_sources", [])
             task.setdefault("image_gen_generated", [])
+            task.setdefault("last_export_path", "")
     active = workspace.get("active_episode_id")
     ids = {ep["id"] for ep in episodes}
     if active not in ids:
@@ -336,6 +381,14 @@ def next_task_id(episode: dict) -> str:
             numbers.append(int(match.group(1)))
     next_no = max(numbers, default=0) + 1
     return f"{episode_id}-task-{next_no}"
+
+
+def find_task_by_lane(workspace: dict, lane_id: str) -> dict | None:
+    for episode in workspace.get("episodes", []):
+        for task in episode.get("tasks", []):
+            if str(task.get("lane_id", "")).strip() == lane_id:
+                return task
+    return None
 
 
 def find_episode(workspace: dict, episode_id: str) -> dict | None:

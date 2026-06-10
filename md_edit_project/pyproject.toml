@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "md-edit"
+version = "0.1.0"
+description = "漫剧 AI 智能剪辑工具"
+requires-python = ">=3.10"
+dependencies = [
+    "faster-whisper>=1.0.0",
+]
+
+[project.scripts]
+md-edit = "mdedit.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["mdedit*"]

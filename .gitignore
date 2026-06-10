@@ -8,7 +8,18 @@ API_Key/
 05_Video/uploads/
 05_Video/segments/.api_cache/
 05_Video/exports/
+output/
 .venv/
 external_tools/deepseek-free-api/.venv/
 external_tools/deepseek-free-api/__pycache__/
 external_tools/deepseek-free-api/app/__pycache__/
+
+# generated data
+.md_cache/
+*.log
+05_Video/segments/ep-*/
+05_Video/segments/lane-*/
+05_Video/segments/_audit_frames/
+05_Video/segments/_clip_analysis/
+05_Video/segments/AD_DEMO_001/
+05_Video/segments/DEMO_TEXT_001/

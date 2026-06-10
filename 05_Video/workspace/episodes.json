@@ -1,7 +1,7 @@
 {
   "version": 1,
   "episode_seq": 13,
-  "active_episode_id": "ep-8",
+  "active_episode_id": "ep-11",
   "episodes": [
     {
       "id": "ep-8",
@@ -38,7 +38,15 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-1-task-1"
+          "output_slug": "ep-1-task-1",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-8-task-4",
@@ -71,7 +79,15 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-1-task-2"
+          "output_slug": "ep-1-task-2",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-8-task-5",
@@ -104,7 +120,15 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-1-task-3"
+          "output_slug": "ep-1-task-3",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-8-task-6",
@@ -137,10 +161,40 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-1-task-4"
+          "output_slug": "ep-1-task-4",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         }
       ],
-      "episode_no": 1
+      "episode_no": 1,
+      "publish_profile": {
+        "targets": [
+          "youtube"
+        ],
+        "default_language": "zh-CN",
+        "content": {
+          "title": "",
+          "description": "",
+          "hashtags": []
+        },
+        "platform_overrides": {},
+        "last_validation_result": {
+          "platforms": {},
+          "summary": {
+            "pass": 0,
+            "warn": 0,
+            "block": 0
+          }
+        },
+        "updated_at": "2026-06-01T04:19:44.327Z"
+      },
+      "concat_video_path": ""
     },
     {
       "id": "ep-10",
@@ -172,7 +226,15 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-2-task-1"
+          "output_slug": "ep-2-task-1",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-10-task-2",
@@ -200,7 +262,15 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-2-task-2"
+          "output_slug": "ep-2-task-2",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-10-task-3",
@@ -228,13 +298,21 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-2-task-3"
+          "output_slug": "ep-2-task-3",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-10-task-4",
           "asset": "GUI_QUICK",
           "gen_mode": "reference",
-          "prompt": "0-2s，中景侧拍推进，方块女孩囚犯提起红黑电锯拉动启动绳，电锯轰鸣，2-4s，特写仰视，她举电锯夸张大笑，低多边形3D渲染，废弃工业库房。，人物形象和场景严格参考参考图，杜绝美化和修改",
+          "prompt": "0-2s，中景侧拍推进，方块女孩囚犯提起红黑电锯拉动启动绳，电锯轰鸣，2-4s，特写仰视，她举电锯夸张大笑，低多边形3D渲染，废弃工业库房，人物形象和场景严格参考参考图，杜绝美化和修改",
           "duration": 4,
           "ratio": "9:16",
           "references": [
@@ -256,7 +334,15 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-2-task-4"
+          "output_slug": "ep-2-task-4",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-10-task-5",
@@ -284,7 +370,15 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-2-task-5"
+          "output_slug": "ep-2-task-5",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-10-task-6",
@@ -317,7 +411,15 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-2-task-6"
+          "output_slug": "ep-2-task-6",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-10-task-7",
@@ -350,10 +452,38 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-2-task-7"
+          "output_slug": "ep-2-task-7",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         }
       ],
-      "episode_no": 2
+      "episode_no": 2,
+      "publish_profile": {
+        "targets": [],
+        "default_language": "zh-CN",
+        "content": {
+          "title": "",
+          "description": "",
+          "hashtags": []
+        },
+        "platform_overrides": {},
+        "last_validation_result": {
+          "platforms": {},
+          "summary": {
+            "pass": 0,
+            "warn": 0,
+            "block": 0
+          }
+        },
+        "updated_at": ""
+      },
+      "concat_video_path": ""
     },
     {
       "id": "ep-11",
@@ -392,7 +522,15 @@
               "name": "20260528_143351_ep-11-task-1_gen_1_10d74884.jpg"
             }
           ],
-          "output_slug": "ep-3-task-1"
+          "output_slug": "ep-3-task-1",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-2",
@@ -426,7 +564,15 @@
               "name": "20260528_165844_ep-11-task-2_gen_1_c2154042.jpg"
             }
           ],
-          "output_slug": "ep-3-task-2"
+          "output_slug": "ep-3-task-2",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-3",
@@ -471,7 +617,15 @@
               "name": "20260528_172217_ep-11-task-3_gen_1_2dc38d1e.jpg"
             }
           ],
-          "output_slug": "ep-3-task-3"
+          "output_slug": "ep-3-task-3",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-4",
@@ -495,6 +649,11 @@
               "path": "05_Video/uploads/20260528_175059_图片节点_2__2_.png",
               "kind": "image",
               "name": "图片节点 2 (2).png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_173655_image.png",
+              "kind": "image",
+              "name": "image.png"
             }
           ],
           "start_frame": null,
@@ -516,7 +675,15 @@
               "name": "20260528_171842_ep-11-task-4_gen_1_bf69ef9b.jpg"
             }
           ],
-          "output_slug": "ep-3-task-4"
+          "output_slug": "ep-3-task-4",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-5",
@@ -561,7 +728,15 @@
               "name": "20260527_184525_ep-11-task-5_gen_1_8de45412.jpg"
             }
           ],
-          "output_slug": "ep-3-task-5"
+          "output_slug": "ep-3-task-5",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-6",
@@ -606,7 +781,15 @@
               "name": "20260527_185623_ep-11-task-6_gen_1_2d737967.jpg"
             }
           ],
-          "output_slug": "ep-3-task-6"
+          "output_slug": "ep-3-task-6",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-7",
@@ -656,7 +839,15 @@
               "name": "20260527_185834_ep-11-task-7_gen_1_e2c2ef0d.jpg"
             }
           ],
-          "output_slug": "ep-3-task-7"
+          "output_slug": "ep-3-task-7",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-8",
@@ -716,7 +907,15 @@
               "name": "20260527_190321_ep-11-task-8_gen_1_8e642aa4.jpg"
             }
           ],
-          "output_slug": "ep-3-task-8"
+          "output_slug": "ep-3-task-8",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-9",
@@ -776,7 +975,15 @@
               "name": "20260527_190835_ep-11-task-9_gen_1_5c7a72f2.jpg"
             }
           ],
-          "output_slug": "ep-3-task-9"
+          "output_slug": "ep-3-task-9",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-10",
@@ -831,7 +1038,15 @@
               "name": "20260527_190931_ep-11-task-10_gen_1_fa4284c5.jpg"
             }
           ],
-          "output_slug": "ep-3-task-10"
+          "output_slug": "ep-3-task-10",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-11",
@@ -886,7 +1101,15 @@
               "name": "20260527_192132_ep-11-task-11_gen_1_11534c69.jpg"
             }
           ],
-          "output_slug": "ep-3-task-11"
+          "output_slug": "ep-3-task-11",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-12",
@@ -946,7 +1169,15 @@
               "name": "20260527_192909_ep-11-task-12_gen_1_971bfadf.jpg"
             }
           ],
-          "output_slug": "ep-3-task-12"
+          "output_slug": "ep-3-task-12",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-13",
@@ -1006,7 +1237,15 @@
               "name": "20260528_095055_ep-11-task-13_gen_1_14d8237f.jpg"
             }
           ],
-          "output_slug": "ep-3-task-13"
+          "output_slug": "ep-3-task-13",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-14",
@@ -1056,7 +1295,15 @@
               "name": "20260528_170328_ep-11-task-14_gen_1_90ef5e3e.jpg"
             }
           ],
-          "output_slug": "ep-3-task-14"
+          "output_slug": "ep-3-task-14",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-15",
@@ -1094,7 +1341,15 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-3-task-15"
+          "output_slug": "ep-3-task-15",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-16",
@@ -1132,7 +1387,15 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-3-task-16"
+          "output_slug": "ep-3-task-16",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         },
         {
           "lane_id": "ep-11-task-17",
@@ -1165,9 +1428,37 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-3-task-17"
+          "output_slug": "ep-3-task-17",
+          "last_export_path": "",
+          "clip": {
+            "enabled": false,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0
+          }
         }
-      ]
+      ],
+      "publish_profile": {
+        "targets": [],
+        "default_language": "zh-CN",
+        "content": {
+          "title": "",
+          "description": "",
+          "hashtags": []
+        },
+        "platform_overrides": {},
+        "last_validation_result": {
+          "platforms": {},
+          "summary": {
+            "pass": 0,
+            "warn": 0,
+            "block": 0
+          }
+        },
+        "updated_at": ""
+      },
+      "concat_video_path": ""
     },
     {
       "id": "ep-12",
@@ -1217,7 +1508,23 @@
               "name": "20260529_150607_ep-12-task-1_gen_1_0e632879.jpg"
             }
           ],
-          "output_slug": "ep-4-task-1"
+          "output_slug": "ep-4-task-1",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "丧尸在吃饭",
+                "fontsize": 36,
+                "xpos": 50,
+                "ypos": null
+              }
+            ]
+          }
         },
         {
           "lane_id": "ep-12-task-2",
@@ -1255,7 +1562,23 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-4-task-2"
+          "output_slug": "ep-4-task-2",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "丧尸在吃饭",
+                "fontsize": 36,
+                "position": "center",
+                "ypos": "bottom"
+              }
+            ]
+          }
         },
         {
           "lane_id": "ep-12-task-3",
@@ -1293,16 +1616,46 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-4-task-3"
+          "output_slug": "ep-4-task-3",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
         },
         {
           "lane_id": "ep-12-task-4",
           "asset": "GUI_QUICK",
           "gen_mode": "reference",
-          "prompt": "",
+          "prompt": "延续视频，0-4s，中景镜头，少年瞳孔放大，毫不犹豫转身冲入，向食堂深处的餐桌区域逃跑。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
           "duration": 4,
           "ratio": "9:16",
-          "references": [],
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_171723_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_171723_media__1_.jpg",
+              "kind": "image",
+              "name": "media (1).jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260529_171723_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_171743_05_Video_exports_ep-4-task-3_TikTok_v001.mp4",
+              "kind": "video",
+              "name": "05_Video_exports_ep-4-task-3_TikTok_v001.mp4"
+            }
+          ],
           "start_frame": null,
           "end_frame": null,
           "image_gen_mode": "text_image",
@@ -1310,23 +1663,36 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-4-task-4"
-        }
-      ]
-    },
-    {
-      "id": "ep-13",
-      "episode_no": 5,
-      "title": "第 5 集",
-      "tasks": [
+          "output_slug": "ep-4-task-4",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
         {
-          "lane_id": "ep-13-task-1",
+          "lane_id": "ep-12-task-5",
           "asset": "GUI_QUICK",
           "gen_mode": "reference",
-          "prompt": "",
+          "prompt": "0-2s，动态跟拍，少年在餐桌间冲刺，2-4s，特写脚部，他右脚踩到褐色汤汁鞋底打滑身体前倾，双手抓住餐桌边缘稳住没有摔倒。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
           "duration": 4,
           "ratio": "9:16",
-          "references": [],
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_171849_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_171849_media__1_.jpg",
+              "kind": "image",
+              "name": "media (1).jpg"
+            }
+          ],
           "start_frame": null,
           "end_frame": null,
           "image_gen_mode": "text_image",
@@ -1334,8 +1700,1148 @@
           "image_gen_model": "gemini-3-pro-image-preview",
           "image_gen_sources": [],
           "image_gen_generated": [],
-          "output_slug": "ep-5-task-1"
+          "output_slug": "ep-4-task-5",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-6",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，中景镜头，丧尸厨师跟在少年身后冲进餐桌区，2-4s，平视跟随，丧尸动作僵硬但速度不减持续向前追赶。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_174436_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_174436_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_174436_media__1_.jpg",
+              "kind": "image",
+              "name": "media (1).jpg"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-6",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-7",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-3s，全景镜头，少年跑出餐桌区，前方地面出现一大片褐色汤汁在灯光下泛着油光，覆盖食堂中央约5米×3米区域。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_181454_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_182724_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "在地上生成一滩褐色的汤汁",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [
+            {
+              "path": "05_Video/uploads/20260529_182747_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260529_182939_ep-12-task-7_gen_1_d49b3bd0.jpg",
+              "kind": "image",
+              "name": "20260529_182939_ep-12-task-7_gen_1_d49b3bd0.jpg"
+            }
+          ],
+          "output_slug": "ep-4-task-7",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-8",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "延续参考视频，0-2s，天花板俯拍，少年跑入镜头一脚踩入褐色汤汁边缘鞋底失去抓地力，2-5s，他整个人不受控制地向前快速滑行双手在空中挥舞，表情从惊恐渐渐变成意外地觉得有点好玩。低多边形3D渲染，人物形象严格参考参考素材，杜绝美化和修改",
+          "duration": 5,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_181822_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_182727_image.png",
+              "kind": "image",
+              "name": "image.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_183709_video__2_.mp4",
+              "kind": "video",
+              "name": "video (2).mp4"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-8",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-9",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，侧拍横移跟随，少年在褐色汤汁上身体后倾双脚朝前滑行，2-5s，他双手张开保持平衡轨迹呈弧线绕过前方一张餐桌。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 5,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_181919_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_181919_media__1_.jpg",
+              "kind": "image",
+              "name": "media (1).jpg"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-9",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-10",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，中景镜头，厨师丧尸追到地上的褐色汤汁边缘右脚踩入汤汁身体向左倾斜，2-4s，它双手在空中胡乱挥舞开始在汤汁上滑动，像是溜冰一样，表情空洞但动作滑稽。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_182019_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_184339_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-10",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-11",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-3s，少年在前方滑行丧尸在后方约4米处追着少年，两人都在褐色汤汁上漂移，3-6s，轨迹交错灯光在汤汁表面反射光斑，形成溜冰般的效果。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 6,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_182210_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_182210_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_183751_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-11",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-12",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "少年正对着镜头脚踩地上的汤汁快速滑行，厨师丧尸在少年的身后也同样在滑行追逐少年，他们两个像在滑冰一样在褐色的汤汁上滑行，0-2s，中景镜头，少年前方出现一张餐桌，2-4s，他迅速调整重心身体向左侧倾斜从桌角边缘擦过，成功避开障碍。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_185210_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185210_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185217_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-12",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-13",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，中景镜头，少年前方出现一把倒下的铁椅，2-4s，他双腿微张利用惯性从椅子两侧精准滑过鞋底几乎没有碰到椅子。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_185526_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185526_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185530_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-13",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-14",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，丧尸在汤汁上滑行并调整方向逐渐逼近少年，2-5s，距离缩短到约2米丧尸的手向前伸抓向少年。低多边形3D渲染，废弃灰石监狱食堂，冷色调，恐怖氛围，电影级光影。",
+          "duration": 5,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_185552_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185552_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185604_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-14",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-15",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "延续参考视频，少年踩着褐色的汤汁滑行，0-2s，中景镜头，少年前方出现一根承重柱，2-4s，他猛地向右转弯身体几乎与地面平行脚底在汤汁上划出弧线成功避开。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_185649_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185659_image.png",
+              "kind": "image",
+              "name": "image.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185723_ep-4-task-11_TikTok_v003.mp4",
+              "kind": "video",
+              "name": "ep-4-task-11_TikTok_v003.mp4"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-15",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-16",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，特写镜头，丧尸在滑行中无法转弯直接撞上承重柱，2-5s，它的脸贴在柱面上发出砰的闷响，然后身体缓缓滑落坐在地上。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 5,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_185806_image.png",
+              "kind": "image",
+              "name": "image.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185829_ep-4-task-11_TikTok_v003.mp4",
+              "kind": "video",
+              "name": "ep-4-task-11_TikTok_v003.mp4"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185834_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_185838_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-16",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-17",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，中景镜头，少年滑出汤汁区双脚踩到干燥地面停下，2-4s，他回头看向承重柱方向丧尸正坐在地上抬头表情空洞。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_190018_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_190018_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_190339_ep-4-task-15_TikTok_v001.mp4",
+              "kind": "video",
+              "name": "ep-4-task-15_TikTok_v001.mp4"
+            },
+            {
+              "path": "05_Video/uploads/20260529_190348_ep-4-task-16_TikTok_v001.mp4",
+              "kind": "video",
+              "name": "ep-4-task-16_TikTok_v001.mp4"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-17",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-18",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，面部特写镜头，少年嘴角微微上扬露出轻松得意的胜利笑容，2-4s，全景镜头，少年停下，撞晕的厨师丧尸坐在地上。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 6,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_190020_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_190020_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_190423_media__1_.jpg",
+              "kind": "image",
+              "name": "media (1).jpg"
+            },
+            {
+              "path": "05_Video/uploads/20260529_222803_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-18",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-19",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，全景镜头，少年转过身双脚踩着汤汁轻轻一蹬像溜冰一样向前滑行，3-5s，他姿态轻松流畅地滑向食堂尽头的后厨门背影越来越远。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 5,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_190021_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_190021_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_190502_media__1_.jpg",
+              "kind": "image",
+              "name": "media (1).jpg"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-19",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
+        },
+        {
+          "lane_id": "ep-12-task-20",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "0-2s，中景镜头，少年滑到后厨门前伸手拉开门，2-3s，他侧身闪入，门在身后缓缓关闭，3-4s，镜头切换食堂里只剩下坐在地上的丧尸。低多边形3D渲染，人物形象和场景严格参考参考素材，杜绝美化和修改",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260529_190022_厨师1.png",
+              "kind": "image",
+              "name": "厨师1.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_190022_跑酷小子.png",
+              "kind": "image",
+              "name": "跑酷小子.png"
+            },
+            {
+              "path": "05_Video/uploads/20260529_190503_media__1_.jpg",
+              "kind": "image",
+              "name": "media (1).jpg"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "",
+          "image_gen_model": "gemini-3-pro-image-preview",
+          "image_gen_sources": [],
+          "image_gen_generated": [],
+          "output_slug": "ep-4-task-20",
+          "last_export_path": "",
+          "clip": {
+            "enabled": true,
+            "trim_start": 0,
+            "trim_end": 0,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": []
+          }
         }
+      ],
+      "publish_profile": {
+        "targets": [
+          "douyin",
+          "youtube",
+          "tiktok"
+        ],
+        "default_language": "zh-CN",
+        "content": {
+          "title": "test",
+          "description": "desc",
+          "hashtags": [
+            "tag1",
+            "tag2"
+          ]
+        },
+        "platform_overrides": {},
+        "last_validation_result": {
+          "platforms": {
+            "douyin": {
+              "language": "zh-CN",
+              "content": {
+                "title": "test",
+                "description": "desc",
+                "hashtags": [
+                  "tag1",
+                  "tag2"
+                ],
+                "language": "zh-CN"
+              },
+              "issues": [
+                {
+                  "level": "pass",
+                  "code": "ok",
+                  "message": "规则检查通过",
+                  "suggestion": "可直接用于发布"
+                }
+              ]
+            },
+            "youtube": {
+              "language": "zh-CN",
+              "content": {
+                "title": "test",
+                "description": "desc",
+                "hashtags": [
+                  "tag1",
+                  "tag2"
+                ],
+                "language": "zh-CN"
+              },
+              "issues": [
+                {
+                  "level": "pass",
+                  "code": "ok",
+                  "message": "规则检查通过",
+                  "suggestion": "可直接用于发布"
+                }
+              ]
+            },
+            "tiktok": {
+              "language": "zh-CN",
+              "content": {
+                "title": "test",
+                "description": "desc",
+                "hashtags": [
+                  "tag1",
+                  "tag2"
+                ],
+                "language": "zh-CN"
+              },
+              "issues": [
+                {
+                  "level": "pass",
+                  "code": "ok",
+                  "message": "规则检查通过",
+                  "suggestion": "可直接用于发布"
+                }
+              ]
+            }
+          },
+          "summary": {
+            "pass": 3,
+            "warn": 0,
+            "block": 0
+          }
+        },
+        "updated_at": "2026-06-01T07:19:49.700Z"
+      },
+      "concat_video_path": "05_Video/exports/ep-4-concat_TikTok_v002.mp4",
+      "last_content_audit_result": {
+        "summary": "本集片段展示了少年在食堂遭遇厨师丧尸追逐，并意外利用地上的汤汁进行滑行逃脱的场景。剧情从紧张的追逐转变为带有喜剧色彩的滑行，这种反转非常适合欧美短视频平台的爆款逻辑。低多边形的美术风格与Minecraft等热门游戏相似，具有天然的受众亲和力。",
+        "score_retention": 9,
+        "score_comment": "开篇的悬念和中段的喜剧反转是极强的留存钩子。滑稽的追逐戏能有效提升完播率和分享欲。",
+        "information_density_diagnosis": "整体信息密度较高，动作和情绪变化丰富。但分镜任务1（0-4s）的广角全景摇镜，如果摇镜速度过慢，可能在开篇的黄金3秒内略显平淡，需要确保有足够的视觉信息或音效刺激。分镜任务11（6s）是目前最长的镜头，需要确保少年和丧尸的滑行轨迹、光影变化等细节足够丰富，避免视觉疲劳。",
+        "game_conversion_diagnosis": "这段剧情巧妙地展示了环境互动和角色应对危机的能力，尤其是将危险转化为趣味滑行的创意，非常具有游戏性。如果游戏中有类似的物理机制、环境利用或角色特殊移动能力，这段内容能有效激发玩家对游戏机制的好奇心。目前缺乏直接的游戏UI或技能提示，转化力仍有提升空间。",
+        "optimization_plans": [
+          "**优化开篇钩子与游戏联动：** 将分镜任务1的摇镜速度加快，或在0-2秒内加入一个快速的视觉焦点转移（例如，从少年特写快速拉到丧尸特写，再回到全景），并配以游戏特有的环境音效（如丧尸喝汤的独特音效或少年心跳声），瞬间抓住注意力。在少年开始滑行（分镜任务8）或丧尸开始滑行（分镜任务10）时，可以短暂闪现一个游戏内对应的“滑行技能”图标或“环境利用”的UI提示，并配以游戏内该技能的专属音效，强化游戏卖点。",
+          "**强化喜剧效果与社媒传播：** 在丧尸滑行（分镜任务10-12）时，可以考虑加入更夸张的肢体动作或面部表情（即使是空洞的眼神，也可以通过身体的滑稽姿态来反衬），并配以更具辨识度的卡通音效（如“Wacky Wobble”或“Boing”音效），进一步提升其作为短视频爆点的潜力。在少年成功避开障碍（分镜任务12）后，可以短暂加入一个类似游戏内“任务完成”或“躲避成功”的简短音效或视觉反馈，增加成就感和节奏感。"
+        ],
+        "risk_level": "low",
+        "risk_items": [],
+        "platform_notes": {
+          "youtube": "作为YouTube Shorts，这段内容节奏快、有反转、有喜剧元素，非常适合快速消费。建议在标题和描述中强调“Zombie Chase Gone Wrong”或“Unexpected Escape”等关键词，吸引点击。如果作为长视频的预告片，需要确保有更强的悬念结尾。",
+          "tiktok": "这段内容是TikTok的完美素材：前3秒有悬念，中间有高潮（滑行反转），视觉冲击力强，且带有幽默感。建议搭配当下流行的快节奏BGM，并利用TikTok的文本叠加功能，在关键时刻（如少年表情变化、丧尸滑行）添加趣味性文案，如“When the apocalypse hits but you find a new hobby”或“Zombie chef on ice!”。",
+          "douyin": "与TikTok类似，节奏和喜剧元素是关键。可以考虑加入一些国内流行的梗或音效，但需注意与欧美宣发内容的区分，避免文化冲突。",
+          "x": "在X（原Twitter）上发布时，可以剪辑成更短的精华片段，突出“滑行”的喜剧高潮，并配以简洁有力的文案，如“Who knew zombie apocalypse could be this fun? #GameDev #IndieGame #ZombieSurvival”"
+        },
+        "raw_text": "{\n  \"summary\": \"本集片段展示了少年在食堂遭遇厨师丧尸追逐，并意外利用地上的汤汁进行滑行逃脱的场景。剧情从紧张的追逐转变为带有喜剧色彩的滑行，这种反转非常适合欧美短视频平台的爆款逻辑。低多边形的美术风格与Minecraft等热门游戏相似，具有天然的受众亲和力。\",\n  \"score_retention\": 9,\n  \"score_comment\": \"开篇的悬念和中段的喜剧反转是极强的留存钩子。滑稽的追逐戏能有效提升完播率和分享欲。\",\n  \"information_density_diagnosis\": \"整体信息密度较高，动作和情绪变化丰富。但分镜任务1（0-4s）的广角全景摇镜，如果摇镜速度过慢，可能在开篇的黄金3秒内略显平淡，需要确保有足够的视觉信息或音效刺激。分镜任务11（6s）是目前最长的镜头，需要确保少年和丧尸的滑行轨迹、光影变化等细节足够丰富，避免视觉疲劳。\",\n  \"game_conversion_diagnosis\": \"这段剧情巧妙地展示了环境互动和角色应对危机的能力，尤其是将危险转化为趣味滑行的创意，非常具有游戏性。如果游戏中有类似的物理机制、环境利用或角色特殊移动能力，这段内容能有效激发玩家对游戏机制的好奇心。目前缺乏直接的游戏UI或技能提示，转化力仍有提升空间。\",\n  \"optimization_plans\": [\n    \"**优化开篇钩子与游戏联动：** 将分镜任务1的摇镜速度加快，或在0-2秒内加入一个快速的视觉焦点转移（例如，从少年特写快速拉到丧尸特写，再回到全景），并配以游戏特有的环境音效（如丧尸喝汤的独特音效或少年心跳声），瞬间抓住注意力。在少年开始滑行（分镜任务8）或丧尸开始滑行（分镜任务10）时，可以短暂闪现一个游戏内对应的“滑行技能”图标或“环境利用”的UI提示，并配以游戏内该技能的专属音效，强化游戏卖点。\",\n    \"**强化喜剧效果与社媒传播：** 在丧尸滑行（分镜任务10-12）时，可以考虑加入更夸张的肢体动作或面部表情（即使是空洞的眼神，也可以通过身体的滑稽姿态来反衬），并配以更具辨识度的卡通音效（如“Wacky Wobble”或“Boing”音效），进一步提升其作为短视频爆点的潜力。在少年成功避开障碍（分镜任务12）后，可以短暂加入一个类似游戏内“任务完成”或“躲避成功”的简短音效或视觉反馈，增加成就感和节奏感。\"\n  ],\n  \"risk_level\": \"low\",\n  \"risk_items\": [],\n  \"platform_notes\": {\n    \"youtube\": \"作为YouTube Shorts，这段内容节奏快、有反转、有喜剧元素，非常适合快速消费。建议在标题和描述中强调“Zombie Chase Gone Wrong”或“Unexpected Escape”等关键词，吸引点击。如果作为长视频的预告片，需要确保有更强的悬念结尾。\",\n    \"tiktok\": \"这段内容是TikTok的完美素材：前3秒有悬念，中间有高潮（滑行反转），视觉冲击力强，且带有幽默感。建议搭配当下流行的快节奏BGM，并利用TikTok的文本叠加功能，在关键时刻（如少年表情变化、丧尸滑行）添加趣味性文案，如“When the apocalypse hits but you find a new hobby”或“Zombie chef on ice!”。\",\n    \"douyin\": \"与TikTok类似，节奏和喜剧元素是关键。可以考虑加入一些国内流行的梗或音效，但需注意与欧美宣发内容的区分，避免文化冲突。\",\n    \"x\": \"在X（原Twitter）上发布时，可以剪辑成更短的精华片段，突出“滑行”的喜剧高潮，并配以简洁有力的文案，如“Who knew zombie apocalypse could be this fun? #GameDev #IndieGame #ZombieSurvival”\"\n  }\n}",
+        "video_path": "05_Video/exports/ep-4-concat_TikTok_v002.mp4",
+        "episode_id": "ep-12",
+        "model": "gemini-2.5-flash",
+        "audited_at": "2026-06-02T17:27:34",
+        "supervisor_prompt_source": "游戏宣发漫剧_AI监制设定词.md"
+      },
+      "clip_video_path": "05_Video/exports/ep-4-concat-clip_TikTok_v009.mp4",
+      "clip_analysis": {
+        "clip_configs": [
+          {
+            "task_index": 0,
+            "trim_start": 0.2,
+            "trim_end": 0.2,
+            "fade_in": 0.3,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "食堂惊魂夜",
+                "fontsize": 60,
+                "xpos": 50,
+                "ypos": 15
+              },
+              {
+                "text": "悄悄探头...",
+                "fontsize": 36,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 1,
+            "trim_start": 0.1,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "被发现了？",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 2,
+            "trim_start": 0.1,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "厨师丧尸登场！",
+                "fontsize": 45,
+                "xpos": 50,
+                "ypos": 15
+              },
+              {
+                "text": "骨头...掉了？",
+                "fontsize": 36,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 3,
+            "trim_start": 0.1,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "跑！",
+                "fontsize": 80,
+                "xpos": 50,
+                "ypos": 50
+              }
+            ]
+          },
+          {
+            "task_index": 4,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "小心脚下！",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 5,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "僵硬的追击",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 6,
+            "trim_start": 0,
+            "trim_end": 0.5,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "前方高能！",
+                "fontsize": 50,
+                "xpos": 50,
+                "ypos": 15
+              },
+              {
+                "text": "巨型汤汁池",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 7,
+            "trim_start": 0,
+            "trim_end": 0.2,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "意外的惊喜？",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 8,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "汤汁滑板高手",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 9,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "丧尸也溜冰？",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 10,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "汤汁上的追逐战",
+                "fontsize": 45,
+                "xpos": 50,
+                "ypos": 15
+              }
+            ]
+          },
+          {
+            "task_index": 11,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "灵活走位",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 12,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "精准闪避",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 13,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "危险！",
+                "fontsize": 80,
+                "xpos": 50,
+                "ypos": 50
+              }
+            ]
+          },
+          {
+            "task_index": 14,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "极限操作！",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 15,
+            "trim_start": 0,
+            "trim_end": 0.2,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "砰！",
+                "fontsize": 80,
+                "xpos": 50,
+                "ypos": 50
+              },
+              {
+                "text": "丧尸：卒",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 16,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "安全着陆",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 17,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "胜利的微笑！",
+                "fontsize": 50,
+                "xpos": 50,
+                "ypos": 50
+              }
+            ]
+          },
+          {
+            "task_index": 18,
+            "trim_start": 0,
+            "trim_end": 0.1,
+            "fade_in": 0,
+            "fade_out": 0,
+            "text_overlays": [
+              {
+                "text": "新技能get√",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          },
+          {
+            "task_index": 19,
+            "trim_start": 0,
+            "trim_end": 0.3,
+            "fade_in": 0,
+            "fade_out": 0.5,
+            "text_overlays": [
+              {
+                "text": "后厨探险，待续？",
+                "fontsize": 40,
+                "xpos": 50,
+                "ypos": 85
+              }
+            ]
+          }
+        ],
+        "audit": {
+          "summary": "本短视频以低多边形3D渲染风格呈现了一段充满创意和幽默的僵尸追逐故事。少年在食堂中遭遇厨师丧尸，在逃跑过程中意外发现地上的汤汁可以用来“溜冰”，并凭借此新技能成功摆脱追捕，最终安全离开。视频节奏紧凑，情节反转有趣，将恐怖元素与喜剧效果巧妙结合，展现了主角的机智和乐观精神。",
+          "score_retention": 8,
+          "score_comment": "视频的创意点（汤汁溜冰）非常新颖，能够迅速抓住观众眼球。主角从惊恐到享受的表情变化，以及丧尸滑稽的追逐，都提供了丰富的笑点和情绪价值。整体叙事流畅，高潮迭起，预计能有效提升用户留存率。",
+          "information_density_diagnosis": "信息密度适中。每个分镜都清晰地推进了故事情节，没有冗余画面。通过人物动作、表情和环境变化，高效传达了剧情发展和情绪。特别是汤汁池的出现和利用，信息传达清晰且富有想象力。",
+          "game_conversion_diagnosis": "该视频具有极高的游戏宣发转化潜力。其低多边形3D风格本身就与游戏高度契合。核心的“汤汁溜冰”机制可以作为游戏的核心玩法，设计成跑酷、解谜或闯关类游戏。少年利用环境（餐桌、椅子、柱子）躲避障碍的场景，可直接转化为游戏关卡设计。丧尸的追逐和滑稽表现也为游戏增添了趣味性。视频结尾的开放式暗示（后厨探险，待续？）也为游戏续作或DLC留下了空间。",
+          "optimization_plans": [
+            "在关键转折点或幽默瞬间，可以考虑添加简短、有冲击力的音效或背景音乐切换，进一步增强视频的感染力。",
+            "在视频结尾处，可考虑加入游戏Logo或简短的Call to Action，引导观众了解更多游戏信息或下载体验。",
+            "确保角色表情和动作的细节表现力，尤其是少年从恐惧到享受，以及丧尸的呆滞与滑稽，这些是提升情感共鸣和喜剧效果的关键。"
+          ],
+          "risk_level": "low",
+          "risk_items": [
+            {
+              "category": "内容敏感性",
+              "severity": "low",
+              "evidence": "视频中出现“丧尸”和“褐色汤汁”（可能联想到不洁或血腥），尽管是低多边形卡通风格，仍需注意部分平台对恐怖或不雅内容的审核标准。",
+              "suggestion": "确保丧尸形象保持卡通化、非写实，避免过于血腥或令人不适的细节。褐色汤汁的视觉呈现应更偏向于食物残渣而非血迹，以降低潜在风险。"
+            }
+          ],
+          "platform_notes": {
+            "youtube": "此视频非常适合作为YouTube Shorts发布，其快节奏和视觉趣味性能够吸引大量短视频用户。可考虑在标题中加入'游戏'、'搞笑'、'僵尸'等关键词，增加搜索曝光。结尾可引导至完整游戏预告或下载链接。",
+            "tiktok": "视频的幽默感和创意玩法与TikTok平台的流行趋势高度契合。利用热门音效或挑战，结合视频内容进行发布，有望获得高互动和传播。主角的'新技能get'和丧尸的'滑稽摔倒'都是很好的爆点。"
+          }
+        }
+      },
+      "clip_segment_order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
       ]
     }
   ]

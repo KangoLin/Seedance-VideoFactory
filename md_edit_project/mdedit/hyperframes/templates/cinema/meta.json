@@ -1,0 +1,15 @@
+{
+  "name": "cinema",
+  "label": "电影字幕风格",
+  "description": "底部白色字幕、优雅淡入淡出",
+  "style": {
+    "font_size": 36,
+    "color": "#FFFFFF",
+    "stroke": "#333333",
+    "position_y": "85%",
+    "font_family": "'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif",
+    "animation_type": "fade",
+    "show_title": false,
+    "extra_css": ".subtitle{font-weight:400;letter-spacing:1px;line-height:1.4;}"
+  }
+}

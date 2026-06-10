@@ -1,0 +1,871 @@
+<!-- md-edit v2026-06-05-catch-fixed -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>md-edit Web UI</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #111; color: #e0e0e0; min-height: 100vh; }
+.container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+h1 { font-size: 22px; margin-bottom: 24px; color: #fff; letter-spacing: 0.5px; }
+h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 10px; }
+.layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.panel { background: #1a1a1a; border-radius: 10px; padding: 18px; border: 1px solid #2a2a2a; }
+.panel.full { grid-column: 1 / -1; }
+label { font-size: 13px; color: #aaa; display: block; margin-bottom: 4px; }
+select, input { width: 100%; background: #222; color: #e0e0e0; border: 1px solid #333; border-radius: 6px; padding: 8px 10px; font-size: 13px; font-family: inherit; }
+select:focus, input:focus { outline: none; border-color: #555; }
+.clip-list { max-height: 260px; overflow-y: auto; border: 1px solid #2a2a2a; border-radius: 6px; padding: 4px; background: #151515; }
+.clip-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.clip-item:hover { background: #222; }
+.clip-item input[type="radio"] { width: auto; margin: 0; flex: 0 0 auto; }
+.clip-item .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e0e0e0; }
+.clip-item .size { color: #666; font-size: 11px; white-space: nowrap; flex: 0 0 auto; }
+.search-box { width: 100%; background: #222; color: #e0e0e0; border: 1px solid #333; border-radius: 6px; padding: 7px 10px; font-size: 13px; margin-bottom: 8px; }
+.search-box:focus { outline: none; border-color: #555; }
+.btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-primary:disabled { background: #334; color: #666; cursor: not-allowed; }
+.btn-render { background: #7c3aed; color: #fff; }
+.btn-render:hover { background: #6d28d9; }
+.btn-render:disabled { background: #334; color: #666; cursor: not-allowed; }
+.btn-sm { padding: 5px 12px; font-size: 12px; background: #2a2a2a; color: #bbb; border-radius: 4px; border: none; cursor: pointer; }
+.btn-sm:hover { background: #333; color: #fff; }
+.btn-sm.download { background: #1a3a5c; color: #4a9eff; }
+.btn-sm.download:hover { background: #1a4a7c; }
+.actions { display: flex; gap: 12px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+.progress { margin-top: 16px; max-height: 300px; overflow-y: auto; }
+.progress-entry { padding: 4px 0; font-size: 13px; color: #999; font-family: 'Consolas', 'Courier New', monospace; }
+.progress-entry.current { color: #4ade80; }
+.progress-entry.error { color: #f87171; }
+.progress-entry.done { color: #666; }
+.output-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; border: 1px solid #2a2a2a; margin-bottom: 4px; }
+.output-item:hover { background: #222; border-color: #444; }
+.output-item .name { flex: 1; }
+.output-item .size { color: #666; font-size: 11px; }
+.empty { color: #555; font-size: 13px; padding: 20px; text-align: center; }
+.form-row { display: flex; gap: 12px; }
+.form-row > * { flex: 1; }
+.score-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+.score-high { background: #14532d; color: #4ade80; }
+.score-mid { background: #3b2f0a; color: #facc15; }
+.score-low { background: #3b1212; color: #f87171; }
+.clip-card { background: #151515; border: 1px solid #2a2a2a; border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+.clip-card video { width: 100%; display: block; background: #000; max-height: 200px; }
+.clip-card .info { padding: 12px; }
+.clip-card .info .title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.clip-card .info .desc { font-size: 13px; color: #999; margin-bottom: 8px; }
+.clip-card .info .meta { display: flex; gap: 16px; font-size: 12px; color: #666; flex-wrap: wrap; }
+.clip-card .info .meta span { display: flex; align-items: center; gap: 4px; }
+.clip-card .info .actions { margin-top: 8px; }
+.player-panel { margin-top: 16px; }
+.player-panel video { width: 100%; border-radius: 8px; background: #000; }
+.download-link { display: inline-flex; align-items: center; gap: 6px; color: #4a9eff; text-decoration: none; font-size: 14px; }
+.download-link:hover { text-decoration: underline; }
+.supervisor-section { margin-top: 10px; padding: 10px; background: #1a1a2e; border-radius: 6px; border: 1px solid #2a2a4a; }
+.supervisor-header { font-size: 12px; color: #a78bfa; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.suggestion-group { margin-bottom: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.suggestion-group .label { font-size: 11px; color: #888; min-width: 40px; flex: 0 0 auto; }
+.suggestion-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #2a2a4a; border-radius: 4px; font-size: 11px; color: #c4b5fd; cursor: pointer; user-select: none; }
+.suggestion-tag:hover { background: #3a3a5a; }
+.suggestion-tag input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
+.suggestion-tag.disabled { opacity: 0.4; text-decoration: line-through; }
+.finecut-progress { margin-top: 10px; padding: 8px; background: #1a1a2e; border-radius: 6px; display: none; }
+.finecut-progress.active { display: block; }
+.gemini-analysis-text { width:100%; min-height:150px; background:#0a0a1a; color:#c4b5fd; border:1px solid #2a2a4a; border-radius:6px; padding:12px; font-size:12px; font-family:'Consolas','Courier New',monospace; line-height:1.5; resize:vertical; white-space:pre-wrap; margin-top:8px; }
+.clip-select-check { width:auto; margin:0 6px 0 0; cursor:pointer; transform:scale(1.2); }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>md-edit · AutoClip 切片工具</h1>
+
+  <div class="layout">
+    <div class="panel" id="clipPanel">
+      <h2>拼接视频</h2>
+      <input class="search-box" id="search" placeholder="搜索..." oninput="loadClips(this.value)">
+      <div class="clip-list" id="clipList"></div>
+      <div id="clipPreview" style="display:none;margin-top:10px">
+        <video id="clipPlayer" controls style="width:100%;border-radius:6px;background:#000;max-height:240px"></video>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>配置</h2>
+      <div class="form-row">
+        <div>
+          <label for="provider">LLM 提供商</label>
+          <select id="provider">
+            <option value="gemini">Gemini</option>
+            <option value="deepseek">DeepSeek（仅文本）</option>
+          </select>
+        </div>
+        <div>
+          <label for="minScore">最低评分（0-100）</label>
+          <input type="number" id="minScore" value="60" min="0" max="100">
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label for="maxClips">最多切片数</label>
+        <input type="number" id="maxClips" value="10" min="1" max="50">
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+        <label><input type="checkbox" id="enhanceCheck"> 精修（字幕+特效+调色+转场）</label>
+        <select id="templateSelect" style="flex:1;background:#222;color:#e0e0e0;border:1px solid #333;border-radius:6px;padding:7px 10px;font-size:13px;">
+          <option value="douyin">🎯 抖音风格</option>
+          <option value="cinema">🎬 电影字幕风格</option>
+          <option value="kinetic">🔥 动感文字风格</option>
+        </select>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+        <label><input type="checkbox" id="supervisorCheck" checked> AI 监制（Gemini 建议特效/字幕/调色/转场）</label>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="runBtn" onclick="runPipeline()">🚀 开始分析</button>
+        <button class="btn btn-render" id="geminiAnalyzeBtn" onclick="analyzeClips()" style="display:none">🤖 Gemini3 分析切片</button>
+        <button class="btn btn-render" id="fineCutBtn" onclick="startRefineCut()" style="display:none">✂ 精简精剪</button>
+        <button class="btn btn-render" id="smartCutBtn" onclick="startSmartCut()" style="display:none;background:#059669">⚡ 智能精剪</button>
+        <span id="status" style="font-size:13px;color:#888"></span>
+      </div>
+    </div>
+
+    <div class="panel full" id="progressPanel" style="display:none">
+      <h2>进度</h2>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="panel full" id="resultPanel" style="display:none">
+      <h2>高光片段</h2>
+      <div id="clipsContainer"></div>
+      <div class="player-panel" id="playerPanel" style="display:none">
+        <video id="mainPlayer" controls></video>
+      </div>
+      <div id="rawAnalysisArea" style="display:none;margin-top:16px">
+        <h2>Gemini 原始分析 <span style="font-size:11px;color:#888;font-weight:400">（结构数据，下一步点🤖 Gemini3 分析"获取详细文本建议）</span></h2>
+        <textarea id="rawAnalysisText" readonly style="width:100%;min-height:200px;background:#0a0a1a;color:#4ade80;border:1px solid #2a2a4a;border-radius:6px;padding:14px;font-size:12px;font-family:'Consolas','Courier New',monospace;line-height:1.5;resize:vertical;white-space:pre;margin-top:8px;"></textarea>
+      </div>
+    </div>
+
+    <div class="panel full" id="geminiAnalysisPanel" style="display:none">
+      <h2>Gemini3 切片分析</h2>
+      <div id="geminiAnalysisProgress" style="margin-bottom:10px;font-size:13px;color:#a78bfa"></div>
+      <div id="geminiAnalysisContent"></div>
+    </div>
+
+    <div class="panel full">
+      <h2>历史输出</h2>
+      <div id="outputList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentClips = [];
+let currentWorkDir = '';
+let currentSuggestions = {};
+
+async function loadClips(q) {
+  const url = q ? `/api/clips?q=${encodeURIComponent(q)}` : '/api/clips';
+  const r = await fetch(url);
+  const data = await r.json();
+  currentClips = data.clips;
+  renderClips(data.clips);
+}
+
+function renderClips(clips) {
+  const el = document.getElementById('clipList');
+  if (!clips.length) {
+    el.innerHTML = '<div class="empty">没有找到拼接视频</div>';
+    return;
+  }
+  el.innerHTML = clips.map(c => `
+    <label class="clip-item" onclick="previewClipSrc('${c.path}','${(c.display || c.name).replace(/'/g,"\\'")}')">
+      <input type="radio" name="video" value="${c.path}" onclick="event.stopPropagation()">
+      <span class="name">${c.display || c.name}</span>
+      <span class="size">${(c.size / 1024 / 1024).toFixed(1)}MB</span>
+    </label>
+  `).join('');
+}
+
+async function runPipeline() {
+  const selected = document.querySelector('input[name="video"]:checked');
+  if (!selected) { alert('请选择一个拼接视频'); return; }
+
+  const btn = document.getElementById('runBtn');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  status.textContent = '分析..';
+  document.getElementById('geminiAnalyzeBtn').style.display = 'none';
+  document.getElementById('fineCutBtn').style.display = 'none';
+  document.getElementById('smartCutBtn').style.display = 'none';
+  document.getElementById('geminiAnalysisPanel').style.display = 'none';
+  document.getElementById('rawAnalysisArea').style.display = 'none';
+
+  document.getElementById('resultPanel').style.display = 'none';
+  document.getElementById('clipsContainer').innerHTML = '';
+  const progressPanel = document.getElementById('progressPanel');
+  progressPanel.style.display = 'block';
+  const progressEl = document.getElementById('progress');
+  progressEl.innerHTML = '';
+
+  const enhance = document.getElementById('enhanceCheck').checked;
+  const supervisor = document.getElementById('supervisorCheck').checked;
+  const body = {
+    input: [selected.value],
+    provider: document.getElementById('provider').value,
+    min_score: parseInt(document.getElementById('minScore').value) || 60,
+    max_clips: parseInt(document.getElementById('maxClips').value) || 10,
+    enhance: enhance,
+    enhance_template: enhance ? document.getElementById('templateSelect').value : null,
+    supervisor: supervisor,
+  };
+
+  const resp = await fetch('/api/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) { continue; }
+      var payload = line.slice(6);
+      var msg = payload;
+      var extraClass = '';
+
+      try {
+        var parsed = JSON.parse(payload);
+        if (parsed.msg) {
+          msg = parsed.msg;
+        } else if (parsed.clips_ready) {
+          msg = '分析完成';
+          extraClass = 'done';
+          currentWorkDir = parsed.work_dir || '';
+          showClips(parsed);
+          document.getElementById('resultPanel').style.display = 'block';
+          document.getElementById('geminiAnalyzeBtn').style.display = 'inline-block';
+          document.getElementById('resultPanel').scrollIntoView({ behavior: 'smooth' });
+          setTimeout(function() {
+            var ra = document.getElementById('rawAnalysisArea');
+            if (ra && ra.style.display !== 'none') { ra.scrollIntoView({ behavior: 'smooth' }); }
+          }, 300);
+        }
+      } catch (e) {}
+
+      if (msg === 'DONE') continue;
+      if (msg.startsWith('ERROR:')) extraClass = 'error';
+
+      const div = document.createElement('div');
+      div.className = `progress-entry ${extraClass}`;
+      div.textContent = `> ${msg}`;
+      progressEl.appendChild(div);
+      progressEl.scrollTop = progressEl.scrollHeight;
+    }
+  }
+
+  btn.disabled = false;
+  if (status.textContent !== '失败') status.textContent = '';
+}
+
+function fxLabel(type) {
+  const map = {
+    zoom_in: '缩放进入', zoom_out: '缩放退出', slow_motion: '慢动作',
+    speed_ramp: '变速', shake: '抖动', vignette: '暗角', glow: '发光'
+  };
+  return map[type] || type;
+}
+
+function emphasisLabel(effect) {
+  const map = {
+    slow_motion: '慢动作', zoom_in: '缩放', freeze_frame: '定格',
+    flash: '闪白', shake: '抖动'
+  };
+  return map[effect] || effect;
+}
+
+function colorGradeLabel(cg) {
+  if (!cg) return '无';
+  const temp = {warm: '暖色', cool: '冷色', neutral: '中性'};
+  const t = temp[cg.temperature] || '中性';
+  const parts = [t];
+  if (cg.brightness !== 1.0) parts.push(`B:${cg.brightness}`);
+  if (cg.contrast !== 1.0) parts.push(`C:${cg.contrast}`);
+  if (cg.saturation !== 1.0) parts.push(`S:${cg.saturation}`);
+  return parts.join(' ');
+}
+
+function showClips(data) {
+  const el = document.getElementById('clipsContainer');
+  const clips = data.clips || [];
+  const sugMap = data.supervisor_suggestions || {};
+
+  if (data.raw_analysis) {
+    const area = document.getElementById('rawAnalysisArea');
+    area.style.display = 'block';
+    try {
+      // Pretty-print JSON for readability
+      const pretty = JSON.stringify(JSON.parse(data.raw_analysis), null, 2);
+      document.getElementById('rawAnalysisText').value = pretty;
+    } catch (e) {
+      document.getElementById('rawAnalysisText').value = data.raw_analysis;
+    }
+  }
+
+  if (!clips.length) {
+    el.innerHTML = '<div class="empty">未找到符合条件的高光片段</div>';
+    return;
+  }
+
+  currentSuggestions = {};
+  clips.forEach(c => {
+    const cid = String(c.id);
+    const raw = sugMap[cid] || c.supervisor_suggestions || {};
+    // Convert flat schema to nested for frontend
+    const sug = {
+      effects: raw.effects || [],
+      transitions: {
+        in: { type: raw.transitions?.in_type || 'cut', duration_sec: raw.transitions?.in_dur || 0.5 },
+        out: { type: raw.transitions?.out_type || 'cut', duration_sec: raw.transitions?.out_dur || 0.5 },
+      },
+      subtitle_style: {
+        text: raw.subtitle_text || '',
+        position: raw.subtitle_position || 'bottom',
+        font_size: raw.subtitle_font_size || 36,
+        animation: raw.subtitle_animation || 'none',
+      },
+      color_grade: {
+        temperature: raw.color_temperature || 'neutral',
+        brightness: raw.color_brightness || 1.0,
+        contrast: raw.color_contrast || 1.0,
+        saturation: raw.color_saturation || 1.0,
+      },
+      emphasis_moments: raw.emphasis || [],
+    };
+    currentSuggestions[cid] = JSON.parse(JSON.stringify(sug));
+  });
+
+  el.innerHTML = clips.map(c => {
+    const scoreClass = c.score >= 80 ? 'score-high' : c.score >= 60 ? 'score-mid' : 'score-low';
+    const videoSrc = c.enhanced_path ? `/api/file/${c.enhanced_path}` : `/api/file/${c.video_path}`;
+    const badge = c.enhanced_path ? '<span style="color:#4ade80;font-size:11px">✨ 已精修</span>' : '';
+    const cid = String(c.id);
+    const sug = currentSuggestions[cid] || {};
+
+    let supervisorHtml = '';
+    if (sug.effects || sug.subtitle_style || sug.color_grade || sug.transitions) {
+      supervisorHtml = '<div class="supervisor-section">';
+      supervisorHtml += '<div class="supervisor-header">AI 监制建议</div>';
+
+      if (sug.effects && sug.effects.length) {
+        supervisorHtml += '<div class="suggestion-group"><span class="label">特效:</span>';
+        sug.effects.forEach((fx, i) => {
+          supervisorHtml += `<label class="suggestion-tag" id="tag-fx-${cid}-${i}"><input type="checkbox" checked onchange="toggleSuggestion(${cid},'effects',${i},this.checked)">${fxLabel(fx.type)} (${fx.start_sec.toFixed(1)}s-${fx.end_sec.toFixed(1)}s)</label>`;
+        });
+        supervisorHtml += '</div>';
+      }
+
+      if (sug.emphasis_moments && sug.emphasis_moments.length) {
+        supervisorHtml += '<div class="suggestion-group"><span class="label">强调:</span>';
+        sug.emphasis_moments.forEach((m, i) => {
+          supervisorHtml += `<label class="suggestion-tag" id="tag-em-${cid}-${i}"><input type="checkbox" checked onchange="toggleSuggestion(${cid},'emphasis',${i},this.checked)">${emphasisLabel(m.effect)} @${m.time_sec.toFixed(1)}s</label>`;
+        });
+        supervisorHtml += '</div>';
+      }
+
+      if (sug.subtitle_style && sug.subtitle_style.text) {
+        const st = sug.subtitle_style;
+        supervisorHtml += `<div class="suggestion-group"><span class="label">字幕:</span><label class="suggestion-tag" id="tag-sub-${cid}"><input type="checkbox" checked onchange="toggleSuggestion(${cid},'subtitle',null,this.checked)">"${st.text}" <span style="color:#888;font-size:10px">${st.animation || 'none'}</span></label></div>`;
+      }
+
+      if (sug.color_grade && (sug.color_grade.temperature !== 'neutral' || sug.color_grade.brightness !== 1.0)) {
+        supervisorHtml += `<div class="suggestion-group"><span class="label">调色:</span><label class="suggestion-tag" id="tag-cg-${cid}"><input type="checkbox" checked onchange="toggleSuggestion(${cid},'color_grade',null,this.checked)">${colorGradeLabel(sug.color_grade)}</label></div>`;
+      }
+
+      if (sug.transitions) {
+        const tin = (sug.transitions.in || {}).type || 'cut';
+        const tout = (sug.transitions.out || {}).type || 'cut';
+        if (tin !== 'cut' || tout !== 'cut') {
+          supervisorHtml += `<div class="suggestion-group"><span class="label">转场:</span><label class="suggestion-tag" id="tag-tin-${cid}"><input type="checkbox" checked onchange="toggleSuggestion(${cid},'transitions','in',this.checked)">🔼 ${tin}</label><label class="suggestion-tag" id="tag-tout-${cid}"><input type="checkbox" checked onchange="toggleSuggestion(${cid},'transitions','out',this.checked)">🔽 ${tout}</label></div>`;
+        }
+      }
+
+      supervisorHtml += '</div>';
+    }
+
+    return `<div class="clip-card">
+      <div class="info">
+        <div class="title"><input type="checkbox" class="clip-select-check" id="clip-chk-${c.id}" checked onchange="updateRefineBtn()"> #${c.id} ${c.title} ${badge}</div>
+        <div class="desc">${c.description}</div>
+        <div class="meta">
+          <span>?${c.start_sec}s ?${c.end_sec}s (${c.duration}s)</span>
+          <span><span class="score-badge ${scoreClass}">${c.score}</span></span>
+          <span style="color:#888">${c.reason}</span>
+        </div>
+        ${supervisorHtml}
+        <div class="gemini-analysis-area" id="gemini-area-${c.id}" style="display:none">
+          <div style="font-size:11px;color:#a78bfa;margin-bottom:4px">Gemini3 分析:</div>
+          <textarea class="gemini-analysis-text" id="gemini-text-${c.id}" readonly></textarea>
+        </div>
+        <div class="actions">
+          <button class="btn-sm" onclick="previewClip('${videoSrc}')">?播放</button>
+          <a class="btn-sm download" href="${videoSrc}" download="${c.title}.mp4">?下载</a>
+          <button class="btn-sm gemini-analyze-btn" id="gemini-btn-${c.id}" onclick="analyzeSingleClip(${c.id})" style="background:#7c3aed;color:#fff;border:none">🤖 Gemini 分析</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSuggestion(clipId, category, index, checked) {
+  const cid = String(clipId);
+  if (!currentSuggestions[cid]) return;
+  const sug = currentSuggestions[cid];
+
+  if (category === 'effects' && sug.effects && sug.effects[index]) {
+    sug.effects[index]._disabled = !checked;
+    const tag = document.getElementById(`tag-fx-${cid}-${index}`);
+    if (tag) tag.classList.toggle('disabled', !checked);
+  } else if (category === 'emphasis' && sug.emphasis_moments && sug.emphasis_moments[index]) {
+    sug.emphasis_moments[index]._disabled = !checked;
+    const tag = document.getElementById(`tag-em-${cid}-${index}`);
+    if (tag) tag.classList.toggle('disabled', !checked);
+  } else if (category === 'subtitle') {
+    sug.subtitle_style._disabled = !checked;
+    const tag = document.getElementById(`tag-sub-${cid}`);
+    if (tag) tag.classList.toggle('disabled', !checked);
+  } else if (category === 'color_grade') {
+    sug.color_grade._disabled = !checked;
+    const tag = document.getElementById(`tag-cg-${cid}`);
+    if (tag) tag.classList.toggle('disabled', !checked);
+  } else if (category === 'transitions') {
+    if (!sug.transitions) return;
+    if (index === 'in' && sug.transitions.in) {
+      sug.transitions.in._disabled = !checked;
+      const tag = document.getElementById(`tag-tin-${cid}`);
+      if (tag) tag.classList.toggle('disabled', !checked);
+    } else if (index === 'out' && sug.transitions.out) {
+      sug.transitions.out._disabled = !checked;
+      const tag = document.getElementById(`tag-tout-${cid}`);
+      if (tag) tag.classList.toggle('disabled', !checked);
+    }
+  }
+}
+
+function getAcceptedSuggestions() {
+  const accepted = {};
+  for (const [cid, sug] of Object.entries(currentSuggestions)) {
+    const clean = {};
+    if (sug.effects) {
+      clean.effects = sug.effects.filter(fx => !fx._disabled);
+    }
+    if (sug.emphasis_moments) {
+      clean.emphasis_moments = sug.emphasis_moments.filter(m => !m._disabled);
+    }
+    if (sug.subtitle_style && !sug.subtitle_style._disabled) {
+      clean.subtitle_style = sug.subtitle_style;
+    }
+    if (sug.color_grade && !sug.color_grade._disabled) {
+      clean.color_grade = sug.color_grade;
+    }
+    if (sug.transitions) {
+      clean.transitions = {};
+      if (sug.transitions.in && !sug.transitions.in._disabled) {
+        clean.transitions.in = sug.transitions.in;
+      }
+      if (sug.transitions.out && !sug.transitions.out._disabled) {
+        clean.transitions.out = sug.transitions.out;
+      }
+    }
+    accepted[cid] = clean;
+  }
+  return accepted;
+}
+
+function updateRefineBtn() {
+  const checked = document.querySelectorAll('.clip-select-check:checked').length;
+  const btn = document.getElementById('fineCutBtn');
+  btn.textContent = checked > 0 ? `✂ 精简精剪 (${checked}?` : '✂ 精简精剪';
+  btn.style.display = document.getElementById('geminiAnalyzeBtn').style.display === 'none' ? 'none' : 'inline-block';
+}
+
+function getSelectedClipIds() {
+  const ids = [];
+  document.querySelectorAll('.clip-select-check:checked').forEach(cb => {
+    ids.push(parseInt(cb.id.replace('clip-chk-', '')));
+  });
+  return ids;
+}
+
+async function analyzeSingleClip(clipId) {
+  if (!currentWorkDir) { alert('请先运行分析'); return; }
+
+  const btn = document.getElementById(`gemini-btn-${clipId}`);
+  const area = document.getElementById(`gemini-area-${clipId}`);
+  const text = document.getElementById(`gemini-text-${clipId}`);
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ 分析中..'; }
+  if (area) area.style.display = 'block';
+  if (text) text.value = '正在调用 Gemini 分析本片段...';
+
+  const resp = await fetch(`/api/analyze_clip/${clipId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ work_dir: currentWorkDir }),
+  });
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const payload = line.slice(6);
+      if (payload === 'DONE') continue;
+
+      try {
+        const parsed = JSON.parse(payload);
+        if (parsed.clip_analyzed && parsed.clip) {
+          const c = parsed.clip;
+          if (text) text.value = c.gemini_analysis || '(空)';
+          if (c.gemini_edit_plan && c.gemini_edit_plan.length && area) {
+            const ops = {speed: '变速', zoom_in: '放大', zoom_out: '缩小', crop: '裁剪'};
+            let html = '<div style="margin-top:8px;font-size:11px;color:#4ade80">📋 剪辑操作:</div>';
+            c.gemini_edit_plan.forEach((op, i) => {
+              const label = ops[op.op] || op.op;
+              html += `<div style="font-size:11px;color:#888;margin-left:12px">${i+1}. ${label}`;
+              if (op.op === 'speed') html += ` ${op.speed}x`;
+              if (op.op === 'zoom_in' || op.op === 'zoom_out') html += ` ${op.amount}x`;
+              if (op.op === 'crop') html += ` ${op.w}x${op.h}`;
+              if (op.reason) html += ` (${op.reason})`;
+              html += '</div>';
+            });
+            area.insertAdjacentHTML('beforeend', html);
+          }
+        } else if (parsed.msg) {
+          if (parsed.msg === 'DONE') continue;
+          if (text) text.value = parsed.msg;
+        } else if (typeof parsed === 'string' && parsed.startsWith('ERROR:')) {
+          if (text) text.value = parsed;
+        }
+      } catch (e) {}
+    }
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = '🤖 Gemini 分析'; }
+}
+
+async function analyzeClips() {
+  if (!currentWorkDir) { alert('请先运行分析'); return; }
+
+  document.getElementById('geminiAnalyzeBtn').disabled = true;
+  document.getElementById('status').textContent = '分析..';
+
+  document.getElementById('geminiAnalysisPanel').style.display = 'block';
+  document.getElementById('geminiAnalysisContent').innerHTML = '';
+  const progEl = document.getElementById('geminiAnalysisProgress');
+  const progressEl = document.getElementById('progress');
+
+  const resp = await fetch('/api/analyze_clips', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ work_dir: currentWorkDir }),
+  });
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const payload = line.slice(6);
+      var msg = payload;
+      var extraClass = '';
+
+      try {
+        const parsed = JSON.parse(payload);
+        if (parsed.msg) {
+          msg = parsed.msg;
+          progEl.textContent = msg;
+        } else if (parsed.clips_analyzed) {
+          msg = '分析完成';
+          extraClass = 'done';
+          (parsed.clips || []).forEach(c => {
+            if (c.gemini_analysis) {
+              const area = document.getElementById(`gemini-area-${c.id}`);
+              const text = document.getElementById(`gemini-text-${c.id}`);
+              if (area && text) {
+                area.style.display = 'block';
+                text.value = c.gemini_analysis;
+              }
+            }
+            if (c.gemini_edit_plan && c.gemini_edit_plan.length) {
+              const area = document.getElementById(`gemini-area-${c.id}`);
+              if (area) {
+                let html = '<div style="margin-top:8px;font-size:11px;color:#4ade80">剪辑操作:</div>';
+                c.gemini_edit_plan.forEach((op, i) => {
+                  const ops = {speed: '变速', zoom_in: '放大', zoom_out: '缩小', crop: '裁剪'};
+                  const label = ops[op.op] || op.op;
+                  html += `<div style="font-size:11px;color:#888;margin-left:12px">${i+1}. ${label}`;
+                  if (op.op === 'speed') html += ` ${op.speed}x`;
+                  if (op.op === 'zoom_in' || op.op === 'zoom_out') html += ` ${op.amount}x`;
+                  if (op.op === 'crop') html += ` ${op.w}x${op.h}`;
+                  if (op.reason) html += ` ?${op.reason}`;
+                  html += '</div>';
+                });
+                area.insertAdjacentHTML('beforeend', html);
+              }
+            }
+          });
+          progEl.textContent = 'Gemini3 切片分析完成';
+          updateRefineBtn();
+          document.getElementById('smartCutBtn').style.display = 'inline-block';
+          document.getElementById('geminiAnalysisPanel').scrollIntoView({ behavior: 'smooth' });
+        }
+      } catch (e) {}
+
+      if (msg === 'DONE') continue;
+      if (msg.startsWith('ERROR:')) extraClass = 'error';
+
+      const div = document.createElement('div');
+      div.className = `progress-entry ${extraClass}`;
+      div.textContent = `> ${msg}`;
+      progressEl.appendChild(div);
+      progressEl.scrollTop = progressEl.scrollHeight;
+    }
+  }
+
+  document.getElementById('geminiAnalyzeBtn').disabled = false;
+  document.getElementById('status').textContent = '';
+}
+
+async function startRefineCut() {
+  if (!currentWorkDir) { alert('请先运行分析'); return; }
+
+  const selectedIds = getSelectedClipIds();
+  if (!selectedIds.length) { alert('请至少选择一个片段'); return; }
+
+  const btn = document.getElementById('fineCutBtn');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  status.textContent = '精剪..';
+
+  const progressPanel = document.getElementById('progressPanel');
+  progressPanel.style.display = 'block';
+  const progressEl = document.getElementById('progress');
+
+  const accepted = getAcceptedSuggestions();
+  const body = {
+    work_dir: currentWorkDir,
+    accepted_suggestions: accepted,
+    selected_clip_ids: selectedIds,
+    bgm: null,
+  };
+
+  const resp = await fetch('/api/render', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const payload = line.slice(6);
+      var msg = payload;
+      var extraClass = '';
+
+      try {
+        const parsed = JSON.parse(payload);
+        if (parsed.msg) {
+          msg = parsed.msg;
+        } else if (parsed.render_done) {
+          msg = '精剪完成';
+          extraClass = 'done';
+          loadOutputs();
+          const panel = document.getElementById('playerPanel');
+          panel.style.display = 'block';
+          document.getElementById('mainPlayer').src = `/api/file/${parsed.output_path}`;
+          document.getElementById('mainPlayer').play();
+          panel.scrollIntoView({ behavior: 'smooth' });
+        }
+      } catch (e) {}
+
+      if (msg === 'DONE') continue;
+      if (msg.startsWith('ERROR:')) extraClass = 'error';
+
+      const div = document.createElement('div');
+      div.className = `progress-entry ${extraClass}`;
+      div.textContent = `> ${msg}`;
+      progressEl.appendChild(div);
+      progressEl.scrollTop = progressEl.scrollHeight;
+    }
+  }
+
+  btn.disabled = false;
+  if (status.textContent !== '失败') status.textContent = '';
+}
+
+
+async function startSmartCut() {
+  if (!currentWorkDir) { alert('请先运行分析'); return; }
+
+  const selectedIds = getSelectedClipIds();
+  if (!selectedIds.length) { alert('请至少选择一个片段'); return; }
+
+  const btn = document.getElementById('smartCutBtn');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  status.textContent = '智能精剪..';
+
+  const progressPanel = document.getElementById('progressPanel');
+  progressPanel.style.display = 'block';
+  const progressEl = document.getElementById('progress');
+
+  const body = {
+    work_dir: currentWorkDir,
+    selected_clip_ids: selectedIds,
+    bgm: null,
+  };
+
+  const resp = await fetch('/api/smart_render', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const payload = line.slice(6);
+      var msg = payload;
+      var extraClass = '';
+
+      try {
+        const parsed = JSON.parse(payload);
+        if (parsed.msg) {
+          msg = parsed.msg;
+        } else if (parsed.render_done) {
+          msg = '智能精剪完成';
+          extraClass = 'done';
+          loadOutputs();
+          const panel = document.getElementById('playerPanel');
+          panel.style.display = 'block';
+          document.getElementById('mainPlayer').src = `/api/file/${parsed.output_path}`;
+          document.getElementById('mainPlayer').play();
+          panel.scrollIntoView({ behavior: 'smooth' });
+        }
+      } catch (e) {}
+
+      if (msg === 'DONE') continue;
+      if (msg.startsWith('ERROR:')) extraClass = 'error';
+
+      const div = document.createElement('div');
+      div.className = `progress-entry ${extraClass}`;
+      div.textContent = `> ${msg}`;
+      progressEl.appendChild(div);
+      progressEl.scrollTop = progressEl.scrollHeight;
+    }
+  }
+
+  btn.disabled = false;
+  if (status.textContent !== '失败') status.textContent = '';
+}
+
+function previewClip(src) {
+  const panel = document.getElementById('playerPanel');
+  panel.style.display = 'block';
+  const player = document.getElementById('mainPlayer');
+  player.src = src;
+  player.play();
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function previewClipSrc(path, label) {
+  const preview = document.getElementById('clipPreview');
+  preview.style.display = 'block';
+  const player = document.getElementById('clipPlayer');
+  player.src = `/api/file/${path}`;
+  player.play();
+  const radio = document.querySelector(`input[name="video"][value="${path}"]`);
+  if (radio) radio.checked = true;
+}
+
+async function loadOutputs() {
+  const r = await fetch('/api/outputs');
+  const data = await r.json();
+  const el = document.getElementById('outputList');
+  if (!data.outputs.length) {
+    el.innerHTML = '<div class="empty">暂无输出</div>';
+    return;
+  }
+  el.innerHTML = data.outputs.map(o => `
+    <div class="output-item" onclick="playOutput('${o.path}')">
+      <span class="name">${o.name}</span>
+      <span class="size">${(o.size / 1024 / 1024).toFixed(1)}MB</span>
+    </div>
+  `).join('');
+}
+
+function playOutput(path) {
+  const panel = document.getElementById('playerPanel');
+  panel.style.display = 'block';
+  document.getElementById('mainPlayer').src = `/api/file/${path}`;
+  document.getElementById('mainPlayer').play();
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+loadClips();
+loadOutputs();
+</script>
+</body>
+</html>

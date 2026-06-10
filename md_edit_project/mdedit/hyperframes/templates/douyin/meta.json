@@ -1,0 +1,15 @@
+{
+  "name": "douyin",
+  "label": "抖音风格",
+  "description": "大字弹跳、高对比、活泼动感",
+  "style": {
+    "font_size": 56,
+    "color": "#FFFFFF",
+    "stroke": "#000000",
+    "position_y": "78%",
+    "font_family": "'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif",
+    "animation_type": "bounce",
+    "show_title": true,
+    "extra_css": ".subtitle{font-weight:900;letter-spacing:2px;}"
+  }
+}

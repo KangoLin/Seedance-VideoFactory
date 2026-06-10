@@ -8,6 +8,7 @@ import binascii
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import threading
@@ -20,6 +21,19 @@ import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+# 自动读取 Windows 系统代理并设置环境变量（解决 Python 不走代理无法连接外网的问题）
+try:
+    import winreg
+    with winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Internet Settings") as key:
+        proxy_enable, _ = winreg.QueryValueEx(key, "ProxyEnable")
+        proxy_server, _ = winreg.QueryValueEx(key, "ProxyServer")
+    if proxy_enable and proxy_server:
+        proxy_url = f"http://{proxy_server}"
+        os.environ["HTTP_PROXY"] = proxy_url
+        os.environ["HTTPS_PROXY"] = proxy_url
+except Exception:
+    pass
+
 from media_refs import (
     MAX_IMAGE_BYTES,
     MAX_REFERENCE_IMAGES,
@@ -27,8 +41,20 @@ from media_refs import (
     MAX_VIDEO_BYTES,
     media_kind,
 )
-from concat_episode import concat_episode_previews
-from export_versions import export_version_label, latest_export_rel_path, max_export_version
+from concat_episode import concat_episode_previews, episode_concat_slug, resolve_ffmpeg
+from export_versions import (
+    export_version_label,
+    find_latest_export_any_platform,
+    find_latest_segment_rel,
+    latest_export_rel_path,
+    max_export_version,
+)
+from publish_rules import (
+    build_publish_export,
+    default_publish_profile,
+    normalize_publish_profile,
+    validate_publish_profile,
+)
 from segment_config import MAX_DURATION, MIN_DURATION, get_segment_mode
 from workspace_store import (
     all_lane_ids,
@@ -38,10 +64,12 @@ from workspace_store import (
     default_workspace,
     episode_lane_ids,
     find_episode,
+    find_task_by_lane,
     load_workspace,
     next_episode_id,
     next_task_id,
     output_slug_for_lane,
+    parse_episode_no,
     remove_episode,
     remove_task,
     save_workspace,
@@ -54,12 +82,12 @@ ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = Path(__file__).resolve().parent
 CONFIG = ROOT / "05_Video" / "seedance_batch.json"
 UPLOAD_DIR = ROOT / "05_Video" / "uploads"
-EXPORT_DIR = ROOT / "05_Video" / "exports"
-SEGMENT_DIR = ROOT / "05_Video" / "segments"
+EXPORT_DIR = ROOT / "output" / "exports"
+SEGMENT_DIR = ROOT / "output" / "segments"
 HOST = "127.0.0.1"
 PORT = 8765
-GUI_API_VERSION = 11
-BUILD_ID = "20260529-public-video-upload-fallback"
+GUI_API_VERSION = 13
+BUILD_ID = "20260601-concat-episode-fix"
 MAX_JOB_LOG_LINES = 400
 EXIT_NO_NEW_VIDEO = 2
 DEEPSEEK_API_KEY_FILE = ROOT / "API_Key" / "deepseek_api_key.txt"
@@ -71,14 +99,17 @@ DEEPSEEK_BASE_URL = os.environ.get(
 )
 DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", os.environ.get("PROMPT_OPTIMIZER_MODEL", "deepseek-chat"))
 GEMINI_BASE_URL = os.environ.get("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3-pro-preview")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3-flash-preview")
 PROMPT_OPTIMIZER_TIMEOUT = int(os.environ.get("PROMPT_OPTIMIZER_TIMEOUT", "90"))
 OPTIMIZER_MODELS = {
     "deepseek": ["deepseek-chat", "deepseek-reasoner"],
-    "gemini": ["gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-3.1-pro-preview", "gemini-3.5-flash"],
+    "gemini": ["gemini-3-flash-preview", "gemini-3.1-pro-preview", "gemini-3.5-flash", "gemini-2.5-flash"],
 }
 IMAGE_GENERATION_MODELS = ["gemini-3-pro-image-preview", "gemini-3.1-flash-image-preview", "gemini-2.5-flash-image"]
 DEFAULT_IMAGE_GENERATION_MODEL = os.environ.get("GEMINI_IMAGE_MODEL", IMAGE_GENERATION_MODELS[0])
+GEMINI_AUDIT_MODEL = os.environ.get("GEMINI_AUDIT_MODEL", "gemini-2.5-flash")
+GEMINI_AUDIT_TIMEOUT = int(os.environ.get("GEMINI_AUDIT_TIMEOUT", "180"))
+SUPERVISOR_PROMPT_FILE = ROOT / "游戏宣发漫剧_AI监制设定词.md"
 
 job_lock = threading.Lock()
 workspace_lock = threading.Lock()
@@ -182,6 +213,24 @@ def update_workspace(mutator) -> dict:
         workspace_state = save_workspace(workspace_state)
     sync_jobs_from_workspace(workspace_state)
     return get_workspace()
+
+
+def get_episode_publish_profile(episode: dict) -> dict:
+    return normalize_publish_profile(episode.get("publish_profile") or default_publish_profile())
+
+
+def extract_episode_video_meta(episode: dict) -> dict:
+    tasks = episode.get("tasks") or []
+    duration = 0
+    ratio = ""
+    if tasks:
+        first = tasks[0]
+        try:
+            duration = int(first.get("duration") or 0)
+        except (TypeError, ValueError):
+            duration = 0
+        ratio = str(first.get("ratio") or "").strip()
+    return {"duration": duration, "ratio": ratio}
 
 GUI_PAGE = SCRIPTS / "gui_page.html"
 
@@ -605,8 +654,77 @@ def get_asset_platform(asset_id: str) -> str:
     return str(meta["assets"].get(asset_id, {}).get("platform", "TikTok"))
 
 
+# ── Clip (Cut/Edit) utilities ────────────────────────────────────────────────
+
+def get_video_duration_sec(path: Path) -> float:
+    try:
+        ffmpeg = resolve_ffmpeg()
+        r = subprocess.run(
+            [ffmpeg, "-i", str(path), "-f", "null", "-"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+        )
+        for m in re.finditer(r"Duration:\s*(\d+):(\d+):(\d+\.\d+)", r.stderr):
+            h, m_, s = m.groups()
+            return int(h) * 3600 + int(m_) * 60 + float(s)
+    except Exception:
+        pass
+    return 0.0
+
+
+
+
+
 def export_rel_path(output_slug: str, platform: str) -> str | None:
     return latest_export_rel_path(output_slug, platform)
+
+
+def resolve_lane_preview_rel(workspace: dict, lane_id: str, job: dict | None = None) -> str | None:
+    task = find_task_by_lane(workspace, lane_id)
+    slug = output_slug_for_lane(workspace, lane_id)
+    candidates: list[str] = []
+
+    if task:
+        stored = str(task.get("last_export_path") or "").strip()
+        if stored:
+            candidates.append(stored)
+
+    asset = str((task or {}).get("asset") or (job or {}).get("asset") or DEFAULT_TEMPLATE_ASSET)
+    platform = get_asset_platform(asset)
+    rel = export_rel_path(slug, platform)
+    if rel:
+        candidates.append(rel)
+
+    for alt_slug in {slug, lane_id}:
+        rel = find_latest_export_any_platform(alt_slug)
+        if rel:
+            candidates.append(rel)
+        rel = find_latest_segment_rel(alt_slug)
+        if rel:
+            candidates.append(rel)
+
+    seen: set[str] = set()
+    for rel in candidates:
+        rel = rel.replace("\\", "/")
+        if rel in seen:
+            continue
+        seen.add(rel)
+        path = ROOT / rel
+        if path.is_file() and path.suffix.lower() == ".mp4":
+            return rel
+    return None
+
+
+def persist_task_preview_path(lane_id: str, rel_path: str) -> None:
+    rel_norm = str(rel_path or "").strip().replace("\\", "/")
+    if not rel_norm:
+        return
+
+    def mutate(ws: dict) -> None:
+        task = find_task_by_lane(ws, lane_id)
+        if task is not None:
+            task["last_export_path"] = rel_norm
+
+    update_workspace(mutate)
 
 
 def resolve_media_path(rel_path: str) -> Path:
@@ -625,17 +743,231 @@ def preview_url_for_rel(rel_path: str) -> str:
     return f"/api/video?path={urllib.parse.quote(rel_path, safe='/')}&t={stamp}"
 
 
+def parse_json_fragment(text: str) -> dict | None:
+    start = text.find("{")
+    end = text.rfind("}")
+    if start < 0 or end <= start:
+        return None
+    try:
+        parsed = json.loads(text[start : end + 1])
+    except json.JSONDecodeError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def collect_episode_frames_for_audit(video_path: Path, max_frames: int = 6) -> list[Path]:
+    ffmpeg = resolve_ffmpeg()
+    frame_dir = SEGMENT_DIR / "_audit_frames"
+    frame_dir.mkdir(parents=True, exist_ok=True)
+    stamp = f"{int(time.time())}_{uuid.uuid4().hex[:6]}"
+    pattern = frame_dir / f"{video_path.stem}_{stamp}_%02d.jpg"
+    interval = max(2, int(12 / max(1, max_frames)))
+    cmd = [
+        ffmpeg,
+        "-y",
+        "-i",
+        str(video_path),
+        "-vf",
+        f"fps=1/{interval}",
+        "-frames:v",
+        str(max_frames),
+        str(pattern),
+    ]
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    except subprocess.CalledProcessError as exc:
+        detail = (exc.stderr or exc.stdout or str(exc)).strip()
+        raise RuntimeError(f"抽帧失败: {detail}") from exc
+    frames = sorted(frame_dir.glob(f"{video_path.stem}_{stamp}_*.jpg"))
+    if not frames:
+        raise RuntimeError("未能提取审核帧，请确认 ffmpeg 可用")
+    return frames
+
+
+def resolve_episode_concat_video(episode: dict, video_path: str = "") -> str:
+    rel = str(video_path or episode.get("concat_video_path") or "").strip()
+    if rel:
+        resolve_media_path(rel)
+        return rel.replace("\\", "/")
+    concat_slug = episode_concat_slug(parse_episode_no(episode))
+    concat_dir = ROOT / "output" / "concat"
+    if concat_dir.is_dir():
+        matches = sorted(concat_dir.glob(f"{concat_slug}_v*.mp4"))
+        if matches:
+            rel = str(matches[-1].relative_to(ROOT)).replace("\\", "/")
+            return rel
+    raise ValueError("未找到整集拼接视频，请先点击「一键拼接本集」")
+
+
+def load_episode_audit_supervisor_prompt() -> str:
+    if SUPERVISOR_PROMPT_FILE.is_file():
+        text = SUPERVISOR_PROMPT_FILE.read_text(encoding="utf-8")
+        block: list[str] = []
+        in_block = False
+        for line in text.splitlines():
+            if "## 建议直接复制给 AI" in line:
+                in_block = True
+                continue
+            if in_block and line.strip() == "---":
+                break
+            if in_block and line.startswith(">"):
+                block.append(line[1:].lstrip())
+        if block:
+            return "\n".join(block).strip()
+        return text.strip()
+    return (
+        "你是一位游戏 IP 衍生漫剧总监制兼欧美跨文化宣发专家，"
+        "负责基于游戏转化率与 YouTube/TikTok 爆款逻辑审核整集内容。"
+    )
+
+
+def build_episode_audit_context(episode: dict) -> str:
+    title = str(episode.get("title") or "").strip()
+    ep_no = parse_episode_no(episode)
+    tasks = episode.get("tasks") or []
+    lines = [f"集数：第 {ep_no} 集", f"标题：{title or '未命名'}"]
+    profile = episode.get("publish_profile") if isinstance(episode.get("publish_profile"), dict) else {}
+    targets = profile.get("targets") if isinstance(profile.get("targets"), list) else []
+    if targets:
+        lines.append(f"计划发布平台：{', '.join(str(x) for x in targets)}")
+    content = profile.get("content") if isinstance(profile.get("content"), dict) else {}
+    if content.get("title"):
+        lines.append(f"发布标题草案：{content.get('title')}")
+    if content.get("description"):
+        lines.append(f"发布简介草案：{content.get('description')}")
+    lines.append(f"分镜任务数：{len(tasks)}")
+    for index, task in enumerate(tasks[:12], start=1):
+        prompt = str(task.get("prompt") or "").strip().replace("\n", " ")
+        if len(prompt) > 180:
+            prompt = prompt[:180] + "…"
+        lines.append(f"分镜任务{index}（{task.get('duration', '?')}s / {task.get('ratio', '?')}）：{prompt or '（无描述）'}")
+    if len(tasks) > 12:
+        lines.append(f"…其余 {len(tasks) - 12} 个分镜任务已省略")
+    return "\n".join(lines)
+
+
+def call_gemini_episode_content_audit(video_rel_path: str, episode: dict) -> dict:
+    video_path = resolve_media_path(video_rel_path)
+    api_key = load_prompt_optimizer_api_key("gemini")
+    if not api_key:
+        raise RuntimeError("未配置 Gemini API Key，请填写 API_Key/gemini_api_key.txt")
+    frames = collect_episode_frames_for_audit(video_path)
+    supervisor_prompt = load_episode_audit_supervisor_prompt()
+    episode_context = build_episode_audit_context(episode)
+    user_text = (
+        "请基于你的「游戏宣发漫剧总监制」角色，对下方整集拼接视频抽帧做多模态审核。\n"
+        "审核重点：欧美受众适配、信息密度、前三秒钩子、游戏卖点转化、YT/TikTok 平台特性，"
+        "并兼顾基础合规（暴力血腥、惊悚不适、未成年人、危险行为、违规营销）。\n\n"
+        f"【本集上下文】\n{episode_context}\n\n"
+        "下方是按时间顺序抽取的视频关键帧，请结合分镜描述一起判断。\n"
+        "请严格返回 JSON，格式为："
+        '{"summary":"","score_retention":0,"score_comment":"","information_density_diagnosis":"",'
+        '"game_conversion_diagnosis":"","optimization_plans":["",""],'
+        '"risk_level":"low|medium|high",'
+        '"risk_items":[{"category":"","severity":"low|medium|high","evidence":"","suggestion":""}],'
+        '"platform_notes":{"youtube":"","tiktok":"","douyin":"","x":""}}'
+    )
+    parts: list[dict] = [{"text": user_text}]
+    for frame in frames:
+        raw = frame.read_bytes()
+        parts.append(
+            {
+                "inlineData": {
+                    "mimeType": "image/jpeg",
+                    "data": base64.b64encode(raw).decode("ascii"),
+                }
+            }
+        )
+    body = {
+        "systemInstruction": {"parts": [{"text": supervisor_prompt}]},
+        "contents": [{"role": "user", "parts": parts}],
+        "generationConfig": {"temperature": 0.2, "responseMimeType": "application/json"},
+    }
+    model = GEMINI_AUDIT_MODEL
+    endpoint = gemini_optimizer_endpoint(model)
+    url = f"{endpoint}?key={urllib.parse.quote(api_key)}"
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=GEMINI_AUDIT_TIMEOUT) as resp:
+            text = resp.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:800]
+        raise RuntimeError(f"Gemini 视频审核 HTTP {exc.code}: {detail}") from exc
+    except urllib.error.URLError as exc:
+        reason = str(exc.reason) if hasattr(exc, 'reason') else str(exc)
+        import winreg as _wr
+        try:
+            _k = _wr.OpenKey(_wr.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Internet Settings")
+            _pe, _ = _wr.QueryValueEx(_k, "ProxyEnable")
+            _ps, _ = _wr.QueryValueEx(_k, "ProxyServer")
+            _wr.CloseKey(_k)
+            proxy_info = f"系统代理={'已启用' if _pe else '未启用'} ({_ps})"
+        except Exception:
+            proxy_info = "读取系统代理失败"
+        raise RuntimeError(
+            f"无法连接 Gemini 视频审核接口（{reason}；{proxy_info}；"
+            f"HTTP_PROXY={os.environ.get('HTTP_PROXY', '(未设置)')}）"
+        ) from exc
+    except Exception as exc:
+        raise RuntimeError(f"Gemini 视频审核连接异常（{type(exc).__name__}: {exc}）") from exc
+
+    data = json.loads(text)
+    candidates = data.get("candidates") if isinstance(data, dict) else None
+    content = ""
+    if candidates:
+        msg_parts = (((candidates[0] or {}).get("content") or {}).get("parts") or [])
+        content = "\n".join(str(part.get("text", "")).strip() for part in msg_parts if part.get("text")).strip()
+    parsed = parse_json_fragment(content) or {}
+    score_raw = parsed.get("score_retention")
+    try:
+        score_retention = int(score_raw) if score_raw is not None else 0
+    except (TypeError, ValueError):
+        score_retention = 0
+    plans = parsed.get("optimization_plans")
+    if isinstance(plans, list):
+        optimization_plans = [str(x).strip() for x in plans if str(x).strip()]
+    else:
+        optimization_plans = []
+    return {
+        "summary": str(parsed.get("summary") or "审核完成"),
+        "score_retention": score_retention,
+        "score_comment": str(parsed.get("score_comment") or "").strip(),
+        "information_density_diagnosis": str(parsed.get("information_density_diagnosis") or "").strip(),
+        "game_conversion_diagnosis": str(parsed.get("game_conversion_diagnosis") or "").strip(),
+        "optimization_plans": optimization_plans,
+        "risk_level": str(parsed.get("risk_level") or "medium"),
+        "risk_items": parsed.get("risk_items") if isinstance(parsed.get("risk_items"), list) else [],
+        "platform_notes": parsed.get("platform_notes") if isinstance(parsed.get("platform_notes"), dict) else {},
+        "raw_text": content,
+        "video_path": video_rel_path,
+        "episode_id": episode.get("id"),
+        "model": model,
+        "audited_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "supervisor_prompt_source": str(SUPERVISOR_PROMPT_FILE.name),
+    }
+
+
 def public_job(lane_id: str, job: dict) -> dict:
+    ws = get_workspace()
     preview_url = job.get("preview_url", "")
-    slug = output_slug_for_lane(get_workspace(), lane_id)
-    platform = job.get("platform", "TikTok")
-    if job.get("asset"):
-        platform = get_asset_platform(job["asset"])
+    slug = output_slug_for_lane(ws, lane_id)
+    task = find_task_by_lane(ws, lane_id)
+    asset = str((task or {}).get("asset") or job.get("asset") or DEFAULT_TEMPLATE_ASSET)
+    platform = get_asset_platform(asset)
     if not preview_url:
-        rel = export_rel_path(slug, platform)
-        if rel and (ROOT / rel).is_file():
+        rel = resolve_lane_preview_rel(ws, lane_id, job)
+        if rel:
             preview_url = preview_url_for_rel(rel)
     output_label = export_version_label(slug, platform) if max_export_version(slug, platform) > 0 else ""
+    if not output_label:
+        rel = resolve_lane_preview_rel(ws, lane_id, job)
+        if rel:
+            output_label = Path(rel).stem
 
     phase = job.get("phase", "idle")
     api_sent = bool(job.get("api_submitted"))
@@ -667,6 +999,7 @@ def public_job(lane_id: str, job: dict) -> dict:
 
 def set_preview(lane: str, rel_path: str) -> None:
     jobs[lane]["preview_url"] = preview_url_for_rel(rel_path)
+    persist_task_preview_path(lane, rel_path)
 
 
 def update_job_status(lane: str, *, phase: str | None = None, status_text: str | None = None) -> None:
@@ -1015,6 +1348,20 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
             return
+        if parsed.path == "/api/debug":
+            import winreg as _wr
+            _k = _wr.OpenKey(_wr.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Internet Settings")
+            _pe, _ = _wr.QueryValueEx(_k, "ProxyEnable")
+            _ps, _ = _wr.QueryValueEx(_k, "ProxyServer")
+            _wr.CloseKey(_k)
+            self.send_json({
+                "ok": True,
+                "proxy_enable": bool(_pe),
+                "proxy_server": _ps or "",
+                "env_http_proxy": os.environ.get("HTTP_PROXY", ""),
+                "env_https_proxy": os.environ.get("HTTPS_PROXY", ""),
+            })
+            return
         if parsed.path == "/api/ping":
             self.send_json(
                 {
@@ -1031,6 +1378,8 @@ class Handler(BaseHTTPRequestHandler):
                         "episode_concat",
                         "prompt_optimizer",
                         "image_generation",
+                        "publish_profile",
+                        "episode_content_audit",
                     ],
                     "prompt_optimizer": prompt_optimizer_config(),
                     "image_generation": image_generation_config(),
@@ -1057,6 +1406,9 @@ class Handler(BaseHTTPRequestHandler):
                 }
             self.send_json({"ok": True, "workspace": ws, "jobs": job_payload})
             return
+        if parsed.path == "/api/publish_profile":
+            self.handle_get_publish_profile(parsed)
+            return
         if parsed.path in {"/api/job", "/api/jobs"}:
             ws = get_workspace()
             with job_lock:
@@ -1068,8 +1420,6 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(payload)
             return
         if parsed.path == "/api/media":
-            query = urllib.parse.parse_qs(parsed.query)
-            rel_path = (query.get("path") or [""])[0]
             try:
                 target = resolve_upload_media_path(rel_path)
             except ValueError:
@@ -1099,6 +1449,16 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Cache-Control", "no-cache")
             self.end_headers()
             self.wfile.write(data)
+            return
+        if parsed.path == "/api/video/duration":
+            query = urllib.parse.parse_qs(parsed.query)
+            rel_path = (query.get("path") or [""])[0]
+            try:
+                target = resolve_media_path(rel_path)
+                dur = get_video_duration_sec(target)
+                self.send_json({"ok": True, "duration": dur})
+            except ValueError as exc:
+                self.send_json({"ok": False, "error": str(exc)}, status=400)
             return
         self.send_error(404)
 
@@ -1143,6 +1503,83 @@ class Handler(BaseHTTPRequestHandler):
                     if lane_id in jobs
                 }
             self.send_json({"ok": True, "workspace": saved, "jobs": job_payload})
+        except (ValueError, json.JSONDecodeError) as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=400)
+
+    def handle_get_publish_profile(self, parsed: urllib.parse.ParseResult) -> None:
+        try:
+            query = urllib.parse.parse_qs(parsed.query)
+            episode_id = str((query.get("episode_id") or [""])[0]).strip()
+            if not episode_id:
+                raise ValueError("缺少 episode_id")
+            episode = find_episode(get_workspace(), episode_id)
+            if not episode:
+                raise ValueError(f"未知集数: {episode_id}")
+            profile = get_episode_publish_profile(episode)
+            self.send_json({"ok": True, "episode_id": episode_id, "publish_profile": profile})
+        except ValueError as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=400)
+
+    def handle_save_publish_profile(self) -> None:
+        try:
+            payload = self.read_json_body()
+            episode_id = str(payload.get("episode_id", "")).strip()
+            if not episode_id:
+                raise ValueError("缺少 episode_id")
+            incoming = payload.get("publish_profile")
+            if not isinstance(incoming, dict):
+                raise ValueError("publish_profile 格式无效")
+            profile = normalize_publish_profile(incoming)
+
+            def mutate(ws: dict) -> None:
+                episode = find_episode(ws, episode_id)
+                if not episode:
+                    raise ValueError(f"未知集数: {episode_id}")
+                episode["publish_profile"] = profile
+
+            ws = update_workspace(mutate)
+            self.send_json({"ok": True, "workspace": ws, "episode_id": episode_id, "publish_profile": profile})
+        except (ValueError, json.JSONDecodeError) as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=400)
+
+    def handle_publish_precheck(self) -> None:
+        try:
+            payload = self.read_json_body()
+            episode_id = str(payload.get("episode_id", "")).strip()
+            if not episode_id:
+                raise ValueError("缺少 episode_id")
+            episode = find_episode(get_workspace(), episode_id)
+            if not episode:
+                raise ValueError(f"未知集数: {episode_id}")
+            profile = payload.get("publish_profile")
+            profile_data = normalize_publish_profile(profile) if isinstance(profile, dict) else get_episode_publish_profile(episode)
+            result = validate_publish_profile(profile_data, extract_episode_video_meta(episode))
+            self.send_json({"ok": True, "episode_id": episode_id, "result": result})
+        except (ValueError, json.JSONDecodeError) as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=400)
+
+    def handle_publish_export(self) -> None:
+        try:
+            payload = self.read_json_body()
+            episode_id = str(payload.get("episode_id", "")).strip()
+            if not episode_id:
+                raise ValueError("缺少 episode_id")
+            episode = find_episode(get_workspace(), episode_id)
+            if not episode:
+                raise ValueError(f"未知集数: {episode_id}")
+            profile = payload.get("publish_profile")
+            profile_data = normalize_publish_profile(profile) if isinstance(profile, dict) else get_episode_publish_profile(episode)
+            validation_result = validate_publish_profile(profile_data, extract_episode_video_meta(episode))
+            export_payload = build_publish_export(episode, profile_data, validation_result)
+            self.send_json(
+                {
+                    "ok": True,
+                    "episode_id": episode_id,
+                    "filename": f"publish-package-{episode_id}.json",
+                    "export": export_payload,
+                    "result": validation_result,
+                }
+            )
         except (ValueError, json.JSONDecodeError) as exc:
             self.send_json({"ok": False, "error": str(exc)}, status=400)
 
@@ -1239,6 +1676,13 @@ class Handler(BaseHTTPRequestHandler):
             )
             output, included, skipped = concat_episode_previews(episode, platform)
             rel = str(output.relative_to(ROOT)).replace("\\", "/")
+
+            def mutate(ws: dict) -> None:
+                ep = find_episode(ws, episode_id)
+                if ep:
+                    ep["concat_video_path"] = rel
+
+            update_workspace(mutate)
             self.send_json(
                 {
                     "ok": True,
@@ -1274,6 +1718,32 @@ class Handler(BaseHTTPRequestHandler):
             payload = self.read_json_body()
             result = call_gemini_image_generation(payload)
             self.send_json({"ok": True, **result, "config": image_generation_config()})
+        except (ValueError, json.JSONDecodeError) as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=400)
+        except Exception as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=502)
+
+    def handle_episode_content_audit(self) -> None:
+        try:
+            payload = self.read_json_body()
+            episode_id = str(payload.get("episode_id", "")).strip()
+            if not episode_id:
+                raise ValueError("缺少 episode_id")
+            episode = find_episode(get_workspace(), episode_id)
+            if not episode:
+                raise ValueError(f"未知集数: {episode_id}")
+            video_path = str(payload.get("video_path") or "").strip()
+            rel = resolve_episode_concat_video(episode, video_path)
+            result = call_gemini_episode_content_audit(rel, episode)
+
+            def mutate(ws: dict) -> None:
+                ep = find_episode(ws, episode_id)
+                if ep:
+                    ep["concat_video_path"] = rel
+                    ep["last_content_audit_result"] = result
+
+            update_workspace(mutate)
+            self.send_json({"ok": True, "episode_id": episode_id, "result": result})
         except (ValueError, json.JSONDecodeError) as exc:
             self.send_json({"ok": False, "error": str(exc)}, status=400)
         except Exception as exc:
@@ -1397,6 +1867,15 @@ class Handler(BaseHTTPRequestHandler):
         if parsed.path == "/api/workspace":
             self.handle_save_workspace()
             return
+        if parsed.path == "/api/publish_profile":
+            self.handle_save_publish_profile()
+            return
+        if parsed.path == "/api/publish_precheck":
+            self.handle_publish_precheck()
+            return
+        if parsed.path == "/api/publish_export":
+            self.handle_publish_export()
+            return
         if parsed.path == "/api/episodes/create":
             self.handle_create_episode()
             return
@@ -1411,6 +1890,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/image/generate":
             self.handle_image_generate()
+            return
+        if parsed.path == "/api/episodes/audit_content":
+            self.handle_episode_content_audit()
             return
         if parsed.path == "/api/episodes/delete":
             self.handle_delete_episode()
@@ -1433,7 +1915,55 @@ class Handler(BaseHTTPRequestHandler):
         if parsed.path == "/api/run":
             self.handle_run()
             return
+        if parsed.path == "/api/clip/timeline-preview":
+            self.handle_clip_timeline_preview()
+            return
         self.send_json({"ok": False, "error": f"未知接口: {parsed.path}"}, status=404)
+
+    def handle_clip_timeline_preview(self) -> None:
+        """Quick concat of task videos in timeline order (no clip processing)."""
+        try:
+            payload = self.read_json_body()
+            episode_id = str(payload.get("episode_id", "")).strip()
+            if not episode_id:
+                raise ValueError("缺少 episode_id")
+            segment_order = payload.get("segment_order")
+            ws = get_workspace()
+            episode = find_episode(ws, episode_id)
+            if not episode:
+                raise ValueError(f"未知集数: {episode_id}")
+            tasks = episode.get("tasks") or []
+            if not tasks:
+                raise ValueError("该集没有分镜任务")
+            if segment_order is not None and len(segment_order) == len(tasks) and all(isinstance(i, int) and 0 <= i < len(tasks) for i in segment_order):
+                ordered_tasks = [tasks[i] for i in segment_order]
+            else:
+                ordered_tasks = list(tasks)
+            platform = get_asset_platform(str(tasks[0].get("asset", DEFAULT_TEMPLATE_ASSET))) if tasks else "TikTok"
+            ep_no = parse_episode_no(episode)
+            from concat_episode import latest_export_path_for_task, concat_video_files
+            import random, string
+            clip_dir = ROOT / "output" / "exports" / ".clip_temp"
+            clip_dir.mkdir(parents=True, exist_ok=True)
+            paths = []
+            for i, task in enumerate(ordered_tasks):
+                orig_idx = tasks.index(task)
+                src = latest_export_path_for_task(ep_no, orig_idx + 1, task, platform)
+                if src:
+                    paths.append(src)
+            if len(paths) < 2:
+                self.send_json({"ok": False, "error": "至少需要 2 个有视频的分镜"})
+                return
+            slug = f"timeline-preview-{episode_id}-{''.join(random.choices(string.ascii_lowercase, k=4))}"
+            output = clip_dir / f"{slug}.mp4"
+            concat_video_files(paths, output)
+            rel = str(output.relative_to(ROOT)).replace("\\", "/")
+            self.send_json({"ok": True, "preview_url": preview_url_for_rel(rel)})
+        except (ValueError, json.JSONDecodeError) as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=400)
+        except Exception as exc:
+            self.send_json({"ok": False, "error": str(exc)}, status=500)
+
 
 
 def main() -> None:

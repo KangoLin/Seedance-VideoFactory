@@ -1,0 +1,15 @@
+{
+  "name": "kinetic",
+  "label": "动感文字风格",
+  "description": "全屏大字交替飞入，快节奏冲击力",
+  "style": {
+    "font_size": 72,
+    "color": "#FFFFFF",
+    "stroke": "#000000",
+    "position_y": "50%",
+    "font_family": "'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif",
+    "animation_type": "kinetic",
+    "show_title": true,
+    "extra_css": ".subtitle{font-weight:900;letter-spacing:4px;text-transform:uppercase;}"
+  }
+}

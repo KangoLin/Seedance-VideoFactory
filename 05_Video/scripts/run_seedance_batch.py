@@ -39,8 +39,8 @@ EXIT_NO_NEW_VIDEO = 2
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_KEY_PATH = ROOT / "API_Key" / "VE_Key.txt"
 DEFAULT_CONFIG = ROOT / "05_Video" / "seedance_batch.json"
-DEFAULT_SEGMENT_DIR = ROOT / "05_Video" / "segments"
-DEFAULT_EXPORT_DIR = ROOT / "05_Video" / "exports"
+DEFAULT_SEGMENT_DIR = ROOT / "output" / "segments"
+DEFAULT_EXPORT_DIR = ROOT / "output" / "exports"
 
 DEFAULT_BASE_URL = "https://ark.cn-beijing.volces.com/api/v3"
 CREATE_PATH = "/contents/generations/tasks"

@@ -71,15 +71,43 @@
       display: block; width: 100%; max-width: 280px; margin-top: 8px;
       border-radius: 6px; background: #000;
     }
+    .publish-panel {
+      margin: 0 0 12px; padding: 12px; background: #f8fafc;
+      border: 1px solid #dbeafe; border-radius: 8px;
+    }
+    .publish-panel h3 { margin: 0 0 8px; font-size: 15px; }
+    .publish-grid {
+      display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+    .publish-grid .full { grid-column: 1 / -1; }
+    .publish-targets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+    .publish-targets label {
+      display: inline-flex; align-items: center; gap: 4px; margin: 0;
+      padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px;
+      background: #fff; color: #334155; font-size: 12px; font-weight: 600;
+    }
+    .publish-targets input { width: auto; height: auto; margin: 0; }
+    .publish-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .publish-actions button { width: auto; min-width: 120px; margin: 0; }
+    .publish-result {
+      margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff;
+      padding: 8px; font-size: 12px; line-height: 1.5;
+    }
+    .publish-result .warn { color: #b45309; }
+    .publish-result .block { color: #b91c1c; }
+    .publish-result .pass { color: #166534; }
     button.back-btn {
       width: auto; height: 34px; padding: 0 12px; margin: 0;
       background: #f8fafc; color: var(--accent); border-color: #b8d4cf;
     }
     .lane {
-      flex: 0 1 760px; width: 760px; max-width: calc(100% - 12px);
-      display: grid; grid-template-columns: minmax(280px, 340px) minmax(300px, 1fr);
+      flex: 0 1 980px; width: 980px; max-width: calc(100% - 12px);
+      display: grid;
+      grid-template-columns: minmax(260px, 300px) minmax(280px, 1fr) minmax(260px, 320px);
       gap: 10px; align-content: start;
     }
+    .image-gen-side { padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 320px; }
+    .image-gen-side .image-gen-panel { flex: 1; }
     .lane-head {
       grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between;
       padding: 8px 12px; background: var(--panel); border: 1px solid var(--line);
@@ -326,7 +354,28 @@
     }
     .modal-actions button { width: auto; min-width: 72px; margin: 0; }
     .modal-err { color: var(--danger); font-size: 12px; min-height: 18px; margin: 0 0 8px; }
-    @media (max-width: 520px) { .lane { width: 100%; flex-basis: 100%; } }
+    @media (max-width: 1100px) {
+      .lane {
+        width: 100%; flex-basis: 100%;
+        grid-template-columns: minmax(220px, 280px) minmax(220px, 280px) minmax(240px, 1fr);
+      }
+    }
+    @media (max-width: 520px) { .lane { width: 100%; flex-basis: 100%; grid-template-columns: 1fr; } }
+    /* ── Concat Panel ── */
+    .concat-btn { background:#0f766e; border-color:#0f766e; color:#fff; width:auto; min-width:auto; padding:6px 12px; font-size:13px; border:1px solid; border-radius:6px; cursor:pointer; }
+    .concat-btn:hover { background:#0b5f59; }
+    .clip-timeline { margin-top: 8px; border-top: 1px solid #fed7aa; padding-top: 6px; }
+    .clip-timeline-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .clip-timeline-header span { font-size: 12px; font-weight: 600; color: #9a3412; }
+    .clip-timeline-track { display: flex; gap: 4px; overflow-x: auto; padding: 4px 0 8px; min-height: 64px; align-items: stretch; }
+    .clip-timeline-card { flex: 0 0 100px; min-width: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 4px; background: #fff; border: 2px solid #fed7aa; border-radius: 6px; cursor: grab; user-select: none; position: relative; transition: transform 0.15s, box-shadow 0.15s; }
+    .clip-timeline-card:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .clip-timeline-card.dragging { opacity: 0.3; transform: scale(0.95); }
+    .clip-timeline-card.drag-over { border-color: #f97316; background: #fff7ed; transform: translateY(-4px); }
+    .clip-timeline-card .drag-handle { position: absolute; top: 2px; left: 4px; font-size: 10px; color: #d97706; }
+    .clip-timeline-card .card-label { font-size: 10px; font-weight: 600; color: #9a3412; text-align: center; line-height: 1.2; }
+    .clip-timeline-card .card-thumb { width: 64px; height: 36px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; }
+    .clip-timeline-card .card-duration { font-size: 9px; color: #999; }
   </style>
 </head>
 <body>
@@ -347,9 +396,58 @@
         <button type="button" class="back-btn" id="backToEpisodes">← 返回集数</button>
         <h2 id="activeEpisodeTitle">第 1 集</h2>
         <button type="button" class="back-btn" id="editActiveEpisode">修改集数</button>
-        <button type="button" class="concat-btn" id="concatEpisodeBtn" title="按分镜任务1、2、3…顺序拼接各任务最新预览视频">一键拼接本集</button>
       </div>
-      <div id="episodeConcatBar" class="episode-concat-preview" hidden></div>
+      <div id="concatBar" style="margin:8px 0;padding:12px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;" hidden>
+        <h3 style="margin:0 0 8px;font-size:14px;color:#9a3412;">📽️ 分镜拼接</h3>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button type="button" id="concatPreviewBtn" class="concat-btn" style="font-size:11px;padding:2px 8px;">生成顺序预览</button>
+          <button type="button" id="concatRenderBtn" class="concat-btn">一键拼接本集</button>
+          <button type="button" id="auditBtn" class="concat-btn" style="background:#7c3aed;border-color:#7c3aed;">AI 全集审核</button>
+          <span id="concatStatus" style="font-size:12px;color:#666;">就绪</span>
+        </div>
+        <div id="concatTimeline" style="margin-top:8px;border-top:1px solid #fed7aa;padding-top:6px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="font-size:12px;font-weight:600;color:#9a3412;">⏱ 时间线</span>
+            <button type="button" id="concatResetBtn" style="font-size:11px;padding:2px 8px;background:transparent;border:1px solid #d97706;border-radius:4px;color:#d97706;cursor:pointer;">恢复默认顺序</button>
+            <span id="timelineStatus" style="font-size:11px;color:#999;"></span>
+          </div>
+          <div id="concatTimelineTrack" style="display:flex;gap:4px;overflow-x:auto;padding:4px 0 8px;min-height:64px;align-items:stretch;"></div>
+        </div>
+        <div id="timelineLog" style="margin-top:4px;max-height:50px;overflow-y:auto;font-size:10px;color:#666;background:#fff;border-radius:4px;padding:2px 6px;display:none;"></div>
+        <div id="concatPreview" class="episode-concat-preview" style="margin-top:8px;display:none;"></div>
+        <div id="auditBar" style="margin-top:6px;padding:8px 10px;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;display:none;font-size:12px;line-height:1.5;"></div>
+      </div>
+      <section id="publishPanel" class="publish-panel" hidden>
+        <h3>平台发布（V1）</h3>
+        <div class="publish-grid">
+          <div class="full">
+            <label>发布平台（可多选）</label>
+            <div class="publish-targets" id="publishTargets"></div>
+          </div>
+          <div>
+            <label for="publishLanguage">默认语言</label>
+            <select id="publishLanguage"></select>
+          </div>
+          <div>
+            <label for="publishHashtags">标签（逗号分隔）</label>
+            <input id="publishHashtags" type="text" placeholder="如：短剧,AI视频,Seedance" />
+          </div>
+          <div class="full">
+            <label for="publishTitle">通用标题</label>
+            <input id="publishTitle" type="text" placeholder="输入平台发布标题" />
+          </div>
+          <div class="full">
+            <label for="publishDescription">通用简介</label>
+            <textarea id="publishDescription" placeholder="输入平台发布简介与话题描述"></textarea>
+          </div>
+        </div>
+        <div class="publish-actions">
+          <button type="button" id="publishSaveBtn">保存配置</button>
+          <button type="button" class="primary" id="publishCheckBtn">开始审核</button>
+          <button type="button" id="publishExportBtn">导出发布包</button>
+        </div>
+        <div id="publishResult" class="publish-result">配置后可点击“开始审核”。</div>
+      </section>
       <div class="lanes-board" id="lanesBoard">
         <button type="button" class="add-tile" id="addLaneBtn" title="添加分镜任务">+</button>
       </div>
@@ -493,6 +591,19 @@
         },
       },
     };
+    const PUBLISH_PLATFORMS = [
+      { id: 'douyin', label: '抖音' },
+      { id: 'youtube', label: 'YouTube' },
+      { id: 'tiktok', label: 'TikTok' },
+      { id: 'x', label: 'X(推特)' },
+      { id: 'custom', label: '其他' },
+    ];
+    const PUBLISH_LANGUAGES = [
+      { id: 'zh-CN', label: '中文简体' },
+      { id: 'zh-TW', label: '中文繁体' },
+      { id: 'en', label: '英文' },
+      { id: 'ja', label: '日文' },
+    ];
 
     const RESTART_HINT = '请关闭旧的黑窗口，双击项目根目录 start_seedance_gui.bat 重新启动后再试。';
 
@@ -506,6 +617,61 @@
 
     function serverSupportsImageGeneration() {
       return serverFeatures.includes('image_generation') || serverApiVersion >= 11;
+    }
+
+    function serverSupportsPublishProfile() {
+      return serverFeatures.includes('publish_profile') || serverApiVersion >= 12;
+    }
+
+    function serverSupportsEpisodeAudit() {
+      return serverFeatures.includes('episode_content_audit') || serverApiVersion >= 13;
+    }
+
+    function defaultPublishProfile() {
+      return {
+        targets: [],
+        default_language: 'zh-CN',
+        content: {
+          title: '',
+          description: '',
+          hashtags: [],
+        },
+        platform_overrides: {},
+        last_validation_result: { platforms: {}, summary: { pass: 0, warn: 0, block: 0 } },
+        updated_at: '',
+      };
+    }
+
+    function normalizePublishProfile(input) {
+      const base = defaultPublishProfile();
+      const profile = input && typeof input === 'object' ? { ...base, ...input } : { ...base };
+      const content = profile.content && typeof profile.content === 'object' ? profile.content : {};
+      profile.content = {
+        title: String(content.title || '').trim(),
+        description: String(content.description || '').trim(),
+        hashtags: Array.isArray(content.hashtags)
+          ? content.hashtags.map(x => String(x || '').trim()).filter(Boolean)
+          : String(content.hashtags || '').split(',').map(x => x.trim()).filter(Boolean),
+      };
+      if (!PUBLISH_LANGUAGES.some(x => x.id === profile.default_language)) {
+        profile.default_language = 'zh-CN';
+      }
+      profile.targets = Array.isArray(profile.targets)
+        ? profile.targets.map(x => String(x || '').trim().toLowerCase()).filter(x => PUBLISH_PLATFORMS.some(p => p.id === x))
+        : [];
+      if (!profile.platform_overrides || typeof profile.platform_overrides !== 'object') {
+        profile.platform_overrides = {};
+      }
+      if (!profile.last_validation_result || typeof profile.last_validation_result !== 'object') {
+        profile.last_validation_result = base.last_validation_result;
+      }
+      return profile;
+    }
+
+    function ensureEpisodePublishProfile(episode) {
+      if (!episode) return defaultPublishProfile();
+      episode.publish_profile = normalizePublishProfile(episode.publish_profile);
+      return episode.publish_profile;
     }
 
     async function parseApiJson(res) {
@@ -828,6 +994,7 @@
             image_gen_sources: [],
             image_gen_generated: [],
           }],
+          publish_profile: defaultPublishProfile(),
         }],
       };
     }
@@ -842,7 +1009,15 @@
       if (!activeEpisodeId) return;
       const episode = findEpisode(activeEpisodeId);
       if (!episode) return;
-      episode.tasks = activeLaneCtrls.map(ctrl => ctrl.getSnapshot());
+      episode.tasks = activeLaneCtrls.map((ctrl, idx) => {
+        const prev = (episode.tasks || [])[idx] || {};
+        return { ...prev, ...ctrl.getSnapshot() };
+      });
+    }
+
+    function videoPreviewUrl(relPath) {
+      if (!relPath) return '';
+      return `/api/video?path=${encodeURIComponent(relPath)}&t=${Date.now()}`;
     }
 
     function scheduleSave() {
@@ -1154,6 +1329,7 @@
             const ep = findEpisode(activeEpisodeId);
             clearTaskBoard();
             if (ep) (ep.tasks || []).forEach((task, index) => mountTaskPanel(task, index + 1));
+            renderConcatTimeline(ep);
             return;
           }
           alert('删除接口不可用。' + RESTART_HINT);
@@ -1167,6 +1343,7 @@
         const ep = findEpisode(activeEpisodeId);
         clearTaskBoard();
         if (ep) (ep.tasks || []).forEach((task, index) => mountTaskPanel(task, index + 1));
+        renderConcatTimeline(ep);
         setSaveHint('已保存到本地', 'saved');
       } catch (err) {
         alert('删除分镜任务失败：' + err.message);
@@ -1220,8 +1397,11 @@
       if (!episode) return;
       updateActiveEpisodeTitle();
       showTaskView();
+      ensureEpisodePublishProfile(episode);
+      mountPublishPanel(episode);
       clearTaskBoard();
       (episode.tasks || []).forEach((task, index) => mountTaskPanel(task, index + 1));
+      restoreConcatBar(episode);
       scheduleSave();
     }
 
@@ -1230,66 +1410,392 @@
       activeEpisodeId = null;
       workspace.active_episode_id = null;
       clearTaskBoard();
-      const bar = document.getElementById('episodeConcatBar');
-      if (bar) bar.hidden = true;
+      const concatBar = document.getElementById('concatBar');
+      if (concatBar) concatBar.hidden = true;
+      const auditBar = document.getElementById('auditBar');
+      if (auditBar) auditBar.style.display = 'none';
+      hidePublishPanel();
       showEpisodeView();
       renderEpisodeBoard();
       scheduleSave();
     }
 
-    function updateConcatButtonState() {
-      const btn = document.getElementById('concatEpisodeBtn');
-      if (!btn) return;
-      const ok = serverSupportsConcat();
-      btn.disabled = !ok;
-      btn.title = ok
-        ? '按分镜任务1、2、3…顺序拼接各任务最新预览视频'
-        : '需要重启 GUI（api_version ≥ 9）后才可使用';
+    function restoreConcatBar(episode) {
+      const bar = document.getElementById('concatBar');
+      if (!bar) return;
+      bar.hidden = false;
+      renderConcatTimeline(episode);
+      if (episode.last_content_audit_result) {
+        renderAuditResult(episode.last_content_audit_result);
+      }
     }
 
-    async function concatActiveEpisode() {
-      if (!activeEpisodeId) return;
-      if (!serverSupportsConcat()) {
-        alert(`当前服务不支持一键拼接（api v${serverApiVersion || '?'}）。${RESTART_HINT}`);
-        return;
+    function renderConcatTimeline(episode) {
+      const wrap = document.getElementById('concatTimeline');
+      const track = document.getElementById('concatTimelineTrack');
+      if (!wrap || !track) return;
+      const tasks = episode?.tasks || [];
+      if (tasks.length < 2) { wrap.style.display = 'none'; return; }
+      wrap.style.display = 'block';
+      const saved = episode?.clip_segment_order;
+      let indices;
+      if (Array.isArray(saved) && saved.length === tasks.length && saved.every(i => i >= 0 && i < tasks.length)) {
+        indices = [...saved];
+      } else {
+        indices = tasks.map((_, i) => i);
       }
-      const btn = document.getElementById('concatEpisodeBtn');
-      const bar = document.getElementById('episodeConcatBar');
-      if (btn) btn.disabled = true;
-      if (bar) {
-        bar.hidden = false;
-        bar.textContent = '正在拼接，请稍候…';
-      }
+      const colors = ['#f97316','#8b5cf6','#06b6d4','#10b981','#f59e0b','#ef4444','#ec4899','#6366f1'];
+      track.innerHTML = indices.map((idx, pos) => `
+        <div class="clip-timeline-card" draggable="true" data-idx="${idx}" data-pos="${pos}">
+          <span class="drag-handle">⠿</span>
+          <div class="card-thumb" style="background:${colors[idx % colors.length]}">${idx + 1}</div>
+          <div class="card-label">${shotTaskLabel(idx)}</div>
+        </div>
+      `).join('');
+
+      let dragEl = null;
+      track.addEventListener('dragover', (e) => e.preventDefault());
+      track.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (!dragEl) return;
+        track.appendChild(dragEl);
+        persistSegmentOrderFromTrack();
+      });
+      track.querySelectorAll('.clip-timeline-card').forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+          dragEl = card;
+          card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        card.addEventListener('dragend', () => {
+          card.classList.remove('dragging');
+          track.querySelectorAll('.clip-timeline-card').forEach(c => c.classList.remove('drag-over'));
+          if (dragEl) { persistSegmentOrderFromTrack(); dragEl = null; }
+        });
+        card.addEventListener('dragover', (e) => { e.preventDefault(); card.classList.add('drag-over'); });
+        card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!dragEl || dragEl === card) return;
+          const after = card.nextSibling;
+          track.insertBefore(dragEl, after);
+          persistSegmentOrderFromTrack();
+        });
+      });
+    }
+
+    function persistSegmentOrderFromTrack() {
+      const track = document.getElementById('concatTimelineTrack');
+      if (!track) return;
+      const ep = findEpisode(activeEpisodeId);
+      if (!ep) return;
+      ep.clip_segment_order = Array.from(track.querySelectorAll('.clip-timeline-card')).map(el => parseInt(el.dataset.idx, 10));
+      scheduleSave();
+    }
+
+    function resetTimelineOrder() {
+      const ep = findEpisode(activeEpisodeId);
+      if (!ep) return;
+      delete ep.clip_segment_order;
+      renderConcatTimeline(ep);
+      scheduleSave();
+    }
+
+    async function concatPreview() {
+      const episode = findEpisode(activeEpisodeId);
+      if (!episode) return;
+      const ts = document.getElementById('timelineStatus');
+      const tlog = document.getElementById('timelineLog');
+      const preview = document.getElementById('concatPreview');
+      if (ts) ts.textContent = '正在生成预览…';
+      if (tlog) { tlog.style.display = 'block'; tlog.textContent = ''; }
       try {
-        const res = await fetch('/api/episodes/concat', {
+        const track = document.getElementById('concatTimelineTrack');
+        let segment_order;
+        if (track) {
+          segment_order = Array.from(track.querySelectorAll('.clip-timeline-card')).map(el => parseInt(el.dataset.idx, 10));
+        }
+        const res = await fetch('/api/clip/timeline-preview', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ episode_id: activeEpisodeId }),
+          body: JSON.stringify({ episode_id: activeEpisodeId, segment_order }),
         });
-        const data = await parseApiJson(res);
-        if (!res.ok || !data.ok) {
-          alert(data.error || '拼接失败');
-          if (bar) bar.hidden = true;
-          return;
-        }
-        const skipped = (data.skipped || []).length
-          ? `<p style="margin:4px 0 0;color:#b45309;">跳过无预览：${data.skipped.join('、')}</p>` : '';
-        if (bar) {
-          bar.innerHTML = `
-            <div>${data.message}：${(data.included || []).join(' → ')}</div>
-            <div>文件：<strong>${data.filename}</strong>
-              <a href="${data.preview_url}" target="_blank" rel="noopener">新窗口播放</a>
-              <a class="download-btn" href="${data.preview_url}" download="${data.filename}">下载视频</a></div>
-            ${skipped}
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || '预览失败');
+        if (data.preview_url && preview) {
+          preview.style.display = 'block';
+          preview.innerHTML = `
+            <div>时间线顺序预览</div>
+            <div><a href="${data.preview_url}" target="_blank" rel="noopener">新窗口播放</a>
+            <a class="download-btn" href="${data.preview_url}" download="timeline-preview.mp4">下载</a></div>
             <video controls playsinline preload="metadata" src="${data.preview_url}"></video>`;
-          bar.hidden = false;
         }
+        if (ts) ts.textContent = '预览就绪';
+        if (tlog) tlog.textContent = `已拼接 ${segment_order?.length || 0} 个片段`;
       } catch (err) {
-        alert('拼接失败：' + err.message);
-        if (bar) bar.hidden = true;
+        if (ts) ts.textContent = '预览失败';
+        if (tlog) tlog.textContent = '错误: ' + err.message;
+      }
+    }
+
+    async function concatRender() {
+      const episode = findEpisode(activeEpisodeId);
+      if (!episode) return;
+      const status = document.getElementById('concatStatus');
+      const track = document.getElementById('concatTimelineTrack');
+      if (!track) return;
+      const segment_order = Array.from(track.querySelectorAll('.clip-timeline-card')).map(el => parseInt(el.dataset.idx, 10));
+      if (status) status.textContent = '正在拼接…';
+      try {
+        const res = await fetch('/api/clip/timeline-preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ episode_id: activeEpisodeId, segment_order }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || '拼接失败');
+        const preview = document.getElementById('concatPreview');
+        if (preview) {
+          preview.style.display = 'block';
+          preview.innerHTML = `<a href="${data.preview_url}" target="_blank" class="download-btn">📥 下载拼接视频</a>
+            <video src="${data.preview_url}" controls style="display:block;width:100%;max-width:280px;margin-top:8px;border-radius:6px;background:#000;"></video>`;
+        }
+        if (status) status.textContent = '拼接完成 ✅';
+      } catch (err) {
+        if (status) status.textContent = '拼接失败: ' + err.message;
+      }
+    }
+
+    async function episodeAudit() {
+      const episode = findEpisode(activeEpisodeId);
+      if (!episode) return;
+      const btn = document.getElementById('auditBtn');
+      const status = document.getElementById('concatStatus');
+      if (btn) btn.disabled = true;
+      if (status) status.textContent = 'AI 正在审核全集…';
+      try {
+        const videoPath = episode.last_content_audit_result?.video_path || episode.concat_video_path || '';
+        const res = await fetch('/api/episodes/audit_content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ episode_id: activeEpisodeId, video_path: videoPath }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || '审核失败');
+        if (data.result) {
+          renderAuditResult(data.result);
+          episode.last_content_audit_result = data.result;
+        }
+        if (status) status.textContent = 'AI 审核完成 ✅';
+      } catch (err) {
+        if (status) status.textContent = '审核失败: ' + err.message;
       } finally {
         if (btn) btn.disabled = false;
       }
+    }
+
+    function updateConcatButtonState() {
+      // previously handled audit button state
+    }
+
+    function renderAuditResult(result) {
+      const bar = document.getElementById('auditBar');
+      if (!bar) return;
+      const items = Array.isArray(result.risk_items) ? result.risk_items : [];
+      const level = result.risk_level || 'medium';
+      const score = result.score_retention ? `${result.score_retention}/10` : '—';
+      const scoreComment = result.score_comment ? `（${result.score_comment}）` : '';
+      const levelColor = level === 'high' ? '#dc2626' : level === 'medium' ? '#d97706' : '#16a34a';
+      const density = result.information_density_diagnosis ? `<div style="margin:4px 0 0;"><strong>信息密度：</strong>${result.information_density_diagnosis}</div>` : '';
+      const conversion = result.game_conversion_diagnosis ? `<div style="margin:2px 0;"><strong>宣发转化：</strong>${result.game_conversion_diagnosis}</div>` : '';
+      const plans = Array.isArray(result.optimization_plans) ? result.optimization_plans : [];
+      const plansHtml = plans.length ? `<div style="margin:4px 0 0;"><strong>优化方案</strong><ul style="margin:2px 0 0 16px;padding:0;">${plans.map(p => `<li style="margin:2px 0;">${p}</li>`).join('')}</ul></div>` : '';
+      const listHtml = items.length ? `<ul style="margin:4px 0 0 16px;padding:0;">${items.map(item => `<li style="margin:2px 0;"><strong>${item.category || '风险点'}</strong>（${item.severity || 'medium'}）：${item.evidence || '无'}；建议：${item.suggestion || '按平台规范调整'}</li>`).join('')}</ul>` : '';
+      const notes = result.platform_notes && typeof result.platform_notes === 'object' ? Object.entries(result.platform_notes).filter(([, v]) => String(v || '').trim()).map(([k, v]) => `<li style="margin:2px 0;"><strong>${k}</strong>：${v}</li>`).join('') : '';
+      const notesHtml = notes ? `<div style="margin:4px 0 0;"><strong>平台建议</strong><ul style="margin:2px 0 0 16px;padding:0;">${notes}</ul></div>` : '';
+      const riskEmoji = level === 'high' ? '🔴' : level === 'medium' ? '🟡' : '🟢';
+      bar.innerHTML = `
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <span style="font-weight:700;font-size:13px;">AI 审核反馈</span>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;">
+          <span><strong>评分</strong> ${score}${scoreComment}</span>
+          <span><strong>风险</strong> <span style="color:${levelColor};font-weight:600;">${riskEmoji} ${level}</span></span>
+          <span><strong>结论</strong> ${result.summary || ''}</span>
+        </div>
+        ${density}
+        ${conversion}
+        ${plansHtml}
+        ${listHtml ? `<div style="margin-top:4px;"><strong>风险明细</strong>${listHtml}</div>` : ''}
+        ${notesHtml}
+      `;
+      bar.style.display = 'block';
+    }
+
+    function renderPublishTargets(selected) {
+      const wrap = document.getElementById('publishTargets');
+      if (!wrap) return;
+      const set = new Set(selected || []);
+      wrap.innerHTML = PUBLISH_PLATFORMS.map(item => `
+        <label>
+          <input type="checkbox" data-publish-target="${item.id}" ${set.has(item.id) ? 'checked' : ''} />
+          <span>${item.label}</span>
+        </label>
+      `).join('');
+    }
+
+    function renderPublishLanguageOptions(selected) {
+      const select = document.getElementById('publishLanguage');
+      if (!select) return;
+      select.innerHTML = PUBLISH_LANGUAGES.map(item => (
+        `<option value="${item.id}" ${item.id === selected ? 'selected' : ''}>${item.label}</option>`
+      )).join('');
+    }
+
+    function getPublishProfileFromForm() {
+      const targets = Array.from(document.querySelectorAll('[data-publish-target]:checked'))
+        .map(el => el.getAttribute('data-publish-target'))
+        .filter(Boolean);
+      return normalizePublishProfile({
+        targets,
+        default_language: document.getElementById('publishLanguage')?.value || 'zh-CN',
+        content: {
+          title: document.getElementById('publishTitle')?.value || '',
+          description: document.getElementById('publishDescription')?.value || '',
+          hashtags: (document.getElementById('publishHashtags')?.value || '')
+            .replace(/，/g, ',')
+            .split(',')
+            .map(x => x.trim())
+            .filter(Boolean),
+        },
+      });
+    }
+
+    function renderPublishResult(result) {
+      const box = document.getElementById('publishResult');
+      if (!box) return;
+      if (!result || !result.platforms) {
+        box.textContent = '配置后可点击“开始审核”。';
+        return;
+      }
+      const summary = result.summary || {};
+      const rows = Object.entries(result.platforms).map(([platform, data]) => {
+        const issues = data.issues || [];
+        const items = issues.map(item => (
+          `<li class="${item.level || ''}">[${item.level}] ${item.message}；建议：${item.suggestion}</li>`
+        )).join('');
+        return `<div><strong>${platform}</strong><ul>${items}</ul></div>`;
+      }).join('');
+      box.innerHTML = `
+        <div>审核汇总：<span class="pass">通过 ${summary.pass || 0}</span> /
+        <span class="warn">警告 ${summary.warn || 0}</span> /
+        <span class="block">阻断 ${summary.block || 0}</span></div>
+        ${rows}
+      `;
+    }
+
+    function mountPublishPanel(episode) {
+      const panel = document.getElementById('publishPanel');
+      if (!panel) return;
+      const profile = ensureEpisodePublishProfile(episode);
+      renderPublishTargets(profile.targets);
+      renderPublishLanguageOptions(profile.default_language);
+      document.getElementById('publishTitle').value = profile.content.title || '';
+      document.getElementById('publishDescription').value = profile.content.description || '';
+      document.getElementById('publishHashtags').value = (profile.content.hashtags || []).join(', ');
+      renderPublishResult(profile.last_validation_result);
+      panel.hidden = false;
+      panel.style.opacity = serverSupportsPublishProfile() ? '1' : '0.7';
+    }
+
+    function hidePublishPanel() {
+      const panel = document.getElementById('publishPanel');
+      if (panel) panel.hidden = true;
+    }
+
+    function savePublishProfileLocal() {
+      if (!activeEpisodeId) return null;
+      const episode = findEpisode(activeEpisodeId);
+      if (!episode) return null;
+      const profile = getPublishProfileFromForm();
+      profile.updated_at = new Date().toISOString();
+      episode.publish_profile = profile;
+      scheduleSave();
+      return profile;
+    }
+
+    async function savePublishProfileRemote() {
+      if (!activeEpisodeId) return;
+      const episode = findEpisode(activeEpisodeId);
+      if (!episode) return;
+      const profile = savePublishProfileLocal();
+      if (!profile) return;
+      if (!serverSupportsPublishProfile()) {
+        setSaveHint(`服务版本 v${serverApiVersion || '?'} 不支持平台发布接口，已本地保存`, 'saving');
+        return;
+      }
+      const res = await fetch('/api/publish_profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ episode_id: activeEpisodeId, publish_profile: profile }),
+      });
+      const data = await parseApiJson(res);
+      if (!res.ok || !data.ok) throw new Error(data.error || '保存平台配置失败');
+      episode.publish_profile = normalizePublishProfile(data.publish_profile || profile);
+      setSaveHint('平台发布配置已保存', 'saved');
+    }
+
+    async function runPublishPrecheck() {
+      if (!activeEpisodeId) return;
+      const episode = findEpisode(activeEpisodeId);
+      if (!episode) return;
+      const profile = savePublishProfileLocal();
+      if (!profile) return;
+      let result = null;
+      if (serverSupportsPublishProfile()) {
+        const res = await fetch('/api/publish_precheck', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ episode_id: activeEpisodeId, publish_profile: profile }),
+        });
+        const data = await parseApiJson(res);
+        if (!res.ok || !data.ok) throw new Error(data.error || '预检失败');
+        result = data.result;
+      } else {
+        throw new Error(`当前服务不支持平台审核（v${serverApiVersion || '?'}），请重启 GUI`);
+      }
+      episode.publish_profile.last_validation_result = result;
+      renderPublishResult(result);
+      scheduleSave();
+    }
+
+    async function exportPublishPackage() {
+      if (!activeEpisodeId) return;
+      const profile = savePublishProfileLocal();
+      if (!profile) return;
+      if (!serverSupportsPublishProfile()) {
+        throw new Error(`当前服务不支持平台导出（v${serverApiVersion || '?'}），请重启 GUI`);
+      }
+      const res = await fetch('/api/publish_export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ episode_id: activeEpisodeId, publish_profile: profile }),
+      });
+      const data = await parseApiJson(res);
+      if (!res.ok || !data.ok) throw new Error(data.error || '导出失败');
+      const filename = data.filename || `publish-package-${activeEpisodeId}.json`;
+      const text = JSON.stringify(data.export || {}, null, 2);
+      const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      renderPublishResult(data.result || null);
     }
 
     function buildLaneElement(laneId, index, canDeleteTask) {
@@ -1303,14 +1809,7 @@
           <h2>${shotTaskLabel(index)}</h2>
           <button type="button" class="btn-del" data-action="deleteLane" title="${delTitle}"${delDisabled}>删除</button>
         </div>
-        <section class="side paste-zone-video" data-role="controls" data-paste-zone="video"></section>
-        <section class="preview-side">
-          <div class="video-wrap">
-            <p class="preview-empty" data-role="previewEmpty">暂无视频，生成成功后将在此预览</p>
-            <video data-role="preview" controls playsinline preload="metadata" style="display:none;"></video>
-          </div>
-          <a class="task-download-btn" data-role="previewDownload" href="#" download hidden>下载当前分镜视频</a>
-          <p class="gen-status phase-idle" data-role="genStatus">就绪</p>
+        <section class="image-gen-side">
           <div class="image-gen-panel paste-zone-image" data-paste-zone="image">
             <h3>图片生成（Gemini）</h3>
             <p class="hint" style="margin:2px 0 6px;">模式固定：参考图 + 文本</p>
@@ -1333,11 +1832,22 @@
               <button type="button" data-action="clearGeneratedImage" disabled>清空</button>
             </div>
           </div>
+        </section>
+        <section class="side paste-zone-video" data-role="controls" data-paste-zone="video"></section>
+        <section class="preview-side" data-role="previewPanel">
+          <div class="video-wrap">
+            <p class="preview-empty" data-role="previewEmpty">暂无视频，生成成功后将在此预览</p>
+            <video data-role="previewVideo" controls playsinline preload="metadata" style="display:none;"></video>
+          </div>
+          <a class="task-download-btn" data-role="previewDownload" href="#" download hidden>下载当前分镜视频</a>
+          <p class="gen-status phase-idle" data-role="genStatus">就绪</p>
           <p class="run-log-label">运行日志</p>
           <div class="run-log-wrap" data-role="runLogWrap">
             <pre class="run-log" data-role="runLog">（点击「正式生成」后，原黑窗口输出会显示在这里）</pre>
           </div>
-        </section>`;
+
+        </section>
+        `;
       return el;
     }
 
@@ -1380,7 +1890,7 @@
         startPreview: q('startPreview'), endPreview: q('endPreview'),
         duration: q('duration'),
         ratio: q('ratio'),
-        preview: laneRoot.querySelector('[data-role="preview"]'),
+        preview: laneRoot.querySelector('[data-role="previewVideo"]'),
         previewEmpty: laneRoot.querySelector('[data-role="previewEmpty"]'),
         previewDownload: laneRoot.querySelector('[data-role="previewDownload"]'),
         genStatus: laneRoot.querySelector('[data-role="genStatus"]'),
@@ -1399,6 +1909,7 @@
         clearGeneratedImageBtn: laneRoot.querySelector('[data-action="clearGeneratedImage"]'),
         dryBtn: side.querySelector('[data-action="dry"]'),
         generateBtn: side.querySelector('[data-action="generate"]'),
+
         lastPreviewUrl: '',
       };
 
@@ -2033,7 +2544,7 @@
       }
 
       function setPreview(url) {
-        if (!url || url === ui.lastPreviewUrl) return;
+        if (!url || !ui.preview || url === ui.lastPreviewUrl) return;
         ui.lastPreviewUrl = url;
         ui.preview.src = url;
         ui.preview.style.display = 'block';
@@ -2046,9 +2557,17 @@
         ui.preview.load();
       }
 
+      function setPreviewFromPath(relPath) {
+        const rel = String(relPath || '').trim();
+        if (!rel) return;
+        setPreview(videoPreviewUrl(rel));
+      }
+
       const laneCtrl = {
         laneId,
+        setPreviewFromPath,
         refreshOutputLabel,
+        stateRef: state,
         getSnapshot() {
           return {
             lane_id: laneId,
@@ -2114,6 +2633,7 @@
         state.imageSources = (snapshot.image_gen_sources || []).map(refFromStored);
         state.generatedImages = (snapshot.image_gen_generated || []).map(refFromStored);
       }
+      // Probe duration if a preview video exists
       populateImageGenModels();
       if (snapshot && snapshot.image_gen_model) {
         const models = imageGenerationConfig.models || [];
@@ -2126,6 +2646,9 @@
       renderGeneratedImages();
       syncModePanels();
       refreshOptimizerUi();
+      if (snapshot && snapshot.last_export_path) {
+        laneCtrl.setPreviewFromPath(snapshot.last_export_path);
+      }
       activeLaneCtrls.push(laneCtrl);
 
       const delBtn = laneRoot.querySelector('[data-action="deleteLane"]');
@@ -2149,8 +2672,10 @@
       if (!activeEpisodeId) return;
       const res = await fetch('/api/lanes/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ episode_id: activeEpisodeId }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            episode_id: activeEpisodeId,
+          }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
@@ -2163,6 +2688,7 @@
         episode.tasks.push(data.task);
       }
       mountTaskPanel(data.task, activeLaneCtrls.length + 1);
+      renderConcatTimeline(episode);
       scheduleSave();
     }
 
@@ -2206,6 +2732,7 @@
               image_gen_sources: [],
               image_gen_generated: [],
             }],
+            publish_profile: defaultPublishProfile(),
           });
           if (await saveWorkspace()) {
             renderEpisodeBoard();
@@ -2244,6 +2771,7 @@
       if (!workspace.episodes || !workspace.episodes.length) {
         workspace = defaultClientWorkspace();
       }
+      workspace.episodes.forEach(ep => ensureEpisodePublishProfile(ep));
       return data.jobs || {};
     }
 
@@ -2258,28 +2786,73 @@
       }
     }
 
+    function initPublishPanelEvents() {
+      const saveBtn = document.getElementById('publishSaveBtn');
+      const checkBtn = document.getElementById('publishCheckBtn');
+      const exportBtn = document.getElementById('publishExportBtn');
+      const panel = document.getElementById('publishPanel');
+      if (!panel || !saveBtn || !checkBtn || !exportBtn) return;
+
+      panel.addEventListener('change', (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.matches('input,select,textarea')) {
+          savePublishProfileLocal();
+        }
+      });
+      panel.addEventListener('input', (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.matches('input,textarea')) {
+          savePublishProfileLocal();
+        }
+      });
+      saveBtn.addEventListener('click', async () => {
+        try {
+          await savePublishProfileRemote();
+        } catch (err) {
+          alert(`保存平台配置失败：${err.message}`);
+        }
+      });
+      checkBtn.addEventListener('click', async () => {
+        try {
+          await runPublishPrecheck();
+        } catch (err) {
+          alert(`平台预检失败：${err.message}`);
+        }
+      });
+      exportBtn.addEventListener('click', async () => {
+        try {
+          await exportPublishPackage();
+        } catch (err) {
+          alert(`导出发布包失败：${err.message}`);
+        }
+      });
+    }
+
     document.getElementById('addEpisodeBtn').addEventListener('click', () => addEpisode());
     document.getElementById('addLaneBtn').addEventListener('click', () => addTaskPanel());
     document.getElementById('backToEpisodes').addEventListener('click', () => leaveEpisode());
     document.getElementById('editActiveEpisode').addEventListener('click', () => {
       if (activeEpisodeId) editEpisode(activeEpisodeId);
     });
-    document.getElementById('concatEpisodeBtn').addEventListener('click', () => concatActiveEpisode());
+    document.getElementById('concatPreviewBtn').addEventListener('click', () => concatPreview());
+    document.getElementById('concatRenderBtn').addEventListener('click', () => concatRender());
+    document.getElementById('auditBtn').addEventListener('click', () => episodeAudit());
+    document.getElementById('concatResetBtn').addEventListener('click', () => resetTimelineOrder());
     initImageLightbox();
     initEpisodeModal();
     initEpisodeDragDrop();
+    initPublishPanelEvents();
 
     (async function boot() {
       const apiOk = await checkServerApi();
       updateConcatButtonState();
       const verEl = document.getElementById('serverVer');
       if (verEl) {
-        if (serverSupportsConcat()) {
+        if (serverApiVersion >= 7) {
           verEl.textContent = `服务 v${serverApiVersion} ✓`;
           verEl.style.color = '#15803d';
-        } else if (serverApiVersion >= 5) {
-          verEl.textContent = `服务 v${serverApiVersion}（需重启以支持拼接）`;
-          verEl.style.color = '#b45309';
         } else {
           verEl.textContent = `服务 v${serverApiVersion || '?'}（过旧，请重启 bat）`;
           verEl.style.color = '#b45309';

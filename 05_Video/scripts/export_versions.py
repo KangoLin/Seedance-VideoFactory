@@ -6,7 +6,8 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPORT_DIR = ROOT / "05_Video" / "exports"
+EXPORT_DIR = ROOT / "output" / "exports"
+SEGMENT_DIR = ROOT / "output" / "segments"
 _VERSION_SUFFIX = re.compile(r"_v(\d+)\.mp4$", re.IGNORECASE)
 
 
@@ -45,3 +46,41 @@ def export_version_label(output_slug: str, platform: str) -> str:
     if version < 1:
         return f"{output_slug}_{platform}_v001"
     return f"{output_slug}_{platform}_v{version:03d}"
+
+
+def find_latest_export_any_platform(output_slug: str) -> str | None:
+    if not EXPORT_DIR.is_dir():
+        return None
+    best_version = 0
+    best_path: Path | None = None
+    for path in EXPORT_DIR.glob(f"{output_slug}_*_v*.mp4"):
+        if not path.is_file():
+            continue
+        match = _VERSION_SUFFIX.search(path.name)
+        if not match:
+            continue
+        version = int(match.group(1))
+        if version > best_version or (
+            version == best_version
+            and best_path is not None
+            and path.stat().st_mtime > best_path.stat().st_mtime
+        ):
+            best_version = version
+            best_path = path
+        elif version == best_version and best_path is None:
+            best_version = version
+            best_path = path
+    if not best_path:
+        return None
+    return str(best_path.relative_to(ROOT)).replace("\\", "/")
+
+
+def find_latest_segment_rel(output_slug: str) -> str | None:
+    seg_dir = SEGMENT_DIR / output_slug
+    if not seg_dir.is_dir():
+        return None
+    candidates = [p for p in seg_dir.glob("*.mp4") if p.is_file()]
+    if not candidates:
+        return None
+    latest = max(candidates, key=lambda p: p.stat().st_mtime)
+    return str(latest.relative_to(ROOT)).replace("\\", "/")

@@ -1,6 +1,15 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
+
+:: 自动检测系统代理并设置环境变量（解决 Python 无法连接外网的问题）
+for /f "tokens=3" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /v ProxyServer 2^>nul') do set "PROXY_ADDR=%%a"
+for /f "tokens=3" %%a in ('reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /v ProxyEnable 2^>nul') do set "PROXY_ENABLE=%%a"
+if "%PROXY_ENABLE%"=="1" if not "%PROXY_ADDR%"=="" (
+    set "HTTP_PROXY=http://%PROXY_ADDR%"
+    set "HTTPS_PROXY=http://%PROXY_ADDR%"
+)
+
 echo 正在执行启动前体检...
 python 05_Video\scripts\preflight_check.py
 if errorlevel 1 (
