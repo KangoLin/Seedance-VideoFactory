@@ -60,6 +60,15 @@ python md_edit_project\run_webui.py   # md-edit 独立 Web UI（端口 8766）
 
 `start_seedance_gui.bat` 和 `seedance_gui.py` 均会从 Windows 注册表 `HKCU\...\Internet Settings` 读取系统代理并设置 `HTTP_PROXY`/`HTTPS_PROXY`。Python 内置 `urllib` 不走系统代理，代码中已做了自动适配，但环境变量优先级更高。
 
+## 版本号
+
+整个工具包版本号记录在项目根目录 `VERSION` 文件中，格式为纯文本版本号（如 `0.2.0`）。
+两个 Web UI 统一读取此文件并显示在页面标题旁：
+  - **种子视频 GUI**（端口 8765）：标题右侧 `v{{SEEDANCE_VERSION}}`
+  - **md-edit**（端口 8766）：标题右侧 `v{{MDEDIT_VERSION}}`
+ 
+**每次对任一工具修改代码后，必须递增 `VERSION` 文件中的版本号**（patch 或 minor，按变更幅度）。
+
 ## 测试 / Lint / 类型检查
 
 无测试框架，无 lint 配置，无类型检查。修改后需手动启动 GUI 验证。

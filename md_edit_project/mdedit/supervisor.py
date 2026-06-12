@@ -83,6 +83,7 @@ def run_supervisor(
     cache,
     force: bool = False,
     provider: str = "gemini",
+    target_language: str = "en",
     progress_callback=None,
 ) -> list[dict]:
     """
@@ -93,8 +94,15 @@ def run_supervisor(
     """
     import concurrent.futures
 
+    from .languages import get_language_instruction
+
     prompt_path = Path(__file__).parent / "prompts" / "supervisor_vision.txt"
     system_prompt = prompt_path.read_text(encoding="utf-8")
+    lang_instruction = get_language_instruction(target_language)
+    system_prompt = system_prompt.replace(
+        "2. Subtitle/text overlay suggestions (content, style, animation, position)",
+        f"2. Subtitle/text overlay suggestions (content, style, animation, position) - **{lang_instruction}**",
+    )
 
     def _progress(msg):
         logger.info(msg)
@@ -146,7 +154,7 @@ def run_supervisor(
                 user_prompt=user_prompt,
                 response_schema=SUPERVISOR_SCHEMA,
                 frame_paths=frame_paths,
-                provider="gemini",
+                provider=provider,
                 temperature=0.3,
             )
             if not isinstance(result, dict):

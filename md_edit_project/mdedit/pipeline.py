@@ -4,7 +4,7 @@ import os
 import re
 from pathlib import Path
 
-from .llm import call_llm_json, _call_gemini_text
+from .llm import call_llm_json, _call_gemini_text, _call_volc_text
 from .ffmpeg import trim_video, get_video_info, extract_frames
 
 logger = logging.getLogger(__name__)
@@ -100,6 +100,7 @@ def run_pipeline(
     enhance: bool = False,
     enhance_template: str = "douyin",
     supervisor: bool = True,
+    target_language: str = "en",
 ) -> dict:
     work_dir = Path(work_dir)
     work_dir.mkdir(parents=True, exist_ok=True)
@@ -125,20 +126,20 @@ def run_pipeline(
 
     # ---- Step 1.5: Extract keyframes ----
     frame_paths = None
-    if provider == "gemini":
-        _progress("Extracting keyframes for Gemini Vision analysis...")
+    if provider in ("gemini", "volc"):
+        _progress("Extracting keyframes for Vision analysis...")
         frame_dir = work_dir / "frames"
         timestamps = [(t["start_sec"] + t["end_sec"]) / 2 for t in tasks]
         frame_paths = extract_frames(video_path, timestamps, str(frame_dir), "scene")
         _progress(f"Extracted {len(frame_paths)} keyframes for {len(tasks)} scenes")
 
     # ---- Step 2: LLM analysis ----
-    _progress("Analyzing scenes with Gemini Vision..." if provider == "gemini" else "Analyzing scenes with LLM...")
+    _progress("Analyzing scenes with Gemini Vision..." if provider == "gemini" else ("Analyzing scenes with Volc Vision..." if provider == "volc" else "Analyzing scenes with LLM..."))
     context = _build_llm_context(tasks)
     total_duration = tasks[-1]["end_sec"]
 
-    system_prompt = _load_prompt("analyze_vision.txt" if provider == "gemini" else "analyze_combined.txt")
-    if provider == "gemini":
+    system_prompt = _load_prompt("analyze_vision.txt" if provider in ("gemini", "volc") else "analyze_combined.txt")
+    if provider in ("gemini", "volc"):
         user_prompt = f"Video duration: {total_duration:.1f}s\n\nThe {len(tasks)} images above are keyframes of each scene in order. Each image corresponds to the scene description below with the same index:\n\n{context}"
     else:
         user_prompt = f"Video duration: {total_duration:.1f}s\n\nScene descriptions (with timestamps):\n\n{context}"
@@ -244,11 +245,11 @@ def run_pipeline(
 
     # ---- Step 2.5: Supervisor (AI 监制) ----
     supervisor_suggestions_data = None
-    if supervisor and provider == "gemini" and clips:
+    if supervisor and provider in ("gemini", "volc") and clips:
         _progress("Running AI Supervisor analysis...")
         from .supervisor import run_supervisor
         clips = run_supervisor(
-            clips, video_path, str(work_dir), cache, force, provider, _progress
+            clips, video_path, str(work_dir), cache, force, provider, target_language, _progress
         )
         supervisor_suggestions_data = {
             str(c["id"]): c.get("supervisor_suggestions", {}) for c in clips
@@ -274,7 +275,7 @@ def run_pipeline(
         "pipeline_summary": {
             "scenes_loaded": len(tasks),
             "clips_found": len(clips),
-            "supervisor": supervisor and provider == "gemini",
+            "supervisor": supervisor and provider in ("gemini", "volc"),
             "enhanced": enhance,
             "enhance_template": enhance_template if enhance else None,
             "provider": provider,
@@ -327,8 +328,9 @@ def _analyze_single_clip(
     work_dir: Path,
     video_prompt: str,
     progress=None,
+    provider: str = "gemini",
 ) -> dict:
-    """Send a single clip to Gemini for analysis. Mutates and returns the clip dict."""
+    """Send a single clip for analysis. Mutates and returns the clip dict."""
     import re
 
     def _emit(msg: str):
@@ -347,18 +349,30 @@ def _analyze_single_clip(
         _emit(f"Clip {clip_id} video not found: {abs_path}")
         return clip
 
-    _emit(f"Sending clip {clip_id} ({clip.get('title', '')}) to Gemini...")
+    _emit(f"Sending clip {clip_id} ({clip.get('title', '')}) to {'Gemini' if provider == 'gemini' else 'Volc'}...")
     try:
-        analysis = _call_gemini_text(
-            system_prompt=video_prompt,
-            user_prompt=(
-                f"视频片段时长: {clip.get('duration', 0)}秒\n"
-                f"标题: {clip.get('title', '')}\n"
-                f"描述: {clip.get('description', '')}\n\n"
-                f"请详细分析这个视频片段。"
-            ),
-            video_path=abs_path,
-        )
+        if provider == "gemini":
+            analysis = _call_gemini_text(
+                system_prompt=video_prompt,
+                user_prompt=(
+                    f"视频片段时长: {clip.get('duration', 0)}秒\n"
+                    f"标题: {clip.get('title', '')}\n"
+                    f"描述: {clip.get('description', '')}\n\n"
+                    f"请详细分析这个视频片段。"
+                ),
+                video_path=abs_path,
+            )
+        else:
+            analysis = _call_volc_text(
+                system_prompt=video_prompt,
+                user_prompt=(
+                    f"视频片段时长: {clip.get('duration', 0)}秒\n"
+                    f"标题: {clip.get('title', '')}\n"
+                    f"描述: {clip.get('description', '')}\n\n"
+                    f"请详细分析这个视频片段。"
+                ),
+                video_path=abs_path,
+            )
         clip["gemini_analysis"] = analysis
 
         m = re.search(
@@ -388,8 +402,9 @@ def analyze_single_clip(
     work_dir: str,
     clip_id: int,
     progress_callback=None,
+    provider: str = "gemini",
 ) -> dict:
-    """Phase 2 (single): Send one clip video to Gemini for detailed analysis.
+    """Phase 2 (single): Send one clip video for detailed analysis.
 
     Loads manifest, runs _analyze_single_clip on the matched clip, persists.
     Returns {"clip": <updated clip dict>}.
@@ -415,7 +430,7 @@ def analyze_single_clip(
         raise RuntimeError(f"Clip {clip_id} not found in manifest")
 
     updated = _analyze_single_clip(
-        target, project_root, work_dir, video_prompt, progress_callback
+        target, project_root, work_dir, video_prompt, progress_callback, provider
     )
 
     for i, c in enumerate(clips):
@@ -555,6 +570,8 @@ def render_fine_cut(
     bgm_path: str | None = None,
     output_path: str | None = None,
     progress_callback=None,
+    target_language: str = "en",
+    provider: str = "gemini",
 ) -> dict:
     """阶段2：根据用户确认的监制建议执行精剪。"""
     work_dir = Path(work_dir)
@@ -616,8 +633,9 @@ def render_fine_cut(
         supervisor_prompt="",
         cache=cache,
         force=True,
-        provider="gemini",
+        provider=provider,
         supervisor_suggestions=analyses,
+        target_language=target_language,
     )
     edit_plan = plan.get("edit_plan", [])
     _progress(f"Edit plan: {len(edit_plan)} segments")

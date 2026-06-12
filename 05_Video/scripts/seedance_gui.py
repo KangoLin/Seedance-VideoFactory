@@ -92,6 +92,7 @@ MAX_JOB_LOG_LINES = 400
 EXIT_NO_NEW_VIDEO = 2
 DEEPSEEK_API_KEY_FILE = ROOT / "API_Key" / "deepseek_api_key.txt"
 GEMINI_API_KEY_FILE = ROOT / "API_Key" / "gemini_api_key.txt"
+VE_API_KEY_FILE = ROOT / "API_Key" / "VE_Key.txt"
 PROMPT_OPTIMIZER_PROVIDER = os.environ.get("PROMPT_OPTIMIZER_PROVIDER", "deepseek").strip().lower()
 DEEPSEEK_BASE_URL = os.environ.get(
     "DEEPSEEK_BASE_URL",
@@ -107,6 +108,9 @@ OPTIMIZER_MODELS = {
 }
 IMAGE_GENERATION_MODELS = ["gemini-3-pro-image-preview", "gemini-3.1-flash-image-preview", "gemini-2.5-flash-image"]
 DEFAULT_IMAGE_GENERATION_MODEL = os.environ.get("GEMINI_IMAGE_MODEL", IMAGE_GENERATION_MODELS[0])
+VOLC_IMAGE_GENERATION_MODELS = ["doubao-seedream-5-0-260128", "doubao-seedream-4-5-251128", "doubao-seedream-4-0-250828"]
+DEFAULT_VOLC_IMAGE_GENERATION_MODEL = os.environ.get("VOLC_IMAGE_MODEL", VOLC_IMAGE_GENERATION_MODELS[0])
+VOLC_BASE_URL = os.environ.get("VOLC_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3").rstrip("/")
 GEMINI_AUDIT_MODEL = os.environ.get("GEMINI_AUDIT_MODEL", "gemini-2.5-flash")
 GEMINI_AUDIT_TIMEOUT = int(os.environ.get("GEMINI_AUDIT_TIMEOUT", "180"))
 SUPERVISOR_PROMPT_FILE = ROOT / "游戏宣发漫剧_AI监制设定词.md"
@@ -233,10 +237,20 @@ def extract_episode_video_meta(episode: dict) -> dict:
     return {"duration": duration, "ratio": ratio}
 
 GUI_PAGE = SCRIPTS / "gui_page.html"
+VERSION_FILE = ROOT / "VERSION"
 
 
 def load_gui_html() -> str:
-    return GUI_PAGE.read_text(encoding="utf-8")
+    html = GUI_PAGE.read_text(encoding="utf-8")
+    ver = _read_version()
+    return html.replace("{{SEEDANCE_VERSION}}", ver)
+
+
+def _read_version() -> str:
+    try:
+        return VERSION_FILE.read_text(encoding="utf-8").strip()
+    except Exception:
+        return "0.0.0"
 
 
 def read_secret_file(path: Path) -> str:
@@ -285,11 +299,23 @@ def prompt_optimizer_config() -> dict:
 
 def image_generation_config() -> dict:
     return {
+        "providers": {
+            "gemini": {
+                "label": "Gemini",
+                "base_url": GEMINI_BASE_URL.rstrip("/"),
+                "default_model": DEFAULT_IMAGE_GENERATION_MODEL,
+                "models": IMAGE_GENERATION_MODELS,
+                "has_api_key": bool(load_prompt_optimizer_api_key("gemini")),
+            },
+            "volc": {
+                "label": "火山方舟",
+                "base_url": VOLC_BASE_URL,
+                "default_model": DEFAULT_VOLC_IMAGE_GENERATION_MODEL,
+                "models": VOLC_IMAGE_GENERATION_MODELS,
+                "has_api_key": bool(read_secret_file(VE_API_KEY_FILE)),
+            },
+        },
         "provider": "gemini",
-        "base_url": GEMINI_BASE_URL.rstrip("/"),
-        "default_model": DEFAULT_IMAGE_GENERATION_MODEL,
-        "models": IMAGE_GENERATION_MODELS,
-        "has_api_key": bool(load_prompt_optimizer_api_key("gemini")),
     }
 
 
@@ -606,6 +632,109 @@ def call_gemini_image_generation(payload: dict) -> dict:
         "note": "\n".join(note for note in notes if note),
     }
 
+
+def call_volc_image_generation(payload: dict) -> dict:
+    mode = str(payload.get("mode") or "text").strip().lower()
+    if mode not in {"text", "image", "text_image"}:
+        raise ValueError("图片生成模式无效")
+    prompt = str(payload.get("prompt") or "").strip()
+    source_images = normalize_image_gen_source_paths(payload)
+    model = str(payload.get("model") or DEFAULT_VOLC_IMAGE_GENERATION_MODEL).strip() or DEFAULT_VOLC_IMAGE_GENERATION_MODEL
+    lane_id = str(payload.get("lane_id") or "task").strip()
+
+    if mode in {"text", "text_image"} and not prompt:
+        raise ValueError("请填写图片生成提示词")
+    if mode in {"image", "text_image"} and not source_images:
+        raise ValueError("请上传用于图生图的参考图")
+    if len(source_images) > MAX_REFERENCE_IMAGES:
+        raise ValueError(f"图生图参考图最多 {MAX_REFERENCE_IMAGES} 张")
+    if mode == "image" and not prompt:
+        if len(source_images) > 1:
+            prompt = (
+                "请综合参考以上多张图片的主体、场景、风格与构图，生成一张新的图片，"
+                "保持关键元素一致并提升画面质量与细节。"
+            )
+        else:
+            prompt = "请基于参考图生成一张新的图片，保持主体特征与画面风格一致，提升构图与细节质量。"
+
+    api_key = read_secret_file(VE_API_KEY_FILE)
+    if not api_key:
+        raise RuntimeError("未配置火山方舟 API Key，请填写 API_Key/VE_Key.txt")
+
+    images_input = None
+    if source_images:
+        imgs = []
+        for rel in source_images:
+            source_path = resolve_upload_media_path(rel)
+            if media_kind(source_path) != "image":
+                raise ValueError("图生图只支持图片参考")
+            raw = source_path.read_bytes()
+            mime_type = MEDIA_TYPES.get(source_path.suffix.lower(), "image/png")
+            imgs.append(f"data:{mime_type};base64,{base64.b64encode(raw).decode('ascii')}")
+        images_input = imgs[0] if len(imgs) == 1 else imgs
+
+    url = f"{VOLC_BASE_URL}/images/generations"
+    body = {
+        "model": model,
+        "prompt": prompt,
+        "size": "2K",
+        "response_format": "b64_json",
+    }
+    if images_input:
+        body["image"] = images_input
+
+    last_err = None
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}",
+                },
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=PROMPT_OPTIMIZER_TIMEOUT * 2) as resp:
+                text = resp.read().decode("utf-8", errors="replace")
+            break
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")[:800]
+            last_err = f"火山方舟图片生成 HTTP {exc.code}: {detail}"
+            if attempt < 2:
+                time.sleep(2 ** attempt)
+        except urllib.error.URLError as exc:
+            raise RuntimeError(f"无法连接火山方舟图片生成接口 {url}") from exc
+    else:
+        raise RuntimeError(f"火山方舟图片生成失败: {last_err}")
+
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"火山方舟返回的不是 JSON: {text[:300]}") from exc
+
+    images: list[dict] = []
+    raw_data_list = data.get("data") if isinstance(data, dict) else None
+    if isinstance(raw_data_list, list):
+        for item in raw_data_list:
+            b64 = (item or {}).get("b64_json", "")
+            if not b64:
+                continue
+            try:
+                raw = base64.b64decode(b64)
+            except binascii.Error as exc:
+                raise RuntimeError("火山方舟返回的图片数据无效") from exc
+            images.append(save_generated_image(raw, "image/png", lane_id, len(images) + 1))
+
+    if not images:
+        raise RuntimeError("火山方舟没有返回图片，请换一个模型或调整提示词")
+    return {
+        "provider": "volc",
+        "model": model,
+        "mode": mode,
+        "source_count": len(source_images),
+        "images": images,
+    }
 
 
 def resolve_upload_path(rel_path: str) -> Path:
@@ -1420,6 +1549,8 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json(payload)
             return
         if parsed.path == "/api/media":
+            query = urllib.parse.parse_qs(parsed.query)
+            rel_path = (query.get("path") or [""])[0]
             try:
                 target = resolve_upload_media_path(rel_path)
             except ValueError:
@@ -1716,7 +1847,11 @@ class Handler(BaseHTTPRequestHandler):
     def handle_image_generate(self) -> None:
         try:
             payload = self.read_json_body()
-            result = call_gemini_image_generation(payload)
+            provider = str(payload.get("provider") or "gemini").strip().lower()
+            if provider == "volc":
+                result = call_volc_image_generation(payload)
+            else:
+                result = call_gemini_image_generation(payload)
             self.send_json({"ok": True, **result, "config": image_generation_config()})
         except (ValueError, json.JSONDecodeError) as exc:
             self.send_json({"ok": False, "error": str(exc)}, status=400)

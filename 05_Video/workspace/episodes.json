@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "episode_seq": 13,
-  "active_episode_id": "ep-11",
+  "episode_seq": 14,
+  "active_episode_id": "ep-14",
   "episodes": [
     {
       "id": "ep-8",
@@ -1456,9 +1456,28 @@
             "block": 0
           }
         },
-        "updated_at": ""
+        "updated_at": "2026-06-11T10:22:43.709Z"
       },
-      "concat_video_path": ""
+      "concat_video_path": "",
+      "clip_segment_order": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
     },
     {
       "id": "ep-12",
@@ -2843,6 +2862,64 @@
         18,
         19
       ]
+    },
+    {
+      "id": "ep-14",
+      "episode_no": 5,
+      "title": "第 5 集",
+      "tasks": [
+        {
+          "lane_id": "ep-14-task-1",
+          "asset": "GUI_QUICK",
+          "gen_mode": "reference",
+          "prompt": "一只猫在跳舞",
+          "duration": 4,
+          "ratio": "9:16",
+          "references": [
+            {
+              "path": "05_Video/uploads/20260611_182405_image.png",
+              "kind": "image",
+              "name": "image.png"
+            }
+          ],
+          "start_frame": null,
+          "end_frame": null,
+          "image_gen_mode": "text_image",
+          "image_gen_prompt": "一只橘猫",
+          "image_gen_model": "doubao-seedream-5-0-260128",
+          "image_gen_sources": [],
+          "image_gen_generated": [
+            {
+              "path": "05_Video/uploads/20260612_123613_ep-14-task-1_gen_1_6b88b6fc.png",
+              "kind": "image",
+              "name": "20260612_123613_ep-14-task-1_gen_1_6b88b6fc.png"
+            }
+          ],
+          "last_export_path": "output/exports/ep-5-task-1_TikTok_v001.mp4",
+          "output_slug": "ep-5-task-1",
+          "image_gen_provider": "volc"
+        }
+      ],
+      "publish_profile": {
+        "targets": [],
+        "default_language": "zh-CN",
+        "content": {
+          "title": "",
+          "description": "",
+          "hashtags": []
+        },
+        "platform_overrides": {},
+        "last_validation_result": {
+          "platforms": {},
+          "summary": {
+            "pass": 0,
+            "warn": 0,
+            "block": 0
+          }
+        },
+        "updated_at": ""
+      },
+      "concat_video_path": ""
     }
   ]
 }

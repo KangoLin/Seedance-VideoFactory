@@ -380,7 +380,7 @@
 </head>
 <body>
   <header>
-    <h1>AI Video Batch Console</h1>
+    <h1>AI Video Batch Console <span style="font-size:12px;font-weight:400;color:#888;margin-left:8px">v{{SEEDANCE_VERSION}}</span></h1>
     <span class="save-hint" id="saveHint">已同步到本地</span>
     <span class="save-hint" id="serverVer" style="margin-left:8px;color:#64748b;"></span>
   </header>
@@ -564,11 +564,23 @@
     let serverApiVersion = 0;
     let serverFeatures = [];
     let imageGenerationConfig = {
+      providers: {
+        gemini: {
+          label: 'Gemini',
+          base_url: 'https://generativelanguage.googleapis.com/v1beta',
+          default_model: 'gemini-3-pro-image-preview',
+          models: ['gemini-3-pro-image-preview', 'gemini-3.1-flash-image-preview', 'gemini-2.5-flash-image'],
+          has_api_key: false,
+        },
+        volc: {
+          label: '火山方舟',
+          base_url: 'https://ark.cn-beijing.volces.com/api/v3',
+          default_model: 'doubao-seedream-5-0-260128',
+          models: ['doubao-seedream-5-0-260128', 'doubao-seedream-4-5-251128', 'doubao-seedream-4-0-250828'],
+          has_api_key: false,
+        },
+      },
       provider: 'gemini',
-      base_url: 'https://generativelanguage.googleapis.com/v1beta',
-      default_model: 'gemini-3-pro-image-preview',
-      models: ['gemini-3-pro-image-preview', 'gemini-3.1-flash-image-preview', 'gemini-2.5-flash-image'],
-      has_api_key: false,
     };
     let promptOptimizerConfig = {
       provider: 'deepseek',
@@ -1071,6 +1083,7 @@
           serverFeatures = data.features || [];
           promptOptimizerConfig = data.prompt_optimizer || promptOptimizerConfig;
           imageGenerationConfig = data.image_generation || imageGenerationConfig;
+          if (window._imageGenRefreshFns) window._imageGenRefreshFns.forEach(function(fn) { fn(); });
           return true;
         }
         if (res.ok && data.ok && data.api_version >= 3) {
@@ -1811,8 +1824,14 @@
         </div>
         <section class="image-gen-side">
           <div class="image-gen-panel paste-zone-image" data-paste-zone="image">
-            <h3>图片生成（Gemini）</h3>
-            <p class="hint" style="margin:2px 0 6px;">模式固定：参考图 + 文本</p>
+            <h3>图片生成</h3>
+            <label>生成模式</label>
+            <select data-field="imageGenMode">
+              <option value="text_image">参考图 + 文本</option>
+              <option value="text">文本生图</option>
+            </select>
+            <label>生成引擎</label>
+            <select data-field="imageGenProvider"></select>
             <label>图片模型</label>
             <select data-field="imageGenModel"></select>
             <label>图片提示词</label>
@@ -1822,7 +1841,7 @@
               <input data-field="imageGenSourceFile" type="file" accept="image/png,image/jpeg,image/webp" />
               <button type="button" class="prompt-addon paste-ref-btn" data-action="pasteImageGenSource">粘贴到生图参考图</button>
               <div class="image-gen-source" data-field="imageGenSourcePreview"></div>
-              <p class="hint" style="margin-top:4px;">鼠标移入「图片生成」区后 Ctrl+V 粘贴；最多 9 张，生成时全部作为多图参考发给 Gemini</p>
+              <p class="hint" style="margin-top:4px;">鼠标移入「图片生成」区后 Ctrl+V 粘贴；最多 9 张，生成时全部作为多图参考</p>
             </div>
             <p class="image-gen-status" data-field="imageGenStatus">生成的图片会保存到 uploads，可一键加入当前任务参考图。</p>
             <button type="button" class="primary" data-action="generateImage">生成图片</button>
@@ -1897,6 +1916,8 @@
         runLog: laneRoot.querySelector('[data-role="runLog"]'),
         runLogWrap: laneRoot.querySelector('[data-role="runLogWrap"]'),
         imageGenModel: qLane('imageGenModel'),
+        imageGenProvider: qLane('imageGenProvider'),
+        imageGenMode: qLane('imageGenMode'),
         imageGenPrompt: qLane('imageGenPrompt'),
         imageGenSourceBlock: qLane('imageGenSourceBlock'),
         imageGenSourceFile: qLane('imageGenSourceFile'),
@@ -2032,16 +2053,41 @@
         ui.imageGenStatus.style.color = isError ? 'var(--danger)' : 'var(--muted)';
       }
 
+      function populateImageGenProviders() {
+        const providers = imageGenerationConfig.providers || {};
+        const keys = Object.keys(providers);
+        ui.imageGenProvider.innerHTML = keys.map(k =>
+          `<option value="${k}">${providers[k].label}</option>`
+        ).join('');
+        const preferred = imageGenerationConfig.provider || 'gemini';
+        if (keys.includes(preferred)) ui.imageGenProvider.value = preferred;
+      }
+
       function populateImageGenModels() {
-        const models = imageGenerationConfig.models || ['gemini-3-pro-image-preview'];
+        const prov = ui.imageGenProvider.value || 'gemini';
+        const cfg = (imageGenerationConfig.providers || {})[prov] || {};
+        const models = cfg.models || ['gemini-3-pro-image-preview'];
         ui.imageGenModel.innerHTML = models.map(model => `<option value="${model}">${model}</option>`).join('');
-        const preferred = imageGenerationConfig.default_model || models[0];
+        const preferred = cfg.default_model || models[0];
         ui.imageGenModel.value = models.includes(preferred) ? preferred : models[0];
       }
 
+      /* global registry for refresh after server config arrives */
+      if (!window._imageGenRefreshFns) window._imageGenRefreshFns = [];
+      window._imageGenRefreshFns.push(function() {
+        populateImageGenProviders();
+        populateImageGenModels();
+      });
+
       function syncImageGenMode() {
-        ui.imageGenSourceBlock.style.display = 'block';
-        ui.imageGenPrompt.placeholder = '描述要生成的图片主体、构图、风格、光线、细节。';
+        const mode = ui.imageGenMode.value || 'text_image';
+        if (mode === 'text') {
+          ui.imageGenSourceBlock.style.display = 'none';
+          ui.imageGenPrompt.placeholder = '描述要生成的图片主体、构图、风格、光线、细节。';
+        } else {
+          ui.imageGenSourceBlock.style.display = 'block';
+          ui.imageGenPrompt.placeholder = '描述要生成的图片主体、构图、风格、光线、细节。';
+        }
       }
 
       function renderImageSource() {
@@ -2070,12 +2116,17 @@
         ui.clearGeneratedImageBtn.disabled = !hasImages;
       }
 
+      function syncImageGenProvider() {
+        populateImageGenModels();
+        persistSoon();
+      }
+
       async function generateImage() {
         if (!serverSupportsImageGeneration()) {
           alert(`当前服务不支持图片生成（api v${serverApiVersion || '?'}）。${RESTART_HINT}`);
           return;
         }
-        const mode = 'text_image';
+        const mode = ui.imageGenMode.value || 'text_image';
         const prompt = ui.imageGenPrompt.value.trim();
         if (!prompt) {
           alert('请填写图片生成提示词');
@@ -2089,6 +2140,7 @@
         ui.generateImageBtn.disabled = true;
         ui.addGeneratedToRefsBtn.disabled = true;
         const refHint = sourcePaths.length > 1 ? `（${sourcePaths.length} 张参考图）` : '';
+        const provider = ui.imageGenProvider.value || 'gemini';
         updateImageGenStatus(`正在生成图片${refHint}，请稍候…`, false);
         try {
           const res = await fetch('/api/image/generate', {
@@ -2097,6 +2149,7 @@
             body: JSON.stringify({
               lane_id: laneId,
               mode,
+              provider: provider,
               model: ui.imageGenModel.value,
               prompt,
               source_images: sourcePaths,
@@ -2429,6 +2482,8 @@
 
       ui.imageGenPrompt.addEventListener('input', persistSoon);
       ui.imageGenModel.addEventListener('change', persistSoon);
+      ui.imageGenProvider.addEventListener('change', syncImageGenProvider);
+      ui.imageGenMode.addEventListener('change', function() { syncImageGenMode(); persistSoon(); });
       ui.imageGenSourceFile.addEventListener('change', async (e) => {
         const file = (e.target.files || [])[0];
         if (!file) return;
@@ -2581,9 +2636,10 @@
               ? { path: state.startFrame.path, kind: state.startFrame.kind, name: state.startFrame.name } : null,
             end_frame: state.endFrame
               ? { path: state.endFrame.path, kind: state.endFrame.kind, name: state.endFrame.name } : null,
-            image_gen_mode: 'text_image',
+            image_gen_mode: ui.imageGenMode.value || 'text_image',
             image_gen_prompt: ui.imageGenPrompt.value,
             image_gen_model: ui.imageGenModel.value,
+            image_gen_provider: ui.imageGenProvider.value,
             image_gen_sources: state.imageSources.map(({ path, kind, name }) => ({ path, kind, name })),
             image_gen_generated: state.generatedImages.map(({ path, kind, name }) => ({ path, kind, name })),
           };
@@ -2630,13 +2686,26 @@
         renderKfPreview(ui.startPreview, state.startFrame);
         renderKfPreview(ui.endPreview, state.endFrame);
         ui.imageGenPrompt.value = snapshot.image_gen_prompt || '';
+        if (snapshot.image_gen_mode && ['text','text_image'].includes(snapshot.image_gen_mode)) {
+          ui.imageGenMode.value = snapshot.image_gen_mode;
+        }
         state.imageSources = (snapshot.image_gen_sources || []).map(refFromStored);
         state.generatedImages = (snapshot.image_gen_generated || []).map(refFromStored);
       }
       // Probe duration if a preview video exists
+      populateImageGenProviders();
       populateImageGenModels();
+      if (snapshot && snapshot.image_gen_provider) {
+        const providers = imageGenerationConfig.providers || {};
+        if (providers[snapshot.image_gen_provider]) {
+          ui.imageGenProvider.value = snapshot.image_gen_provider;
+          populateImageGenModels();
+        }
+      }
       if (snapshot && snapshot.image_gen_model) {
-        const models = imageGenerationConfig.models || [];
+        const prov = ui.imageGenProvider.value || 'gemini';
+        const cfg = (imageGenerationConfig.providers || {})[prov] || {};
+        const models = cfg.models || [];
         if (models.includes(snapshot.image_gen_model)) {
           ui.imageGenModel.value = snapshot.image_gen_model;
         }

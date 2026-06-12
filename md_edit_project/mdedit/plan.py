@@ -2,6 +2,7 @@ import json
 import os
 from mdedit.llm import call_llm_json
 from mdedit.cache import Cache
+from mdedit.languages import LANGUAGE_NAMES
 
 
 PLAN_SCHEMA = {
@@ -124,7 +125,7 @@ Output JSON with:
 
 When supervisor suggestions are provided, incorporate them into the edit_plan. You may adjust intensity, timing, or omit suggestions that don't fit the overall episode flow.
 
-IMPORTANT: All text_overlay and subtitle text must be in English. Translate any Chinese content into natural, concise English suitable for short-form video subtitles."""
+IMPORTANT: All text_overlay and subtitle text must follow the target language specified in the user prompt."""
 
 
 def plan_episode(
@@ -135,6 +136,7 @@ def plan_episode(
     provider: str = "deepseek",
     frame_paths: list[str] | None = None,
     supervisor_suggestions: list[dict] | None = None,
+    target_language: str = "en",
 ) -> dict:
     cache_key = f"plan:{hash(json.dumps(analyses, sort_keys=True))}:{provider}"
     if not force:
@@ -163,6 +165,9 @@ def plan_episode(
                 + json.dumps(suggestions_map, ensure_ascii=False, indent=2)
             )
 
+    from .languages import get_language_instruction
+    lang_instruction = get_language_instruction(target_language)
+
     user_prompt = f"""Here are the per-clip analyses:
 
 {analyses_text}
@@ -171,8 +176,11 @@ def plan_episode(
 Supervisor instructions:
 {supervisor_prompt}
 
+Target language: {lang_instruction}
+
 Create the complete episode edit plan.
-Incorporate the supervisor suggestions (effects, transitions, subtitle_style, color_grade, emphasis_moments) into the edit_plan where appropriate. You may adjust or omit suggestions that don't fit the overall episode flow.{schema_hint}"""
+Incorporate the supervisor suggestions (effects, transitions, subtitle_style, color_grade, emphasis_moments) into the edit_plan where appropriate. You may adjust or omit suggestions that don't fit the overall episode flow.
+All text_overlay and subtitle text must be written in {LANGUAGE_NAMES.get(target_language, 'English')} ({target_language}).{schema_hint}"""
 
     result = call_llm_json(
         system_prompt=SYSTEM_PROMPT,

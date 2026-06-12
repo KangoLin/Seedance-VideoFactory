@@ -1,4 +1,4 @@
-<!-- md-edit v2026-06-05-catch-fixed -->
+<!-- md-edit v2026-06-11-tabbed -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -9,17 +9,97 @@
 <meta http-equiv="Expires" content="0">
 <title>md-edit Web UI</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: system-ui, -apple-system, sans-serif; background: #111; color: #e0e0e0; min-height: 100vh; }
+body { font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif; background: #0d0d0d; color: #e0e0e0; min-height: 100vh; }
 .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
-h1 { font-size: 22px; margin-bottom: 24px; color: #fff; letter-spacing: 0.5px; }
+h1 { font-size: 22px; margin-bottom: 20px; color: #fff; letter-spacing: 0.5px; }
 h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 10px; }
 .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.panel { background: #1a1a1a; border-radius: 10px; padding: 18px; border: 1px solid #2a2a2a; }
+
+/* Panel */
+.panel { background: #141414; border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.06); position: relative; overflow: hidden; }
+.panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); }
 .panel.full { grid-column: 1 / -1; }
-label { font-size: 13px; color: #aaa; display: block; margin-bottom: 4px; }
-select, input { width: 100%; background: #222; color: #e0e0e0; border: 1px solid #333; border-radius: 6px; padding: 8px 10px; font-size: 13px; font-family: inherit; }
-select:focus, input:focus { outline: none; border-color: #555; }
+
+/* Config Section */
+.config-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: #555; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.config-title::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+
+/* Form Grid */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 11px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Inputs & Selects */
+.form-group select,
+.form-group input {
+  width: 100%;
+  background: #1a1a1a;
+  color: #e0e0e0;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.form-group select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+.form-group select:hover,
+.form-group input:hover { border-color: rgba(255,255,255,0.15); }
+.form-group select:focus,
+.form-group input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+/* Checkbox Group */
+.checkbox-group { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+.checkbox-row { display: flex; align-items: center; gap: 10px; }
+.checkbox-custom { position: relative; width: 16px; height: 16px; }
+.checkbox-custom input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; z-index: 1; }
+.checkbox-custom .checkmark { position: absolute; top: 0; left: 0; width: 16px; height: 16px; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.12); border-radius: 4px; transition: all 0.2s ease; }
+.checkbox-custom input:checked + .checkmark { background: #3b82f6; border-color: #3b82f6; }
+.checkbox-custom input:checked + .checkmark::after { content: ''; position: absolute; left: 4px; top: 1px; width: 6px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.checkbox-label { font-size: 13px; color: #bbb; cursor: pointer; user-select: none; }
+.checkbox-label b { color: #e0e0e0; font-weight: 500; }
+
+/* Template Select */
+.template-select { margin-left: auto; flex: 0 0 160px; }
+.template-select select { width: 100%; }
+
+/* Actions */
+.actions { display: flex; gap: 12px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+.btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,0.3); }
+.btn-primary:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 12px rgba(59,130,246,0.4); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { background: #222; color: #555; cursor: not-allowed; box-shadow: none; }
+.btn-render { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; box-shadow: 0 2px 8px rgba(139,92,246,0.3); }
+.btn-render:hover { background: linear-gradient(135deg, #7c3aed, #6d28d9); box-shadow: 0 4px 12px rgba(139,92,246,0.4); transform: translateY(-1px); }
+.btn-render:disabled { background: #222; color: #555; cursor: not-allowed; box-shadow: none; }
+.btn-sm { padding: 5px 12px; font-size: 12px; background: #222; color: #bbb; border-radius: 4px; border: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: all 0.15s; }
+.btn-sm:hover { background: #2a2a2a; color: #fff; border-color: rgba(255,255,255,0.12); }
+.btn-sm.download { background: #0f2a3f; color: #60a5fa; border-color: rgba(96,165,250,0.2); }
+.btn-sm.download:hover { background: #163a52; }
+
+/* Progress */
+.progress { margin-top: 16px; max-height: 300px; overflow-y: auto; }
+.progress-entry { padding: 4px 0; font-size: 13px; color: #666; font-family: 'JetBrains Mono', 'Consolas', monospace; }
+.progress-entry.current { color: #4ade80; }
+.progress-entry.error { color: #f87171; }
+.progress-entry.done { color: #555; }
+
+/* Output Items */
+.output-item { display: flex; align-items: center; gap: 10px; padding: 6px; border-radius: 8px; cursor: pointer; font-size: 13px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 6px; transition: all 0.15s; position: relative; }
+.output-item:hover { background: #1a1a1a; border-color: rgba(255,255,255,0.12); }
+.output-item .output-thumb { width: 100px; height: 56px; object-fit: cover; border-radius: 4px; background: #111; flex: 0 0 auto; }
+.output-item .output-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.output-item .name { color: #e0e0e0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.output-item .size { color: #555; font-size: 11px; }
+.output-item .output-actions { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.empty { color: #444; font-size: 13px; padding: 20px; text-align: center; }
+
+/* Video Clip List */
 .clip-list { max-height: 260px; overflow-y: auto; border: 1px solid #2a2a2a; border-radius: 6px; padding: 4px; background: #151515; }
 .clip-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 13px; }
 .clip-item:hover { background: #222; }
@@ -28,139 +108,273 @@ select:focus, input:focus { outline: none; border-color: #555; }
 .clip-item .size { color: #666; font-size: 11px; white-space: nowrap; flex: 0 0 auto; }
 .search-box { width: 100%; background: #222; color: #e0e0e0; border: 1px solid #333; border-radius: 6px; padding: 7px 10px; font-size: 13px; margin-bottom: 8px; }
 .search-box:focus { outline: none; border-color: #555; }
-.btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-.btn-primary { background: #2563eb; color: #fff; }
-.btn-primary:hover { background: #1d4ed8; }
-.btn-primary:disabled { background: #334; color: #666; cursor: not-allowed; }
-.btn-render { background: #7c3aed; color: #fff; }
-.btn-render:hover { background: #6d28d9; }
-.btn-render:disabled { background: #334; color: #666; cursor: not-allowed; }
-.btn-sm { padding: 5px 12px; font-size: 12px; background: #2a2a2a; color: #bbb; border-radius: 4px; border: none; cursor: pointer; }
-.btn-sm:hover { background: #333; color: #fff; }
-.btn-sm.download { background: #1a3a5c; color: #4a9eff; }
-.btn-sm.download:hover { background: #1a4a7c; }
-.actions { display: flex; gap: 12px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
-.progress { margin-top: 16px; max-height: 300px; overflow-y: auto; }
-.progress-entry { padding: 4px 0; font-size: 13px; color: #999; font-family: 'Consolas', 'Courier New', monospace; }
-.progress-entry.current { color: #4ade80; }
-.progress-entry.error { color: #f87171; }
-.progress-entry.done { color: #666; }
-.output-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; border: 1px solid #2a2a2a; margin-bottom: 4px; }
-.output-item:hover { background: #222; border-color: #444; }
-.output-item .name { flex: 1; }
-.output-item .size { color: #666; font-size: 11px; }
-.empty { color: #555; font-size: 13px; padding: 20px; text-align: center; }
-.form-row { display: flex; gap: 12px; }
-.form-row > * { flex: 1; }
+
+/* Score Badges */
 .score-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
-.score-high { background: #14532d; color: #4ade80; }
-.score-mid { background: #3b2f0a; color: #facc15; }
-.score-low { background: #3b1212; color: #f87171; }
-.clip-card { background: #151515; border: 1px solid #2a2a2a; border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
-.clip-card video { width: 100%; display: block; background: #000; max-height: 200px; }
+.score-high { background: #052e16; color: #4ade80; }
+.score-mid { background: #422006; color: #facc15; }
+.score-low { background: #450a0a; color: #f87171; }
+
+/* Clip Cards */
+.clip-card { background: #111; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
 .clip-card .info { padding: 12px; }
 .clip-card .info .title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
-.clip-card .info .desc { font-size: 13px; color: #999; margin-bottom: 8px; }
-.clip-card .info .meta { display: flex; gap: 16px; font-size: 12px; color: #666; flex-wrap: wrap; }
+.clip-card .info .desc { font-size: 13px; color: #888; margin-bottom: 8px; }
+.clip-card .info .meta { display: flex; gap: 16px; font-size: 12px; color: #555; flex-wrap: wrap; }
 .clip-card .info .meta span { display: flex; align-items: center; gap: 4px; }
 .clip-card .info .actions { margin-top: 8px; }
-.player-panel { margin-top: 16px; }
-.player-panel video { width: 100%; border-radius: 8px; background: #000; }
-.download-link { display: inline-flex; align-items: center; gap: 6px; color: #4a9eff; text-decoration: none; font-size: 14px; }
-.download-link:hover { text-decoration: underline; }
-.supervisor-section { margin-top: 10px; padding: 10px; background: #1a1a2e; border-radius: 6px; border: 1px solid #2a2a4a; }
-.supervisor-header { font-size: 12px; color: #a78bfa; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Player */
+.player-panel video { width: 100%; border-radius: 8px; background: #000; max-height: 70vh; }
+
+/* Supervisor Suggestions */
+.supervisor-section { margin-top: 10px; padding: 10px; background: rgba(139,92,246,0.05); border-radius: 6px; border: 1px solid rgba(139,92,246,0.15); }
+.supervisor-header { font-size: 11px; color: #a78bfa; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 .suggestion-group { margin-bottom: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.suggestion-group .label { font-size: 11px; color: #888; min-width: 40px; flex: 0 0 auto; }
-.suggestion-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #2a2a4a; border-radius: 4px; font-size: 11px; color: #c4b5fd; cursor: pointer; user-select: none; }
-.suggestion-tag:hover { background: #3a3a5a; }
+.suggestion-group .label { font-size: 11px; color: #666; min-width: 40px; flex: 0 0 auto; }
+.suggestion-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2); border-radius: 4px; font-size: 11px; color: #c4b5fd; cursor: pointer; user-select: none; transition: all 0.15s; }
+.suggestion-tag:hover { background: rgba(139,92,246,0.15); }
 .suggestion-tag input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
 .suggestion-tag.disabled { opacity: 0.4; text-decoration: line-through; }
-.finecut-progress { margin-top: 10px; padding: 8px; background: #1a1a2e; border-radius: 6px; display: none; }
-.finecut-progress.active { display: block; }
-.gemini-analysis-text { width:100%; min-height:150px; background:#0a0a1a; color:#c4b5fd; border:1px solid #2a2a4a; border-radius:6px; padding:12px; font-size:12px; font-family:'Consolas','Courier New',monospace; line-height:1.5; resize:vertical; white-space:pre-wrap; margin-top:8px; }
-.clip-select-check { width:auto; margin:0 6px 0 0; cursor:pointer; transform:scale(1.2); }
+
+/* Gemini Analysis */
+.gemini-analysis-text { width:100%; min-height:150px; background:#0a0a12; color:#c4b5fd; border:1px solid rgba(139,92,246,0.2); border-radius:6px; padding:12px; font-size:12px; font-family:'JetBrains Mono','Consolas',monospace; line-height:1.5; resize:vertical; white-space:pre-wrap; margin-top:8px; }
+.clip-select-check { width:auto; margin:0 6px 0 0; cursor:pointer; transform:scale(1.2); accent-color: #3b82f6; }
+
+/* Tabs */
+.tabs { display: flex; gap: 2px; margin-bottom: 20px; background: #111; border-radius: 10px; padding: 3px; border: 1px solid rgba(255,255,255,0.06); }
+.tab { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; background: transparent; color: #555; transition: all 0.2s; flex: 1; text-align: center; }
+.tab:hover { color: #888; }
+.tab.active { background: #1a1a1a; color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Cinematic Section */
+.cinematic-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>md-edit · AutoClip 切片工具</h1>
+  <h1>md-edit · AutoClip <span id="versionBadge" style="font-size:12px;font-weight:400;color:#888;margin-left:8px">v{{MDEDIT_VERSION}}</span></h1>
 
-  <div class="layout">
-    <div class="panel" id="clipPanel">
-      <h2>拼接视频</h2>
-      <input class="search-box" id="search" placeholder="搜索..." oninput="loadClips(this.value)">
-      <div class="clip-list" id="clipList"></div>
-      <div id="clipPreview" style="display:none;margin-top:10px">
-        <video id="clipPlayer" controls style="width:100%;border-radius:6px;background:#000;max-height:240px"></video>
-      </div>
+  <!-- Shared: Video selector -->
+  <div class="panel" style="margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <h2 style="margin:0;white-space:nowrap">拼接视频</h2>
+      <input class="search-box" id="search" placeholder="搜索..." oninput="loadClips(this.value)" style="flex:1;margin:0">
     </div>
+    <div class="clip-list" id="clipList"></div>
+    <div id="clipPreview" style="display:none;margin-top:10px">
+      <video id="clipPlayer" controls style="width:100%;border-radius:6px;background:#000;max-height:240px"></video>
+    </div>
+  </div>
 
-    <div class="panel">
-      <h2>配置</h2>
-      <div class="form-row">
-        <div>
-          <label for="provider">LLM 提供商</label>
-          <select id="provider">
-            <option value="gemini">Gemini</option>
-            <option value="deepseek">DeepSeek（仅文本）</option>
-          </select>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="tabClips">🎬 高光切片</button>
+    <button class="tab" data-tab="tabCinematic">🎥 电影感精剪</button>
+  </div>
+
+  <!-- ==================== TAB 1: 高光切片 ==================== -->
+  <div id="tabClips" class="tab-content active">
+    <div class="layout">
+      <div class="panel">
+        <div class="config-title">配置</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="provider">LLM 提供商</label>
+            <select id="provider">
+              <option value="gemini">Gemini</option>
+              <option value="volc">火山方舟（豆包视觉）</option>
+              <option value="deepseek">DeepSeek（仅文本）</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="targetLang">字幕语言</label>
+            <select id="targetLang">
+              <option value="en">English</option>
+              <option value="th">[东南亚] ไทย</option>
+              <option value="vi">[东南亚] Tiếng Việt</option>
+              <option value="id">[东南亚] Bahasa Indonesia</option>
+              <option value="ms">[东南亚] Bahasa Melayu</option>
+              <option value="fil">[东南亚] Filipino</option>
+              <option value="ja">[日韩] 日本語</option>
+              <option value="ko">[日韩] 한국어</option>
+              <option value="es">[拉美] Español</option>
+              <option value="pt">[拉美] Português</option>
+              <option value="fr">[欧洲] Français</option>
+              <option value="de">[欧洲] Deutsch</option>
+              <option value="it">[欧洲] Italiano</option>
+              <option value="nl">[欧洲] Nederlands</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="minScore">最低评分</label>
+            <input type="number" id="minScore" value="60" min="0" max="100">
+          </div>
+          <div class="form-group">
+            <label for="maxClips">最多切片数</label>
+            <input type="number" id="maxClips" value="10" min="1" max="50">
+          </div>
         </div>
-        <div>
-          <label for="minScore">最低评分（0-100）</label>
-          <input type="number" id="minScore" value="60" min="0" max="100">
+        <div class="checkbox-group" style="margin-top:14px">
+          <div class="checkbox-row">
+            <label class="checkbox-custom">
+              <input type="checkbox" id="enhanceCheck">
+              <span class="checkmark"></span>
+            </label>
+            <span class="checkbox-label"><b>精修</b> 字幕+特效+调色+转场</span>
+            <div class="template-select">
+              <select id="templateSelect">
+                <option value="douyin">🎯 抖音风格</option>
+                <option value="cinema">🎬 电影字幕风格</option>
+                <option value="kinetic">🔥 动感文字风格</option>
+              </select>
+            </div>
+          </div>
+          <div class="checkbox-row">
+            <label class="checkbox-custom">
+              <input type="checkbox" id="supervisorCheck" checked>
+              <span class="checkmark"></span>
+            </label>
+            <span class="checkbox-label"><b>AI 监制</b> Gemini 建议特效/字幕/调色/转场</span>
+          </div>
+          <div class="form-group" style="margin-top:10px">
+            <label for="fineCutProvider">精剪执行模型</label>
+            <select id="fineCutProvider">
+              <option value="gemini">Gemini</option>
+              <option value="volc">火山方舟（豆包视觉）</option>
+              <option value="deepseek">DeepSeek（仅文本）</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" id="runBtn" onclick="runPipeline()">🚀 开始分析</button>
+          <button class="btn btn-render" id="geminiAnalyzeBtn" onclick="analyzeClips()" style="display:none">🤖 Gemini3 分析切片</button>
+          <button class="btn btn-render" id="smartCutBtn" onclick="startSmartCut()" style="display:none;background:#059669">⚡ 智能精剪</button>
+          <button class="btn btn-render" id="fineCutBtn" onclick="startRefineCut()" style="display:none">✂ 开始精剪</button>
+          <span id="clipsStatus" style="font-size:13px;color:#888"></span>
         </div>
       </div>
-      <div style="margin-top:10px">
-        <label for="maxClips">最多切片数</label>
-        <input type="number" id="maxClips" value="10" min="1" max="50">
+
+      <div class="panel" style="display:flex;flex-direction:column;justify-content:center;align-items:center">
+        <div style="color:#444;font-size:13px;line-height:1.8;text-align:center">
+          <div style="font-size:36px;margin-bottom:12px;opacity:0.6">🎬</div>
+          <div>1. 选择视频 + 字幕语言 → <b style="color:#666">开始分析</b></div>
+          <div>2. 勾选/取消需保留的片段 → <b style="color:#666">⚡ 智能精剪</b></div>
+          <div>3. 或切换 AI 监制建议 → <b style="color:#666">✂ 开始精剪</b></div>
+        </div>
       </div>
-      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
-        <label><input type="checkbox" id="enhanceCheck"> 精修（字幕+特效+调色+转场）</label>
-        <select id="templateSelect" style="flex:1;background:#222;color:#e0e0e0;border:1px solid #333;border-radius:6px;padding:7px 10px;font-size:13px;">
-          <option value="douyin">🎯 抖音风格</option>
-          <option value="cinema">🎬 电影字幕风格</option>
-          <option value="kinetic">🔥 动感文字风格</option>
-        </select>
+
+      <div class="panel full" id="clipsProgress" style="display:none">
+        <h2>进度</h2>
+        <div class="progress" id="clipsProgressList"></div>
       </div>
-      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
-        <label><input type="checkbox" id="supervisorCheck" checked> AI 监制（Gemini 建议特效/字幕/调色/转场）</label>
+
+      <div class="panel full" id="resultPanel" style="display:none">
+        <h2>高光片段</h2>
+        <div id="clipsContainer"></div>
+        <div id="rawAnalysisArea" style="display:none;margin-top:16px">
+          <h2>Gemini 原始分析 <span style="font-size:11px;color:#888;font-weight:400">（结构数据，下一步点🤖 Gemini3 分析获取详细文本建议）</span></h2>
+          <textarea id="rawAnalysisText" readonly style="width:100%;min-height:200px;background:#0a0a1a;color:#4ade80;border:1px solid #2a2a4a;border-radius:6px;padding:14px;font-size:12px;font-family:'Consolas','Courier New',monospace;line-height:1.5;resize:vertical;white-space:pre;margin-top:8px;"></textarea>
+        </div>
       </div>
-      <div class="actions">
-        <button class="btn btn-primary" id="runBtn" onclick="runPipeline()">🚀 开始分析</button>
-        <button class="btn btn-render" id="geminiAnalyzeBtn" onclick="analyzeClips()" style="display:none">🤖 Gemini3 分析切片</button>
-        <button class="btn btn-render" id="fineCutBtn" onclick="startRefineCut()" style="display:none">✂ 精简精剪</button>
-        <button class="btn btn-render" id="smartCutBtn" onclick="startSmartCut()" style="display:none;background:#059669">⚡ 智能精剪</button>
-        <span id="status" style="font-size:13px;color:#888"></span>
+
+      <div class="panel full" id="geminiAnalysisPanel" style="display:none">
+        <h2>Gemini3 切片分析</h2>
+        <div id="geminiAnalysisProgress" style="margin-bottom:10px;font-size:13px;color:#a78bfa"></div>
+        <div id="geminiAnalysisContent"></div>
+      </div>
+
+      <div class="panel full player-panel" id="clipsPlayer" style="display:none">
+        <h2>高光播放器</h2>
+        <video id="clipsPlayerVideo" controls></video>
+      </div>
+
+      <div class="panel full">
+        <h2>历史输出</h2>
+        <div id="outputList"></div>
       </div>
     </div>
+  </div>
 
-    <div class="panel full" id="progressPanel" style="display:none">
-      <h2>进度</h2>
-      <div class="progress" id="progress"></div>
-    </div>
-
-    <div class="panel full" id="resultPanel" style="display:none">
-      <h2>高光片段</h2>
-      <div id="clipsContainer"></div>
-      <div class="player-panel" id="playerPanel" style="display:none">
-        <video id="mainPlayer" controls></video>
+  <!-- ==================== TAB 2: 电影感精剪 ==================== -->
+  <div id="tabCinematic" class="tab-content">
+    <div class="layout">
+      <div class="panel">
+        <div class="config-title">配置</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="cinematicBgm">背景音乐</label>
+            <select id="cinematicBgm">
+              <option value="">无 BGM</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cinematicEdit">AI 剪辑强度</label>
+            <select id="cinematicEdit">
+              <option value="0">无剪辑</option>
+              <option value="1" selected>轻度剪辑</option>
+              <option value="2">强力剪辑</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cinematicProvider">LLM 提供商</label>
+            <select id="cinematicProvider">
+              <option value="gemini">Gemini</option>
+              <option value="volc">火山方舟（豆包视觉）</option>
+              <option value="deepseek">DeepSeek（仅文本）</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cinematicLang">字幕语言</label>
+            <select id="cinematicLang">
+              <option value="en">English</option>
+              <option value="th">[东南亚] ไทย</option>
+              <option value="vi">[东南亚] Tiếng Việt</option>
+              <option value="id">[东南亚] Bahasa Indonesia</option>
+              <option value="ms">[东南亚] Bahasa Melayu</option>
+              <option value="fil">[东南亚] Filipino</option>
+              <option value="ja">[日韩] 日本語</option>
+              <option value="ko">[日韩] 한국어</option>
+              <option value="es">[拉美] Español</option>
+              <option value="pt">[拉美] Português</option>
+              <option value="fr">[欧洲] Français</option>
+              <option value="de">[欧洲] Deutsch</option>
+              <option value="it">[欧洲] Italiano</option>
+              <option value="nl">[欧洲] Nederlands</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" id="cinematicBtn" onclick="startCinematic()" style="background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;box-shadow:0 2px 8px rgba(220,38,38,0.3)">🎬 开始电影感精剪</button>
+          <span id="cinematicStatus" style="font-size:13px;color:#666"></span>
+        </div>
+        <div style="margin-top:6px;font-size:11px;color:#555;letter-spacing:0.3px">AI 逐场生成多语言字幕 · 8% letterbox · 电影调色 · 可选 BGM（15%音量）</div>
       </div>
-      <div id="rawAnalysisArea" style="display:none;margin-top:16px">
-        <h2>Gemini 原始分析 <span style="font-size:11px;color:#888;font-weight:400">（结构数据，下一步点🤖 Gemini3 分析"获取详细文本建议）</span></h2>
-        <textarea id="rawAnalysisText" readonly style="width:100%;min-height:200px;background:#0a0a1a;color:#4ade80;border:1px solid #2a2a4a;border-radius:6px;padding:14px;font-size:12px;font-family:'Consolas','Courier New',monospace;line-height:1.5;resize:vertical;white-space:pre;margin-top:8px;"></textarea>
+
+      <div class="panel" style="display:flex;flex-direction:column;justify-content:center;align-items:center">
+        <div style="color:#444;font-size:13px;line-height:1.8;text-align:center">
+          <div style="font-size:36px;margin-bottom:12px;opacity:0.6">🎥</div>
+          <div>将整个拼接视频一键转为电影感成片</div>
+          <div style="color:#555">含 AI 字幕 · 调色 · 转场 · BGM 混音</div>
+        </div>
       </div>
-    </div>
 
-    <div class="panel full" id="geminiAnalysisPanel" style="display:none">
-      <h2>Gemini3 切片分析</h2>
-      <div id="geminiAnalysisProgress" style="margin-bottom:10px;font-size:13px;color:#a78bfa"></div>
-      <div id="geminiAnalysisContent"></div>
-    </div>
+      <div class="panel full" id="cinematicProgress" style="display:none">
+        <h2>进度</h2>
+        <div class="progress" id="cinematicProgressList"></div>
+      </div>
 
-    <div class="panel full">
-      <h2>历史输出</h2>
-      <div id="outputList"></div>
+      <div class="panel full player-panel" id="cinematicPlayer" style="display:none">
+        <h2>电影感播放器</h2>
+        <video id="cinematicPlayerVideo" controls></video>
+      </div>
+
+      <div class="panel full">
+        <h2>历史输出</h2>
+        <div id="cinematicOutputList"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -169,7 +383,19 @@ select:focus, input:focus { outline: none; border-color: #555; }
 let currentClips = [];
 let currentWorkDir = '';
 let currentSuggestions = {};
+let currentLang = 'en';
 
+/* ========== Tab switching ========== */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+/* ========== Shared: Video list ========== */
 async function loadClips(q) {
   const url = q ? `/api/clips?q=${encodeURIComponent(q)}` : '/api/clips';
   const r = await fetch(url);
@@ -193,25 +419,37 @@ function renderClips(clips) {
   `).join('');
 }
 
+function previewClipSrc(path, label) {
+  const preview = document.getElementById('clipPreview');
+  preview.style.display = 'block';
+  const player = document.getElementById('clipPlayer');
+  player.src = `/api/file/${path}`;
+  player.play();
+  const radio = document.querySelector(`input[name="video"][value="${path}"]`);
+  if (radio) radio.checked = true;
+}
+
+/* ========== Tab 1: 高光切片 Pipeline ========== */
 async function runPipeline() {
   const selected = document.querySelector('input[name="video"]:checked');
   if (!selected) { alert('请选择一个拼接视频'); return; }
 
   const btn = document.getElementById('runBtn');
-  const status = document.getElementById('status');
+  const status = document.getElementById('clipsStatus');
   btn.disabled = true;
-  status.textContent = '分析..';
+  status.textContent = '分析中...';
   document.getElementById('geminiAnalyzeBtn').style.display = 'none';
-  document.getElementById('fineCutBtn').style.display = 'none';
   document.getElementById('smartCutBtn').style.display = 'none';
+  document.getElementById('fineCutBtn').style.display = 'none';
   document.getElementById('geminiAnalysisPanel').style.display = 'none';
   document.getElementById('rawAnalysisArea').style.display = 'none';
-
   document.getElementById('resultPanel').style.display = 'none';
   document.getElementById('clipsContainer').innerHTML = '';
-  const progressPanel = document.getElementById('progressPanel');
+  document.getElementById('clipsPlayer').style.display = 'none';
+
+  const progressPanel = document.getElementById('clipsProgress');
   progressPanel.style.display = 'block';
-  const progressEl = document.getElementById('progress');
+  const progressEl = document.getElementById('clipsProgressList');
   progressEl.innerHTML = '';
 
   const enhance = document.getElementById('enhanceCheck').checked;
@@ -224,6 +462,7 @@ async function runPipeline() {
     enhance: enhance,
     enhance_template: enhance ? document.getElementById('templateSelect').value : null,
     supervisor: supervisor,
+    target_language: document.getElementById('targetLang').value || 'en',
   };
 
   const resp = await fetch('/api/run', {
@@ -257,14 +496,15 @@ async function runPipeline() {
           msg = '分析完成';
           extraClass = 'done';
           currentWorkDir = parsed.work_dir || '';
+          currentLang = parsed.target_language || 'en';
+          console.log('[DEBUG clips_ready]', JSON.stringify({clips_count: (parsed.clips||[]).length, keys: Object.keys(parsed)}));
           showClips(parsed);
           document.getElementById('resultPanel').style.display = 'block';
+          console.log('[DEBUG resultPanel display]', document.getElementById('resultPanel').style.display, 'clipsContainer innerHTML length:', document.getElementById('clipsContainer').innerHTML.length);
           document.getElementById('geminiAnalyzeBtn').style.display = 'inline-block';
+          document.getElementById('smartCutBtn').style.display = 'inline-block';
+          updateRefineBtn();
           document.getElementById('resultPanel').scrollIntoView({ behavior: 'smooth' });
-          setTimeout(function() {
-            var ra = document.getElementById('rawAnalysisArea');
-            if (ra && ra.style.display !== 'none') { ra.scrollIntoView({ behavior: 'smooth' }); }
-          }, 300);
         }
       } catch (e) {}
 
@@ -314,12 +554,16 @@ function showClips(data) {
   const el = document.getElementById('clipsContainer');
   const clips = data.clips || [];
   const sugMap = data.supervisor_suggestions || {};
+  console.log('[DEBUG showClips] clips count:', clips.length, 'sugMap keys:', Object.keys(sugMap));
+  if (clips.length === 0) {
+    el.innerHTML = '<div class="empty">DEBUG: clips array is empty. Data keys: ' + Object.keys(data).join(', ') + '</div>';
+    return;
+  }
 
   if (data.raw_analysis) {
     const area = document.getElementById('rawAnalysisArea');
     area.style.display = 'block';
     try {
-      // Pretty-print JSON for readability
       const pretty = JSON.stringify(JSON.parse(data.raw_analysis), null, 2);
       document.getElementById('rawAnalysisText').value = pretty;
     } catch (e) {
@@ -329,14 +573,15 @@ function showClips(data) {
 
   if (!clips.length) {
     el.innerHTML = '<div class="empty">未找到符合条件的高光片段</div>';
+    console.log('[DEBUG showClips] EMPTY clips');
     return;
   }
+  console.log('[DEBUG showClips] rendering', clips.length, 'clips');
 
   currentSuggestions = {};
   clips.forEach(c => {
     const cid = String(c.id);
     const raw = sugMap[cid] || c.supervisor_suggestions || {};
-    // Convert flat schema to nested for frontend
     const sug = {
       effects: raw.effects || [],
       transitions: {
@@ -375,7 +620,9 @@ function showClips(data) {
       if (sug.effects && sug.effects.length) {
         supervisorHtml += '<div class="suggestion-group"><span class="label">特效:</span>';
         sug.effects.forEach((fx, i) => {
-          supervisorHtml += `<label class="suggestion-tag" id="tag-fx-${cid}-${i}"><input type="checkbox" checked onchange="toggleSuggestion(${cid},'effects',${i},this.checked)">${fxLabel(fx.type)} (${fx.start_sec.toFixed(1)}s-${fx.end_sec.toFixed(1)}s)</label>`;
+          const fxType = (fx.type || '').split('_').slice(0, 2).join('_') || fx.type || 'unknown';
+          const fxStart = fx.start_sec != null ? ` (${fx.start_sec.toFixed(1)}s-${fx.end_sec.toFixed(1)}s)` : '';
+          supervisorHtml += `<label class="suggestion-tag" id="tag-fx-${cid}-${i}"><input type="checkbox" checked onchange="toggleSuggestion(${cid},'effects',${i},this.checked)">${fxLabel(fxType)}${fxStart}</label>`;
         });
         supervisorHtml += '</div>';
       }
@@ -383,7 +630,8 @@ function showClips(data) {
       if (sug.emphasis_moments && sug.emphasis_moments.length) {
         supervisorHtml += '<div class="suggestion-group"><span class="label">强调:</span>';
         sug.emphasis_moments.forEach((m, i) => {
-          supervisorHtml += `<label class="suggestion-tag" id="tag-em-${cid}-${i}"><input type="checkbox" checked onchange="toggleSuggestion(${cid},'emphasis',${i},this.checked)">${emphasisLabel(m.effect)} @${m.time_sec.toFixed(1)}s</label>`;
+          const mTime = m.time_sec != null ? ` @${m.time_sec.toFixed(1)}s` : '';
+          supervisorHtml += `<label class="suggestion-tag" id="tag-em-${cid}-${i}"><input type="checkbox" checked onchange="toggleSuggestion(${cid},'emphasis',${i},this.checked)">${emphasisLabel(m.effect)}${mTime}</label>`;
         });
         supervisorHtml += '</div>';
       }
@@ -413,7 +661,7 @@ function showClips(data) {
         <div class="title"><input type="checkbox" class="clip-select-check" id="clip-chk-${c.id}" checked onchange="updateRefineBtn()"> #${c.id} ${c.title} ${badge}</div>
         <div class="desc">${c.description}</div>
         <div class="meta">
-          <span>?${c.start_sec}s ?${c.end_sec}s (${c.duration}s)</span>
+          <span>&#9201; ${c.start_sec}s &#9202; ${c.end_sec}s (${c.duration}s)</span>
           <span><span class="score-badge ${scoreClass}">${c.score}</span></span>
           <span style="color:#888">${c.reason}</span>
         </div>
@@ -423,9 +671,9 @@ function showClips(data) {
           <textarea class="gemini-analysis-text" id="gemini-text-${c.id}" readonly></textarea>
         </div>
         <div class="actions">
-          <button class="btn-sm" onclick="previewClip('${videoSrc}')">?播放</button>
-          <a class="btn-sm download" href="${videoSrc}" download="${c.title}.mp4">?下载</a>
-          <button class="btn-sm gemini-analyze-btn" id="gemini-btn-${c.id}" onclick="analyzeSingleClip(${c.id})" style="background:#7c3aed;color:#fff;border:none">🤖 Gemini 分析</button>
+          <button class="btn-sm" onclick="previewClip('${videoSrc}')">&#9654; 播放</button>
+          <a class="btn-sm download" href="${videoSrc}" download="${c.title}.mp4">&#8615; 下载</a>
+          <button class="btn-sm gemini-analyze-btn" id="gemini-btn-${c.id}" onclick="analyzeSingleClip(${c.id})" style="background:#7c3aed;color:#fff;border:none">&#129302; Gemini 分析</button>
         </div>
       </div>
     </div>`;
@@ -500,7 +748,7 @@ function getAcceptedSuggestions() {
 function updateRefineBtn() {
   const checked = document.querySelectorAll('.clip-select-check:checked').length;
   const btn = document.getElementById('fineCutBtn');
-  btn.textContent = checked > 0 ? `✂ 精简精剪 (${checked}?` : '✂ 精简精剪';
+  btn.textContent = checked > 0 ? `✂ 开始精剪 (${checked}个)` : '✂ 开始精剪';
   btn.style.display = document.getElementById('geminiAnalyzeBtn').style.display === 'none' ? 'none' : 'inline-block';
 }
 
@@ -581,12 +829,12 @@ async function analyzeClips() {
   if (!currentWorkDir) { alert('请先运行分析'); return; }
 
   document.getElementById('geminiAnalyzeBtn').disabled = true;
-  document.getElementById('status').textContent = '分析..';
+  document.getElementById('clipsStatus').textContent = '分析中...';
 
   document.getElementById('geminiAnalysisPanel').style.display = 'block';
   document.getElementById('geminiAnalysisContent').innerHTML = '';
   const progEl = document.getElementById('geminiAnalysisProgress');
-  const progressEl = document.getElementById('progress');
+  const progressEl = document.getElementById('clipsProgressList');
 
   const resp = await fetch('/api/analyze_clips', {
     method: 'POST',
@@ -623,10 +871,7 @@ async function analyzeClips() {
             if (c.gemini_analysis) {
               const area = document.getElementById(`gemini-area-${c.id}`);
               const text = document.getElementById(`gemini-text-${c.id}`);
-              if (area && text) {
-                area.style.display = 'block';
-                text.value = c.gemini_analysis;
-              }
+              if (area && text) { area.style.display = 'block'; text.value = c.gemini_analysis; }
             }
             if (c.gemini_edit_plan && c.gemini_edit_plan.length) {
               const area = document.getElementById(`gemini-area-${c.id}`);
@@ -639,7 +884,7 @@ async function analyzeClips() {
                   if (op.op === 'speed') html += ` ${op.speed}x`;
                   if (op.op === 'zoom_in' || op.op === 'zoom_out') html += ` ${op.amount}x`;
                   if (op.op === 'crop') html += ` ${op.w}x${op.h}`;
-                  if (op.reason) html += ` ?${op.reason}`;
+                  if (op.reason) html += ` (${op.reason})`;
                   html += '</div>';
                 });
                 area.insertAdjacentHTML('beforeend', html);
@@ -665,7 +910,7 @@ async function analyzeClips() {
   }
 
   document.getElementById('geminiAnalyzeBtn').disabled = false;
-  document.getElementById('status').textContent = '';
+  document.getElementById('clipsStatus').textContent = '';
 }
 
 async function startRefineCut() {
@@ -675,13 +920,13 @@ async function startRefineCut() {
   if (!selectedIds.length) { alert('请至少选择一个片段'); return; }
 
   const btn = document.getElementById('fineCutBtn');
-  const status = document.getElementById('status');
+  const status = document.getElementById('clipsStatus');
   btn.disabled = true;
-  status.textContent = '精剪..';
+  status.textContent = '精剪中...';
 
-  const progressPanel = document.getElementById('progressPanel');
+  const progressPanel = document.getElementById('clipsProgress');
   progressPanel.style.display = 'block';
-  const progressEl = document.getElementById('progress');
+  const progressEl = document.getElementById('clipsProgressList');
 
   const accepted = getAcceptedSuggestions();
   const body = {
@@ -689,6 +934,8 @@ async function startRefineCut() {
     accepted_suggestions: accepted,
     selected_clip_ids: selectedIds,
     bgm: null,
+    target_language: currentLang,
+    provider: document.getElementById('fineCutProvider').value,
   };
 
   const resp = await fetch('/api/render', {
@@ -722,10 +969,10 @@ async function startRefineCut() {
           msg = '精剪完成';
           extraClass = 'done';
           loadOutputs();
-          const panel = document.getElementById('playerPanel');
+          const panel = document.getElementById('clipsPlayer');
           panel.style.display = 'block';
-          document.getElementById('mainPlayer').src = `/api/file/${parsed.output_path}`;
-          document.getElementById('mainPlayer').play();
+          document.getElementById('clipsPlayerVideo').src = `/api/file/${parsed.output_path}`;
+          document.getElementById('clipsPlayerVideo').play();
           panel.scrollIntoView({ behavior: 'smooth' });
         }
       } catch (e) {}
@@ -745,7 +992,6 @@ async function startRefineCut() {
   if (status.textContent !== '失败') status.textContent = '';
 }
 
-
 async function startSmartCut() {
   if (!currentWorkDir) { alert('请先运行分析'); return; }
 
@@ -753,13 +999,13 @@ async function startSmartCut() {
   if (!selectedIds.length) { alert('请至少选择一个片段'); return; }
 
   const btn = document.getElementById('smartCutBtn');
-  const status = document.getElementById('status');
+  const status = document.getElementById('clipsStatus');
   btn.disabled = true;
-  status.textContent = '智能精剪..';
+  status.textContent = '智能精剪中...';
 
-  const progressPanel = document.getElementById('progressPanel');
+  const progressPanel = document.getElementById('clipsProgress');
   progressPanel.style.display = 'block';
-  const progressEl = document.getElementById('progress');
+  const progressEl = document.getElementById('clipsProgressList');
 
   const body = {
     work_dir: currentWorkDir,
@@ -798,10 +1044,10 @@ async function startSmartCut() {
           msg = '智能精剪完成';
           extraClass = 'done';
           loadOutputs();
-          const panel = document.getElementById('playerPanel');
+          const panel = document.getElementById('clipsPlayer');
           panel.style.display = 'block';
-          document.getElementById('mainPlayer').src = `/api/file/${parsed.output_path}`;
-          document.getElementById('mainPlayer').play();
+          document.getElementById('clipsPlayerVideo').src = `/api/file/${parsed.output_path}`;
+          document.getElementById('clipsPlayerVideo').play();
           panel.scrollIntoView({ behavior: 'smooth' });
         }
       } catch (e) {}
@@ -822,50 +1068,171 @@ async function startSmartCut() {
 }
 
 function previewClip(src) {
-  const panel = document.getElementById('playerPanel');
+  const panel = document.getElementById('clipsPlayer');
   panel.style.display = 'block';
-  const player = document.getElementById('mainPlayer');
+  const player = document.getElementById('clipsPlayerVideo');
   player.src = src;
   player.play();
   panel.scrollIntoView({ behavior: 'smooth' });
 }
 
-function previewClipSrc(path, label) {
-  const preview = document.getElementById('clipPreview');
-  preview.style.display = 'block';
-  const player = document.getElementById('clipPlayer');
-  player.src = `/api/file/${path}`;
-  player.play();
-  const radio = document.querySelector(`input[name="video"][value="${path}"]`);
-  if (radio) radio.checked = true;
+/* ========== Tab 2: 电影感精剪 ========== */
+async function loadBgm() {
+  const r = await fetch('/api/bgm');
+  const data = await r.json();
+  const sel = document.getElementById('cinematicBgm');
+  sel.innerHTML = '<option value="">无 BGM</option>' + data.bgm.map(b =>
+    `<option value="${b.path}">${b.name}</option>`
+  ).join('');
 }
 
+async function loadLanguages() {
+  // Languages are preloaded in HTML; just ensure default selection
+  var sel1 = document.getElementById('targetLang');
+  if (sel1 && !sel1.value) sel1.value = 'en';
+  var sel2 = document.getElementById('cinematicLang');
+  if (sel2 && !sel2.value) sel2.value = 'en';
+}
+
+async function startCinematic() {
+  const selected = document.querySelector('input[name="video"]:checked');
+  if (!selected) { alert('请先选择一个拼接视频'); return; }
+
+  const btn = document.getElementById('cinematicBtn');
+  const status = document.getElementById('cinematicStatus');
+  btn.disabled = true;
+  status.textContent = '渲染中...';
+
+  const provider = document.getElementById('cinematicProvider').value;
+  const bgm = document.getElementById('cinematicBgm').value;
+  const editIntensity = parseInt(document.getElementById('cinematicEdit').value, 10);
+  const cinLang = document.getElementById('cinematicLang').value || 'en';
+
+  const progressPanel = document.getElementById('cinematicProgress');
+  progressPanel.style.display = 'block';
+  const progressEl = document.getElementById('cinematicProgressList');
+
+  const resp = await fetch('/api/cinematic_render', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      video_path: selected.value,
+      provider: provider,
+      bgm: bgm || null,
+      edit_intensity: editIntensity,
+      target_language: cinLang,
+    }),
+  });
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const payload = line.slice(6);
+      var msg = payload;
+      var extraClass = '';
+
+      try {
+        const parsed = JSON.parse(payload);
+        if (parsed.msg) {
+          msg = parsed.msg;
+        } else if (parsed.cinematic_done) {
+          msg = '电影感精剪完成';
+          extraClass = 'done';
+          loadOutputs();
+          const panel = document.getElementById('cinematicPlayer');
+          panel.style.display = 'block';
+          document.getElementById('cinematicPlayerVideo').src = `/api/file/${parsed.output_path}`;
+          document.getElementById('cinematicPlayerVideo').play();
+          panel.scrollIntoView({ behavior: 'smooth' });
+        }
+      } catch (e) {}
+
+      if (msg === 'DONE') continue;
+      if (msg.startsWith('ERROR:')) extraClass = 'error';
+
+      const div = document.createElement('div');
+      div.className = `progress-entry ${extraClass}`;
+      div.textContent = `> ${msg}`;
+      progressEl.appendChild(div);
+      progressEl.scrollTop = progressEl.scrollHeight;
+    }
+  }
+
+  btn.disabled = false;
+  if (status.textContent !== '渲染中...') status.textContent = '';
+}
+
+/* ========== Shared: Output History ========== */
 async function loadOutputs() {
   const r = await fetch('/api/outputs');
   const data = await r.json();
-  const el = document.getElementById('outputList');
-  if (!data.outputs.length) {
-    el.innerHTML = '<div class="empty">暂无输出</div>';
-    return;
-  }
-  el.innerHTML = data.outputs.map(o => `
-    <div class="output-item" onclick="playOutput('${o.path}')">
-      <span class="name">${o.name}</span>
-      <span class="size">${(o.size / 1024 / 1024).toFixed(1)}MB</span>
-    </div>
-  `).join('');
+  const lists = ['outputList', 'cinematicOutputList'];
+  lists.forEach(listId => {
+    const el = document.getElementById(listId);
+    if (!el) return;
+    if (!data.outputs.length) {
+      el.innerHTML = '<div class="empty">暂无输出</div>';
+      return;
+    }
+    el.innerHTML = data.outputs.map(o => {
+      const safePath = o.path.replace(/'/g, "\\'");
+      return `<div class="output-item">
+        <img class="output-thumb" src="${o.thumb}" alt="" loading="lazy"
+          onerror="this.style.display='none'"
+          onclick="playOutput('${safePath}')" title="点击预览">
+        <span class="output-info" onclick="playOutput('${safePath}')" title="点击预览">
+          <span class="name">${o.name}</span>
+          <span class="size">${(o.size / 1024 / 1024).toFixed(1)}MB</span>
+          <span class="output-actions">
+            <button class="btn-sm" onclick="event.stopPropagation(); playOutput('${safePath}')">▶ 播放</button>
+            <a class="btn-sm download" href="/api/file/${safePath}" download="${o.name}">⬇ 下载</a>
+            <button class="btn-sm" style="color:#f87171" onclick="event.stopPropagation(); deleteOutput('${safePath}','${o.name}')">✕ 删除</button>
+          </span>
+        </span>
+      </div>`;
+    }).join('');
+  });
 }
 
 function playOutput(path) {
-  const panel = document.getElementById('playerPanel');
-  panel.style.display = 'block';
-  document.getElementById('mainPlayer').src = `/api/file/${path}`;
-  document.getElementById('mainPlayer').play();
-  panel.scrollIntoView({ behavior: 'smooth' });
+  const url = '/api/file/' + path;
+  const activeTab = document.querySelector('.tab-content.active');
+  if (activeTab && activeTab.id === 'tabClips') {
+    const panel = document.getElementById('clipsPlayer');
+    const player = document.getElementById('clipsPlayerVideo');
+    if (panel && player) { panel.style.display = 'block'; player.src = url; player.play(); panel.scrollIntoView({ behavior: 'smooth' }); }
+  } else {
+    const panel = document.getElementById('cinematicPlayer');
+    const player = document.getElementById('cinematicPlayerVideo');
+    if (panel && player) { panel.style.display = 'block'; player.src = url; player.play(); panel.scrollIntoView({ behavior: 'smooth' }); }
+  }
+}
+
+async function deleteOutput(path, name) {
+  if (!confirm('确认删除 "' + name + '"？')) return;
+  try {
+    const r = await fetch('/api/file/' + path, { method: 'DELETE' });
+    if (!r.ok) { alert('删除失败: ' + r.status); return; }
+    loadOutputs();
+  } catch (e) {
+    alert('删除失败: ' + e.message);
+  }
 }
 
 loadClips();
 loadOutputs();
+loadBgm();
+loadLanguages();
 </script>
 </body>
 </html>

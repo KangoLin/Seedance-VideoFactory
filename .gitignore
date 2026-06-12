@@ -14,6 +14,9 @@ external_tools/deepseek-free-api/.venv/
 external_tools/deepseek-free-api/__pycache__/
 external_tools/deepseek-free-api/app/__pycache__/
 
+tmp/
+*.egg-info/
+
 # generated data
 .md_cache/
 *.log

@@ -1,12 +1,14 @@
 import base64
 import json
 import os
+import time
 import urllib.request
 import urllib.error
 import winreg
 
 
 _GEMINI_BASE_URL = None
+_VOLC_BASE_URL = os.environ.get("VOLC_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3").rstrip("/")
 
 
 _PROXY_SET = False
@@ -30,7 +32,8 @@ def _setup_proxy():
 
 
 def _load_api_key(provider: str) -> str:
-    fname = f"{provider}_api_key.txt"
+    fname_map = {"ve": "VE_Key.txt"}
+    fname = fname_map.get(provider, f"{provider}_api_key.txt")
     paths = [
         os.path.join("API_Key", fname),
         os.path.join(os.path.dirname(__file__), "..", "..", "API_Key", fname),
@@ -159,6 +162,163 @@ def _call_gemini_text(
     if not text or not text.strip():
         raise RuntimeError(f"Empty response: {json.dumps(result, ensure_ascii=False)[:500]}")
     return text.strip()
+
+
+def _call_volc_text(
+    system_prompt: str,
+    user_prompt: str,
+    video_path: str | None = None,
+    model: str = "doubao-seed-2-0-lite-251228",
+    temperature: float = 0.3,
+) -> str:
+    api_key = _load_api_key("ve")
+    url = f"{_VOLC_BASE_URL}/chat/completions"
+
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    user_content = user_prompt
+    if video_path:
+        import subprocess, tempfile, uuid
+        from pathlib import Path
+        frame_dir = tempfile.mkdtemp(prefix="volc_frames_")
+        try:
+            dur = _get_video_duration(video_path)
+            timestamps = [dur * 0.25, dur * 0.5, dur * 0.75]
+            frame_paths = []
+            for i, ts in enumerate(timestamps):
+                out = os.path.join(frame_dir, f"frame_{i:03d}.jpg")
+                subprocess.run(
+                    ["ffmpeg", "-ss", str(ts), "-i", video_path, "-vframes", "1", "-q:v", "3", "-y", out],
+                    capture_output=True, timeout=60
+                )
+                if os.path.isfile(out):
+                    frame_paths.append(out)
+            parts = []
+            for fp in frame_paths:
+                with open(fp, "rb") as f:
+                    b64 = base64.b64encode(f.read()).decode()
+                parts.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}})
+            parts.append({"type": "text", "text": user_prompt})
+            user_content = parts
+        finally:
+            for f in os.listdir(frame_dir):
+                try:
+                    os.unlink(os.path.join(frame_dir, f))
+                except Exception:
+                    pass
+            try:
+                os.rmdir(frame_dir)
+            except Exception:
+                pass
+    messages.append({"role": "user", "content": user_content})
+
+    body = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+    }
+    last_err = None
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}",
+                },
+            )
+            with urllib.request.urlopen(req, timeout=300) as resp:
+                result = json.loads(resp.read().decode("utf-8", errors="replace"))
+            break
+        except (urllib.error.HTTPError, urllib.error.URLError, json.JSONDecodeError) as e:
+            last_err = str(e)
+            if attempt < 2:
+                time.sleep(2 ** attempt)
+    else:
+        raise RuntimeError(f"Volc API failed after 3 retries: {last_err}")
+
+    choices = result.get("choices", [])
+    if not choices:
+        raise RuntimeError(f"No choices: {json.dumps(result, ensure_ascii=False)[:500]}")
+    text = choices[0].get("message", {}).get("content", "")
+    if not text or not text.strip():
+        raise RuntimeError(f"Empty response: {json.dumps(result, ensure_ascii=False)[:500]}")
+    return text.strip()
+
+
+def _call_volc(
+    system_prompt: str,
+    user_prompt: str,
+    response_schema: dict,
+    frame_paths: list[str] | None = None,
+    model: str = "doubao-seed-1-8-251228",
+    temperature: float = 0.2,
+) -> dict:
+    api_key = _load_api_key("ve")
+    url = f"{_VOLC_BASE_URL}/chat/completions"
+
+    json_constraint = "\n\nYou MUST output ONLY valid JSON, no markdown, no code fences, no other text."
+    sys_content = (system_prompt or "") + json_constraint
+    messages = []
+    if sys_content.strip():
+        messages.append({"role": "system", "content": sys_content})
+    if frame_paths:
+        parts = []
+        for fp in frame_paths:
+            with open(fp, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode()
+            parts.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}})
+        parts.append({"type": "text", "text": user_prompt})
+        messages.append({"role": "user", "content": parts})
+    else:
+        messages.append({"role": "user", "content": user_prompt})
+
+    body = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+    }
+
+    last_err = None
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}",
+                },
+            )
+            with urllib.request.urlopen(req, timeout=180) as resp:
+                raw_text = resp.read().decode("utf-8", errors="replace")
+            result = json.loads(raw_text)
+            break
+        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+            last_err = str(e)
+            if attempt < 2:
+                time.sleep(2 ** attempt)
+        except json.JSONDecodeError as e:
+            last_err = f"JSON parse error: {e}. Response: {raw_text[:200]}"
+            if attempt < 2:
+                time.sleep(2 ** attempt)
+
+    else:
+        raise RuntimeError(f"Volc API failed after 3 retries: {last_err}")
+
+    choices = result.get("choices", [])
+    if not choices:
+        raise RuntimeError(f"No choices: {json.dumps(result, ensure_ascii=False)[:500]}")
+    content = choices[0].get("message", {}).get("content", "")
+    if not content or not content.strip():
+        raise RuntimeError(f"Empty response: {json.dumps(result, ensure_ascii=False)[:500]}")
+    try:
+        parsed = json.loads(content)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Volc JSON parse failed (retry manually): {e}. Content: {content[:300]}")
+    return parsed, content
 
 
 def _call_gemini(
@@ -318,5 +478,11 @@ def call_llm_json(
             raise RuntimeError("DeepSeek does not support image input")
         model = model or "deepseek-chat"
         return _call_deepseek(system_prompt, user_prompt, response_schema, frame_paths, model, temperature)
+    elif provider == "volc":
+        model = model or "doubao-seed-1-8-251228"
+        result, raw_text = _call_volc(system_prompt, user_prompt, response_schema, frame_paths, model, temperature)
+        if _raw_output is not None:
+            _raw_output.append(raw_text)
+        return result
     else:
         raise RuntimeError(f"Unknown provider: {provider}")

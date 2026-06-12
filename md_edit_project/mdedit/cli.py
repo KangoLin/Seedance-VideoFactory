@@ -32,8 +32,8 @@ def main():
     parser.add_argument("--preview-only", action="store_true",
                         help="Only render preview (skip full render)")
     parser.add_argument("--provider", default="gemini",
-                        choices=["gemini", "deepseek"],
-                        help="LLM provider for Plan stage (Analyze always uses Gemini)")
+                        choices=["gemini", "deepseek", "volc"],
+                        help="LLM provider for Plan stage")
     parser.add_argument("--version", action="version",
                         version=f"md-edit {__version__}")
     args = parser.parse_args()

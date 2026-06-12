@@ -62,8 +62,8 @@ SYSTEM_PROMPT = """You are a professional manga-drama video editor. Analyze the 
 - suggested_color_temperature: "warm", "cool", or "neutral" (optional)"""
 
 
-def analyze_clip(clip: dict, cache: Cache, force: bool = False) -> dict:
-    cache_key = f"analyze:{clip['id']}"
+def analyze_clip(clip: dict, cache: Cache, force: bool = False, provider: str = "gemini") -> dict:
+    cache_key = f"analyze:{clip['id']}:{provider}"
     if not force:
         cached = cache.get(cache_key)
         if cached:
@@ -81,7 +81,7 @@ def analyze_clip(clip: dict, cache: Cache, force: bool = False) -> dict:
             user_prompt=f"Analyze this clip (id: {clip['id']}, duration: {dur:.1f}s).",
             response_schema=ANALYSIS_SCHEMA,
             frame_paths=frame_paths,
-            provider="gemini",
+            provider=provider,
         )
     except Exception as e:
         logger.warning("Analyze via Gemini failed (%s), using default analysis", e)
@@ -100,12 +100,12 @@ def analyze_clip(clip: dict, cache: Cache, force: bool = False) -> dict:
 
 
 def analyze_all(
-    clips: list[dict], cache: Cache, force: bool = False, max_workers: int = 4
+    clips: list[dict], cache: Cache, force: bool = False, max_workers: int = 4, provider: str = "gemini"
 ) -> list[dict]:
     analyses = [None] * len(clips)
 
     def _analyze(i: int):
-        return i, analyze_clip(clips[i], cache, force)
+        return i, analyze_clip(clips[i], cache, force, provider)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
         fut_to_i = {pool.submit(_analyze, i): i for i in range(len(clips))}

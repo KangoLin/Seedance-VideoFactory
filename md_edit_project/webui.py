@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import time
+import urllib.parse
 from pathlib import Path
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse, HTMLResponse
@@ -10,6 +11,7 @@ import uvicorn
 
 from mdedit.cache import Cache
 from mdedit.pipeline import run_pipeline, analyze_clips_gemini, analyze_single_clip, render_smart_cut, render_fine_cut
+from mdedit.cinematic import render_cinematic as _render_cinematic
 from mdedit.ffmpeg import get_video_info
 from mdedit.llm import _setup_proxy
 
@@ -105,6 +107,11 @@ def api_list_clips(q: str = Query("", description="Search filter")):
     return {"clips": clips}
 
 
+@app.get("/api/languages")
+def api_list_languages():
+    from mdedit.languages import LANGUAGES, REGIONS
+    return {"languages": LANGUAGES, "regions": REGIONS}
+
 @app.get("/api/bgm")
 def api_list_bgm():
     return {"bgm": _list_bgm()}
@@ -127,6 +134,7 @@ async def api_run(body: dict):
     enhance = body.get("enhance", False)
     enhance_template = body.get("enhance_template", "douyin")
     supervisor = body.get("supervisor", True)
+    target_language = body.get("target_language", "en")
 
     if not input_patterns:
         raise HTTPException(400, "No input clips selected")
@@ -172,6 +180,7 @@ async def api_run(body: dict):
                         enhance=enhance,
                         enhance_template=enhance_template,
                         supervisor=supervisor,
+                        target_language=target_language,
                     ),
                 )
                 progress_queue.put_nowait("__DONE__")
@@ -201,6 +210,7 @@ async def api_run(body: dict):
             "clips_ready": True,
             "work_dir": work_dir,
             "provider": provider,
+            "target_language": target_language,
             "clips": manifest["clips"],
             "video_path": manifest["video_path"],
             "duration": manifest["duration"],
@@ -228,7 +238,7 @@ async def api_analyze_clips(body: dict):
         def send_json(obj: dict):
             return f"data: {json.dumps(obj, ensure_ascii=False)}\n\n"
 
-        yield send("Starting Gemini clip analysis...")
+        yield send("Starting clip analysis...")
 
         progress_queue = asyncio.Queue()
 
@@ -418,6 +428,8 @@ async def api_render(body: dict):
     accepted_suggestions = body.get("accepted_suggestions", {})
     selected_clip_ids = body.get("selected_clip_ids")
     bgm = body.get("bgm")
+    target_language = body.get("target_language", "en")
+    provider = body.get("provider", "gemini")
 
     if not work_dir:
         raise HTTPException(400, "work_dir is required")
@@ -460,6 +472,8 @@ async def api_render(body: dict):
                         bgm_path=bgm_path,
                         output_path=output_path,
                         progress_callback=on_progress,
+                        target_language=target_language,
+                        provider=provider,
                     ),
                 )
                 progress_queue.put_nowait("__DONE__")
@@ -491,17 +505,150 @@ async def api_render(body: dict):
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
+@app.post("/api/cinematic_render")
+async def api_cinematic_render(body: dict):
+    video_path = body.get("video_path", "")
+    bgm = body.get("bgm")
+    provider = body.get("provider", "gemini")
+    edit_intensity = body.get("edit_intensity", 0)
+    target_language = body.get("target_language", "en")
+
+    if not video_path:
+        raise HTTPException(400, "video_path is required")
+
+    full_video_path = os.path.join(ROOT, video_path) if not os.path.isabs(video_path) else video_path
+    if not os.path.isfile(full_video_path):
+        raise HTTPException(404, f"Video not found: {full_video_path}")
+
+    bgm_path = None
+    if bgm:
+        bgm_full = os.path.join(ROOT, bgm) if not os.path.isabs(bgm) else bgm
+        if os.path.isfile(bgm_full):
+            bgm_path = bgm_full
+
+    output_name = f"cinematic_{int(time.time())}.mp4"
+    output_dir = ROOT / "output" / "renders"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = str(output_dir / output_name)
+    work_dir = os.path.join(ROOT, "output", "pipeline", f"cinematic_{int(time.time())}")
+
+    async def event_stream():
+        def send(msg: str):
+            return f"data: {json.dumps({'msg': msg}, ensure_ascii=False)}\n\n"
+
+        def send_json(obj: dict):
+            return f"data: {json.dumps(obj, ensure_ascii=False)}\n\n"
+
+        yield send("Starting cinematic render...")
+
+        progress_queue = asyncio.Queue()
+
+        async def progress_feeder():
+            def on_progress(msg: str):
+                progress_queue.put_nowait(msg)
+
+            loop = asyncio.get_event_loop()
+            try:
+                result = await loop.run_in_executor(
+                    None,
+                    lambda: _render_cinematic(
+                        video_path=full_video_path,
+                        work_dir=work_dir,
+                        output_path=output_path,
+                        bgm_path=bgm_path,
+                        provider=provider,
+                        edit_intensity=edit_intensity,
+                        target_language=target_language,
+                        progress_callback=on_progress,
+                    ),
+                )
+                progress_queue.put_nowait("__DONE__")
+            except Exception as e:
+                import traceback
+                tb = traceback.format_exc()
+                print(f"[CINEMATIC RENDER ERROR] {e}\n{tb}")
+                progress_queue.put_nowait(f"__ERROR__:{e}")
+
+        asyncio.create_task(progress_feeder())
+
+        while True:
+            msg = await progress_queue.get()
+            if msg == "__DONE__":
+                break
+            if msg.startswith("__ERROR__:"):
+                yield send(f"ERROR: {msg[len('__ERROR__:'):]}")
+                return
+            yield send(msg)
+
+        rel_path = str(Path(output_path).relative_to(ROOT)).replace("\\", "/")
+        yield send_json({
+            "cinematic_done": True,
+            "output_path": rel_path,
+            "output_name": output_name,
+        })
+        yield send("DONE")
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+@app.get("/api/thumb")
+def api_thumbnail(path: str = Query("")):
+    if not path:
+        raise HTTPException(400, "path is required")
+    full = ROOT / path
+    if not full.exists() or not full.is_file():
+        raise HTTPException(404, "File not found")
+    thumb_dir = ROOT / "output" / "renders" / ".thumbs"
+    thumb_dir.mkdir(parents=True, exist_ok=True)
+    thumb_path = thumb_dir / f"{full.stem}.jpg"
+    if not thumb_path.exists():
+        import subprocess
+        r = subprocess.run(
+            ["ffmpeg", "-y", "-ss", "0.5", "-i", str(full),
+             "-vframes", "1", "-q:v", "5", "-f", "image2pipe", "-"],
+            capture_output=True, timeout=30,
+        )
+        if r.returncode != 0 or len(r.stdout) < 100:
+            r2 = subprocess.run(
+                ["ffmpeg", "-y", "-i", str(full),
+                 "-vframes", "1", "-q:v", "5", "-f", "image2pipe", "-"],
+                capture_output=True, timeout=30,
+            )
+            if r2.returncode == 0 and len(r2.stdout) > 100:
+                thumb_path.write_bytes(r2.stdout)
+            else:
+                raise HTTPException(500, "Thumbnail generation failed")
+        else:
+            thumb_path.write_bytes(r.stdout)
+    return FileResponse(str(thumb_path), media_type="image/jpeg")
+
+
+@app.delete("/api/file/{path:path}")
+def api_delete_file(path: str):
+    full = ROOT / path
+    if not full.exists() or not full.is_file():
+        raise HTTPException(404, "File not found")
+    full.unlink()
+    thumb_dir = ROOT / "output" / "renders" / ".thumbs"
+    thumb_path = thumb_dir / f"{full.stem}.jpg"
+    if thumb_path.exists():
+        thumb_path.unlink()
+    return {"deleted": path}
+
+
 @app.get("/api/outputs")
 def api_list_outputs():
     outputs = []
     out_dir = ROOT / "output" / "renders"
     if out_dir.is_dir():
         for f in sorted(out_dir.glob("*.mp4"), key=lambda x: x.stat().st_mtime, reverse=True)[:10]:
+            rel = str(f.relative_to(ROOT)).replace("\\", "/")
             outputs.append({
                 "name": f.name,
-                "path": str(f.relative_to(ROOT)).replace("\\", "/"),
+                "path": rel,
                 "size": f.stat().st_size,
                 "mtime": f.stat().st_mtime,
+                "thumb": f"/api/thumb?path={urllib.parse.quote(rel)}",
             })
     return {"outputs": outputs}
 
@@ -509,6 +656,8 @@ def api_list_outputs():
 @app.get("/")
 async def index():
     html = (Path(__file__).parent / "static" / "index.html").read_text(encoding="utf-8")
+    ver = _read_toolkit_version()
+    html = html.replace("{{MDEDIT_VERSION}}", ver)
     return HTMLResponse(
         html,
         headers={
@@ -518,6 +667,14 @@ async def index():
             "X-Accel-Expires": "0",
         },
     )
+
+
+def _read_toolkit_version() -> str:
+    try:
+        vf = ROOT / "VERSION"
+        return vf.read_text(encoding="utf-8").strip()
+    except Exception:
+        return "0.0.0"
 
 
 if __name__ == "__main__":
